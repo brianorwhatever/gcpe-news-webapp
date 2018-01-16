@@ -1,0 +1,141 @@
+﻿@model IEnumerable<string>
+
+<div id="container">
+    <div class="wowza-wrapper asset wowza video" data-media-type="wowza">
+        <div id="videoPlayer" style="display: none !important; position: absolute; top: 0; left: 0;">
+            <video controls></video>
+            <p>Video not playing?  Install <a href="https://get.adobe.com/flashplayer/">Adobe Flash</a>.</p>
+        </div>
+        <div class="placeholder-container">
+            <img src="https://news.gov.bc.ca/Content/Images/Gov/Live_Webcast.png" />
+            <div class="overlay-container">
+                <div class="outer">
+                    <div class="inner not-expanded">
+                        <div class="play-button">
+                            <a href="javascript:void(0);" title="Play"></a>
+                        </div>
+                        <div class="play-instructions">
+                            <div class="preface">
+                                Press play again to view content from <strong>wowza.com</strong>. For more information, please read our <a href="">Privacy</a> statement.
+                            </div>
+                            <div class="controls">
+                                <div>
+                                    <label>
+                                        <span>
+                                            <input type="checkbox" value="1" class="save-preference" />
+                                        </span>
+                                        Always allow content from <strong>wowza.com</strong>
+                                    </label>
+                                </div>
+                                <div>
+                                    <span>Your preference will be saved using cookies.</span>
+                                </div>
+                            </div>
+                            <div class="play-close">
+                                <a href="javascript:void(0);" title="Close"></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="clear"></div>
+        </div>
+    </div>
+    <div id="videoPlaceholder" style="display: none !important;">
+        <image src="https://news.gov.bc.ca/Content/Images/Gov/Live_Webcast.png" width="768" height="432"></image>
+    </div>
+</div>
+
+@*TODO: Serve this file from the local server*@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+
+<script type="text/javascript">
+        var started = false;
+        function secondaryIsLiveCallback(webcastingEnabled, playlistLinks) {
+
+            if (webcastingEnabled === false) // only start once
+            {
+                // jwplayer dynamically adds a new div
+                if (document.getElementById('videoPlayer_wrapper') != null)
+                    document.getElementById('videoPlayer_wrapper').setAttribute('style', 'display: none !important;');
+                document.getElementById('videoPlayer').setAttribute('style', 'display: none !important;');
+                document.getElementById('videoPlaceholder').setAttribute('style', 'display: inline-block;');
+
+                started = false;
+                return;
+            }
+
+            if (started)
+                return;
+
+            // jwplayer dynamically adds a new div
+            if (document.getElementById('videoPlayer_wrapper') != null)
+                document.getElementById('videoPlayer_wrapper').setAttribute('style', 'display: inline-block;');
+            document.getElementById('videoPlayer').setAttribute('style', 'display: inline-block;')
+            document.getElementById('videoPlaceholder').setAttribute('style', 'display: none !important;')
+
+            started = true;
+            // otherwise build up the links
+            var links = [];
+
+            for (i = 0; i < playlistLinks.length; i++)
+                links.push({ file: playlistLinks[i] });
+
+            //links.push({ file: "http://wowzaprod3-lh.akamaihd.net/z/5df2507d_1@142171/manifest.f4m" });
+            //links.push({ file: "http://wowzaprod3-lh.akamaihd.net/i/5df2507d_1@142171/master.m3u8" });
+
+            var jwplayerScript = document.createElement("script");
+            jwplayerScript.setAttribute("type", "text/javascript");
+            if (jwplayerScript.readyState) {
+                jwplayerScript.onreadystatechange = function () {
+                    if (jwplayerScript.readyState == 'loaded' || jwplayerScript.readyState == 'complete') {
+                        jwplayerScript.readyState = null;
+                        LoadPlayer(links);
+                    }
+                }
+            }
+            else {
+                jwplayerScript.onload = function () {
+                    LoadPlayer(links);
+                }
+            }
+            jwplayerScript.src = "https://jwpsrv.com/library/1iIVIrESEeK0iiIACpYGxA.js";
+            document.getElementsByTagName("head")[0].appendChild(jwplayerScript);
+        }
+
+        function LoadPlayer(links) {
+            var playerInstance = jwplayer("videoPlayer").setup({
+                playlist: [
+                    {
+                        image: "https://news.gov.bc.ca/Content/Images/Gov/Live_Webcast.png",
+                        sources: links
+                    }
+                ],
+                captions: {
+                    color: '#FFFFFF',
+                    fontSize: 18,
+                    backgroundOpacity: 50
+                },
+                repeat: true,
+                //height: 432,
+                aspectratio: "16:9",
+                primary: "flash",
+                androidhls: true,
+                controlbar: false,
+                width: "100%",
+                //width: 768,
+                autostart: true,
+                fallback: false,
+                stretching: "exactfit"
+            });
+        }
+
+        var playlist = [];
+        @if (Model != null)
+        {
+            foreach(var webcastingPlaylists in Model)
+            {
+                @:playlist.push('@webcastingPlaylists');
+            }
+        }
+</script>

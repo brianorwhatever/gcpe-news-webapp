@@ -1,0 +1,84 @@
+﻿@using Gov.News.Website.Models.Subscribe
+@using Gov.News.Website.Helpers
+@model SubscribeViewModel
+
+<div class="connect subscribe">
+
+    <div class="home-body" style="width:100%">
+        <h3>Manage Subscription</h3>
+
+        <form action="/subscribe/manage" method="post">
+            @if (Model.Token != null)
+            {
+                <input type="hidden" name="Token" value="@Model.Token" />
+            }
+            else
+            {
+                <label>Please enter your email address so that a new link can be sent to you.</label>
+                <br /><br />
+            }
+            @Html.AntiForgeryToken()
+            <div>
+                <input type="email" name="EmailAddress" @(Model.Token != null ? "disabled='disabled'" : "") style="width:300px;margin-right:20px" value="@Model.Selection.EmailAddress"/>
+                @*@if (Model.Token != null)
+                {
+                    <button class="btn" style="margin-right:20px;background-image:none" onclick="$(this).siblings('input').removeAttr('disabled'); $(this).hide();return false">Change Email Address</button>
+                }*@
+                <button type="submit" class="btn">@(Model.Token != null ? "Unsubscribe" : "Renew Link")</button>
+            </div>
+            <br />
+            <br />
+
+            @Html.Partial("_SelectionPartial")
+
+            <!--<div>Would you like to be notified about changes to our subscription services?</div>
+            <div><label><input type="radio" name="subscription" checked="checked" />&nbsp;<b>Yes</b>, please notify me when new subscription options are available.</label><br /></div>
+            <div><label><input type="radio" name="subscription" />&nbsp;<b>No</b>, I am only interested in the subscription I have selected.</label><br /></div>
+            <br />-->
+
+            <div>
+                @if (Model.Token != null)
+                {
+                <button id="save" class="btn" type="button" onclick="doPost(this, '/subscribe/save')">Save</button>
+                <label id="message" style="margin-left:20px" ></label>
+                }
+            </div>
+
+        </form>
+
+    </div>
+    <div class="clear"></div>
+</div>
+@section Scripts {
+    <script src="~/Scripts/connect.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            hookSectionsExpandCollapse();
+            hookSubscribeToAllNewsOnDemand();
+
+            $(".expandable-section.collapsed").each(function () {
+                var firstChecked = $(this).find("input[type=checkbox][value!=true]:checked:first,input[type=radio][value=true]:checked");
+                if (firstChecked.length) $(this).removeClass('collapsed').addClass('expanded');
+            });
+        });
+
+        function doPost(btnClicked, url) {
+            if (!ValidateForm('#message')) return;
+
+            var $form = $(btnClicked).parents('form');
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: $form.serialize(),
+                error: function (xhr, status, error) {
+                    $("#message").text(status);
+                },
+                success: function (response) {
+                    $("#message").text(response);
+                }
+            });
+        }
+    </script>
+}

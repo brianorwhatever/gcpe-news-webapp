@@ -1,0 +1,31 @@
+﻿@using Gov.News.Website;
+@using Gov.News.Website.Helpers;
+
+@model Tuple<Ministry, Minister>
+@{
+    var Ministry = Model.Item1;
+    var Minister = Model.Item2;
+}
+
+@if (Model != null)
+{
+    <div class="resource-links minister">
+        <h5>@Ministry.Name</h5>
+        
+        <img src="@Minister.Photo" />
+        <h5>@Minister.Headline</h5>
+
+        @Minister.Summary.AsHtmlParagraphs()
+        
+        <a href="@Ministry.GetMinisterUri()" class="read-more">Read Bio</a>
+
+        @if (!string.IsNullOrWhiteSpace(Minister.EmailHtml))
+        {
+            <h6>Contact</h6>
+            <p>Email: @Html.Raw(Minister.EmailHtml)</p>
+        }
+        <ul>
+            <li><a href="@Ministry.GetUri()">Visit Minister of State Website</a></li>
+        </ul>
+    </div>
+}

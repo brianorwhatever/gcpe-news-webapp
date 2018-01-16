@@ -1,0 +1,56 @@
+﻿@using Gov.News.Api.Models
+@using Gov.News.Website
+
+@model Ministry
+
+@if (Model.Key == "office-of-the-premier")
+{
+    <div class="resource-links">
+
+        <h5>Meet the Team</h5>
+
+        <ul>
+            <li><a href="http://www2.gov.bc.ca/gov/topic.page?id=B6365144E6E04650B85FDEB73DC58247">Cabinet Ministers</a></li>
+            <li><a href="http://www2.gov.bc.ca/gov/topic.page?id=19C77917F9C04812B152A3DA8D31C402">Deputy Ministers</a></li>
+            <li><a href="http://www2.gov.bc.ca/gov/topic.page?id=8713137390424FA5A9C5733D4DD3CCCD">Cabinet Committees</a></li>
+        </ul>
+    </div>
+}
+
+@if ((ViewBag.Type == null || ViewBag.Type != "factsheets") || (Model.MinistryUrl != null))
+{
+
+    <div class="resource-links">
+
+ 
+        @if (Model.Key == "office-of-the-premier")
+        {
+            <h5>More from the Premier</h5>
+        }
+        else
+        {
+            <h5>More from this Ministry</h5>
+        }
+
+        <ul>
+
+            @if (ViewBag.Type == null || ViewBag.Type != "factsheets")
+            {
+
+                <li><a href="@Model.GetUri()/factsheets">Factsheets</a></li>
+
+                if (Model.Key == "office-of-the-premier")
+                {
+                    <li><a href="@Model.GetUri()/speeches">Speeches</a></li>
+                }
+            }
+
+            @if (Model.MinistryUrl != null)
+            {
+                <li><a href="@Model.MinistryUrl" target="_blank">Visit Ministry Website</a></li>
+            }
+        </ul>
+    
+
+    </div>
+}

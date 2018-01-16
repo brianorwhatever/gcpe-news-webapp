@@ -1,0 +1,205 @@
+﻿@using Gov.News.Website.Models
+@using Gov.News.Api.Models
+
+@model HomeViewModel
+
+@{
+    IEnumerable<Category> sectors = null;
+}
+
+@section Meta
+{
+    <meta name="description" content="News from the Province of BC">
+    <meta name="google-site-verification" content="@ViewBag.GoogleSiteVerification" />
+    <meta name="msvalidate.01" content="@ViewBag.BingSiteVerification" />
+
+    @if (Model.FeedUri != null)
+    {
+        <link rel="alternate" type="application/rss+xml" href="@Model.FeedUri" title="BC Gov News" />
+    }
+}
+
+@section Carousel {
+    @Html.Partial("HomeCarousel")
+}
+
+<div class="home-features">
+    @Html.Partial("ConnectSocialMedia")
+    <!-- collapsible-regions are cloned here by _Layout-->
+</div>
+
+<div class="home-body">
+    @if (Model.TopStory != null)
+    {
+        <div class="top-article">
+            @{
+                Model.PostSectors.TryGetValue(Model.TopStory, out sectors);
+            }
+            @Html.Partial("Article", Model.TopStory)
+        </div>
+    }
+
+    <div class="other-articles">
+        @if (Model.FeatureStory != null)
+        {
+            <div class="feature-article">
+                @{
+                    Model.PostSectors.TryGetValue(Model.FeatureStory, out sectors);
+                }
+                @Html.Partial("Article", Model.FeatureStory)
+            </div>
+        }
+
+        <div class="regular-articles">
+            @foreach (var post in Model.LatestNews.Take(3))
+            {
+                @Html.Partial("Article", post)
+            }
+
+             @foreach (var post in Model.LatestNews.Skip(3))
+             {
+                    @Html.Partial("Article", post, new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "Display", "false"} })
+             }
+        </div>
+
+        <div class="news-control">
+            <a href="#" rel="nofollow" class="load-more link-button">Load More News</a>
+            <a href="/search" class="read-more">Search News</a>
+            <div class="clear"> </div>
+        </div>
+    </div>
+
+    <div class="social-media-feed">
+        @Html.Partial("SocialMediaFacebookFeed", Model.FacebookPosts)
+        @Html.Partial("SocialMediaTwitterFeed", Model.TwitterPosts)
+    </div>
+
+    <div class="collapsible-regions">
+        @Html.Partial("ResourceLinks")
+        <vc:top-sectors />  @*@await Component.InvokeAsync("TopSectors")*@
+        @if (Model.CalendarModel != null)
+        {
+            @Html.Partial("EventsCalendar", Model.CalendarModel)
+        }
+    </div>
+
+</div>
+
+@section AssortedMedia {
+    @Html.Partial("EmbeddedMediaBanner", Model.Footer)
+}
+
+@section Scripts {
+    <script type="text/javascript">
+        var fadeTime = 600;
+        var displayTime = 15000;
+        var currentIndex = 0;
+        var timer = null;
+
+        var pages = $('.home-banner');
+
+        function timedFade() {
+            if (timer) {
+                window.clearTimeout(timer);
+            }
+            timer = setTimeout(fade, fadeTime + displayTime);
+        }
+
+        function fade(targetIndex) {
+            if (window.allowFade == false)
+                return;
+
+            var currentPage = pages.eq(currentIndex);
+            var nextIndex;
+            if (targetIndex === undefined) {
+                nextIndex = (currentIndex + 1);
+                if (nextIndex >= pages.length) {
+                    window.allowFade = false;
+                    nextIndex = 0;
+                }
+            } else {
+                nextIndex = targetIndex % pages.length;
+            }
+
+            var nextPage = pages.eq(nextIndex);
+            currentIndex = nextIndex;
+
+            currentPage.stop(true, true).fadeOut(fadeTime, function() {});
+            nextPage.stop(true, true).fadeIn(fadeTime, function() {});
+
+            //toggleBackgroundImage(nextPage);
+            timedFade();
+        }
+
+        function forward() {
+            window.allowFade = true;
+            fade(currentIndex + 1);
+            window.allowFade = false;
+        }
+
+        function back() {
+            window.allowFade = true;
+            fade(currentIndex - 1);
+            window.allowFade = false;
+        }
+
+        $(function() {
+            $('.story-previous').on('click', back);
+            $('.story-next').on('click', forward);
+
+            var firstPage = pages.first();
+            firstPage.fadeIn(0);
+            //toggleBackgroundImage(firstPage);
+            timedFade(1);
+
+            var isLoading = false;
+            var doubleClick = false;
+            $(".load-more").on('click', function (event) {
+                
+                if (!isLoading) {
+                    isLoading = true;
+                    var offset = $(".regular-articles .article").length;
+                    var hiddenCount = $(".regular-articles .hidden-article").length;
+                    $(".regular-articles .hidden-article").removeClass("hidden-article");
+                    if(hiddenCount < @Gov.News.Website.Providers.ProviderHelpers.MaximumLatestNewsItemsLoadMore) {
+                        $(".load-more").hide();
+                        event.preventDefault();
+                        return;
+                    }
+                    $.ajax({
+                        url: '@Url.Action("MoreArticles")?offset=' + offset,
+                        success: function (data) {
+                            
+                            if (data == '') {
+                                $(".load-more").hide();
+                                return;
+                            }
+                            $(".regular-articles").append(data);
+                            
+                        }
+                    }).done(function () {
+                        isLoading = false;
+                        if(doubleClick)
+                        {
+                            doubleClick = false;
+                            $(".load-more").click();
+                        }
+                    });
+                
+                } else {
+                    doubleClick = true;
+                }
+                event.preventDefault();
+            });
+
+            $(".event-header").on('click', function () {
+                var details = $(this).next();
+                $(".event-detail").slideUp();
+                if (details.is(":visible"))
+                    details.slideUp();
+                else
+                    details.slideDown();
+            });
+        });
+    </script>
+}

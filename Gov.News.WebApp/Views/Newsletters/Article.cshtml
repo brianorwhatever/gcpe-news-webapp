@@ -1,0 +1,23 @@
+﻿@using Gov.News.Website.Helpers;
+@using Gov.News.Website.Models
+@model NewsletterViewModel
+<div class="newsletters">
+    <h3><a href=@string.Format("../")>@Model.Article.NewsletterName</a></h3>
+    <h2>Edition: @Model.Article.EditionName</h2>
+    <div class="home-features">
+        @Html.Partial("ConnectSocialMedia")
+        @Html.Partial("ResourceLinks")
+
+    </div>
+
+    <!--googleon: all-->
+    <div class="home-body">
+        @*<h1><a href=@string.Format("../../")>Newsletters</a>  > <a href=@string.Format("../../{0}", Model.Article.NewsletterKey)>@Model.Article.NewsletterName</a>  >  <a href=@string.Format("../{0}",@Model.Article.EditionKey)>@Model.Article.EditionName</a></h1>*@
+        <div class="clear">
+            @Html.Raw(Model.Article.HtmlBody)
+        </div>
+    </div>
+    <!--googleoff: all-->
+    <div class="clear"></div>
+</div>
+
