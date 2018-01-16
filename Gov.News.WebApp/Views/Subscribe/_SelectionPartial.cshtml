@@ -1,0 +1,251 @@
+﻿@using Gov.News.Website.Models.Subscribe
+@model SubscribeViewModel
+
+@if (Model.Selection.MediaDistributionLists != null)
+{
+    <div id="mediadistributionlists" class="expandable-section collapsed">
+        <a name="Media Distribution Lists"></a>
+        <h4>Media Advisories</h4>
+        <input id="mediadistributionlistsHidden" style="display:none" name ="MediaDistributionLists" value="@Model.Selection.MediaDistributionLists" />
+
+        <div class="expandable-section-content" style="padding-left: 10px; padding-bottom: 0px;">
+            <div class="expander-body">
+                <br />
+
+                <div>
+                    Select your interest(s) below and then enter your email in the form at the bottom of the page.  To make changes to your subscription, please email <a href="mailto:PABMRel@Victoria1.gov.bc.ca">PABMRel@Victoria1.gov.bc.ca</a>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+}
+
+@if (Model.Selection.Ministries != null || Model.Selection.Sectors != null)
+{
+    <div id="newsOnDemand" class="expandable-section collapsed">
+        <a name="newsOnDemand"></a>
+        <h4>BC Gov News On Demand</h4>
+
+        <div class="expandable-section-content" style="padding-left: 10px; padding-bottom: 0px;">
+            <div class="expander-body">
+
+                <p>
+                    Get your news delivered to your mobile or desktop. Subscribe to receive your news as it happens or receive a daily news digest at 5 p.m.
+                </p>
+
+                <div>
+                    <span style="font-weight:bold">When would you like your news delivered to your mobile or desktop?</span><br />
+                    <div>
+                        <ul class="external-links">
+                            <li>
+                                <label style="font-weight:normal"><input type="checkbox" name="NewsAsItHappens" value="true" checked="@Model.Selection.NewsAsItHappens" />&nbsp;As soon as it's published.</label>
+                            </li>
+                            <li>
+                                <label style="font-weight:normal"><input type="checkbox" name="NewsDailyDigest" value="true" checked="@Model.Selection.NewsDailyDigest" />&nbsp;In a daily digest after 5 p.m.</label>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="font-weight:bold">Let us know what areas of the B.C. government you're interested in.</div>
+
+                <div style="display:none"><label style="font-weight:normal"><input type="radio" name="AllNews" value="true" />&nbsp;I would like to receive news from all ministries and sectors.</label><br /></div>
+                <div style="display:none"><label style="font-weight:normal"><input type="radio" name="AllNews" value="false" />&nbsp;I would like to customize the news that I receive.</label><br /></div>
+
+                <div style="clear:both"></div>
+
+                <div id="newsOnDemandCustomOptions">
+
+                    @{
+                        var lists = new[] { new { Category = "", Key = "", Name = "" } }.ToList();
+                        lists.Clear();
+
+                        foreach (var ministry in Model.Ministries)
+                        {
+                            lists.Add(new { Category = "ministries", Key = ministry.Category.Key, Name = ministry.Category.Name.Replace("Minister of State for ", "") });
+                        }
+
+                        foreach (var sector in Model.Sectors)
+                        {
+                            lists.Add(new { Category = "sectors", Key = sector.Key, Name = sector.Name });
+                        }
+
+                        if (Model.Tags != null)
+                        {
+                            foreach (var tag in Model.Tags)
+                            {
+                                lists.Add(new { Category = "tags", Key = tag.Key, Name = tag.Value });
+                            }
+                        }
+
+                        lists = lists.OrderBy(e => e.Name).ToList();
+                    }
+
+                    <div style="float:left;padding-right:60px">
+                        @{int halfList = (lists.Count + 1) / 2;}
+                        <ul class="external-links">
+                            @for (int i = 0; i < halfList; i++)
+                            {
+                                var list = lists.ElementAt(i);
+                                <li><label><input class="ministries-checkbox" type="checkbox" value="@list.Key" name="@list.Category" checked="@Model.Selection.Contains(list.Category, list.Key)" />&nbsp;@list.Name</label></li>
+                            }
+                        </ul>
+                    </div>
+                    <div style="float:left">
+                        <ul class="external-links">
+                            @for (int i = halfList; i < lists.Count; i++)
+                            {
+                                var list = lists.ElementAt(i);
+                                <li><label><input class="ministries-checkbox" type="checkbox" value="@list.Key" name="@list.Category" checked="@Model.Selection.Contains(list.Category, list.Key)" />&nbsp;@list.Name</label></li>
+                            }
+                        </ul>
+                    </div>
+
+                    <div style="clear:left"> </div>
+                </div>
+
+                <div class="article-fade"> </div>
+
+            </div>
+
+        </div>
+
+        <a href="#" class="link-button expand">Show More about News</a>
+        <a href="#" class="link-button collapse" onclick="">Show less about News</a>
+
+    </div>
+
+    <div id="EMBC" class="expandable-section collapsed">
+        <a name="EMBC"></a>
+        <h4>Emergency Info BC</h4>
+
+        <div class="expandable-section-content" style="padding-left: 10px; padding-bottom: 10px;">
+            <div>
+
+                <p>
+                    Are you prepared for an emergency? Make sure you’re as ready as you can be for an accident, environmental emergency or natural disaster.
+                </p>
+
+                <div style="font-weight:bold">Would you like to receive notifications from Emergency Info BC?</div>
+
+                <div style="clear:both"></div>
+
+                <div id="embcCustomOptions">
+
+                    <div style="float:left">
+                        <ul class="external-links">
+                            @foreach (var list in Model.Emergencies.OrderBy(e => e.Value).ToList())
+                            {
+                                <li><label><input type="checkbox" value="@list.Key" name="emergency" checked="@Model.Selection.Contains("emergency", list.Key)" />&nbsp;@list.Value</label></li>
+                            }
+                        </ul>
+                    </div>
+
+                    <div style="clear:left"> </div>
+                </div>
+
+                @*<div class="article-fade"> </div>*@
+
+            </div>
+
+        </div>
+
+        <!--<a href="#" class="link-button expand">Show More about EMBC</a>
+        <a href="#" class="link-button collapse" onclick="">Show less about EMBC</a>-->
+
+    </div>
+                            }
+
+@if (Model.Selection.Services != null)
+{
+    <div id="services" class="expandable-section collapsed">
+        <a name="services"></a>
+        <h4>Featured Program and Service Updates</h4>
+        <div class="expandable-section-content" style="padding-left: 10px; padding-bottom: 0px;">
+            <div class="expander-body">
+
+                <p>The Government of B.C. delivers programs and services so British Columbians can benefit from our diverse, strong and growing economy.  To stay informed on the B.C. government’s policies, programs and services, you can subscribe to email updates about programs and services that may benefit you or your family.</p>
+
+                <span style="font-weight:bold">Let us know what programs and services you're interested in.</span>
+
+                <div style="clear:both"></div>
+
+                <div style="float:left;padding-right:60px">
+                    @{int halfList = (Model.Services.Count() + 1) / 2;}
+                    <ul class="external-links">
+                        @for (int i = 0; i < halfList; i++)
+                        {
+                            var service = Model.Services.ElementAt(i);
+                            <li><label><input type="checkbox" value="@service.Key" name="Services" checked="@Model.Selection.Contains("services", service.Key)" />&nbsp;@service.Name</label></li>
+                        }
+                    </ul>
+                </div>
+                <div>
+                    <ul class="external-links">
+                        @for (int i = halfList; i < Model.Services.Count(); i++)
+                        {
+                            var service = Model.Services.ElementAt(i);
+                            <li><label><input type="checkbox" value="@service.Key" name="Services" checked="@Model.Selection.Contains("services", service.Key)" />&nbsp;@service.Name</label></li>
+                        }
+                    </ul>
+                </div>
+                <div style="clear:left"> </div>
+                <div class="article-fade"> </div>
+
+            </div>
+
+        </div>
+
+        <a href="#" class="link-button expand" id="subscribeToServices">Show More about Updates</a>
+        <a href="#" class="link-button collapse" onclick="">Show Less about Updates</a>
+
+    </div>
+                        }
+
+@if (Model.Selection.Newsletters != null)
+{
+    <div id="newsletters" class="expandable-section collapsed">
+        <a name="newsletters"></a>
+        <h4>Newsletters</h4>
+
+        <div class="expandable-section-content" style="padding-left: 10px; padding-bottom: 0px;">
+            <div class="expander-body">
+
+                <br />
+
+                <div>Get your newsletter delivered to your mobile or desktop.  Subscribe to receive editions.</div>
+                <div>Let us know what newsletters you’re interested in.</div>
+
+                <div>
+
+                    <ul class="external-links">
+                        @foreach (var newsletter in Model.Newsletters)
+                        {
+                            //var id = newsletter.DistributionId;
+                            var key = newsletter.Key;
+                            <li><label><input type="checkbox" value="@key" name="Newsletters" checked="@Model.Selection.Contains("newsletters", key)" />&nbsp;@newsletter.Name</label></li>
+                        }
+                    </ul>
+
+                    <div style="clear:left"> </div>
+                </div>
+
+                <div class="article-fade"> </div>
+
+            </div>
+
+        </div>
+
+        <a href="#" class="link-button expand" id="subscribeToServices">Show More About Newsletters</a>
+        <a href="#" class="link-button collapse" onclick="">Show Less About Newsletters</a>
+
+    </div>
+}
+
+@if (Model.Selection != null && Model.Selection.EmailAddress != null)
+{
+    <input type="hidden" name="EmailAddress" value="@Model.Selection.EmailAddress" />
+}

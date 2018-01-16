@@ -1,0 +1,19 @@
+﻿@using Gov.News.Api.Models;
+
+@model Contact
+
+<span class="contact-name">@Model.FullName</span>
+<div>
+    @if (!string.IsNullOrEmpty(@Model.PhoneNumber))
+    {
+        <span>Direct: @Model.PhoneNumber</span>
+    }
+    @if (!string.IsNullOrEmpty(@Model.MobileNumber))
+    {
+        <span>Cell: @Model.MobileNumber</span>
+    }
+</div>
+@if (!string.IsNullOrEmpty(@Model.EmailAddress))
+{
+    <a href="mailto:@Model.EmailAddress">@Model.EmailAddress</a><br />
+}

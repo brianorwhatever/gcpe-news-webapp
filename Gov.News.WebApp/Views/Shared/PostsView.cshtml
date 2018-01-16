@@ -1,0 +1,109 @@
+﻿@using Gov.News.Website.Models
+@using Gov.News.Api.Models
+@model ListViewModel
+
+@section Meta
+{
+    @if (Model.FeedUri != null)
+    {
+        <link rel="alternate" type="application/rss+xml" href="@Model.FeedUri" title="@Model.Title | BC Gov News" />
+    }
+}
+
+<div class="home-features">
+    @Html.Partial("ConnectSocialMedia")
+    <!-- collapsible-regions are cloned here by _Layout-->
+</div>
+
+<div class="home-body">
+    <h3>@Model.Title</h3>
+
+    <div class="other-articles">
+        <div class="regular-articles">
+            @foreach (var post in Model.LatestNews.Take(3))
+            {
+                @Html.Partial("Article", post)
+            }
+            @foreach (var post in Model.LatestNews.Skip(3))
+            {
+                @Html.Partial("Article", post, new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "Display", "false" } })
+            }
+        </div>
+
+        <div class="news-control">
+            @Html.ActionLink("Search News", "Search", "Default", new { content = Model.Title.ToLower() }, new { @class = "read-more" })
+            <a href="#" class="load-more link-button">@string.Format("Load More {0}", Model.Title)</a>
+            <div class="clear"> </div>
+        </div>
+    </div>
+
+    <div class="social-media-feed">
+        @if (Model.FacebookPosts != null)
+            {
+            @Html.Partial("SocialMediaFacebookFeed", Model.FacebookPosts)
+        }
+        @if (Model.TwitterPosts != null)
+            {
+            @Html.Partial("SocialMediaTwitterFeed", Model.TwitterPosts)
+        }
+    </div>
+
+
+    <div class="collapsible-regions">
+        @Html.Partial("ResourceLinks")
+        <vc:top-sectors />
+        @*@Html.Partial("EventsCalendar")*@
+        @*@Html.Partial("EventCalendarPartialView")*@
+    </div>
+
+</div>
+
+@section AssortedMedia {
+    @Html.Partial("EmbeddedMediaBanner", Model.Footer)
+}
+
+@section Scripts {
+    <script type="text/javascript">
+        $(function () {
+
+            var isLoading = false;
+            var doubleClick = false;
+            $(".load-more").on('click', function (event) {
+                if (!isLoading) {
+                    isLoading = true;
+                    var offset = $(".regular-articles .article").length;
+                    var hiddenCount = $(".regular-articles .hidden-article").length;
+                    $(".regular-articles .hidden-article").removeClass("hidden-article");
+                    if(hiddenCount < @Gov.News.Website.Providers.ProviderHelpers.MaximumLatestNewsItemsLoadMore) {
+                        $(".load-more").hide();
+                        event.preventDefault();
+                        return;
+                    }
+                    $.ajax({
+                        url: '@Url.Action("MoreArticles")?offset=' + offset,
+                        success: function (data) {
+
+                            if (data == '') {
+                                $(".load-more").hide();
+                                return;
+                            }
+                            $(".regular-articles").append(data);
+
+                        }
+                    }).done(function () {
+                        isLoading = false;
+                        if(doubleClick)
+                        {
+                            doubleClick = false;
+                            $(".load-more").click();
+                        }
+                    });
+
+                } else {
+                    doubleClick = true;
+                }
+                event.preventDefault();
+            });
+        });
+    </script>
+}

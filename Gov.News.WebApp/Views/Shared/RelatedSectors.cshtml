@@ -1,0 +1,17 @@
+﻿@using Gov.News.Api.Models
+@using Gov.News.Website;
+
+@model List<Category>
+
+@if (Model.Any())
+{
+    <div class="resource-links more-from-sectors">
+        <h5>More From These Sectors</h5>
+        <ul>
+            @foreach (var sector in Model)
+            {
+                <li><a href="@sector.GetUri()">@System.Net.WebUtility.HtmlEncode(sector.Name)</a></li>
+            }
+        </ul>
+    </div>
+}

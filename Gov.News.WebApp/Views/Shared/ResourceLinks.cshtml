@@ -1,0 +1,13 @@
+﻿@using Gov.News.Website.Models
+@model BaseViewModel 
+<div class="resource-links">
+    <h5>Resources</h5>
+    <ul>
+        @{int i = 0; }
+        @foreach (var link in Model.ResourceLinks)
+        {
+            <li><a id='Resource_@(i)' href="@link.Uri">@link.Text</a></li>
+            i++;
+        }
+    </ul>
+</div>

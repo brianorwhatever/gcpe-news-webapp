@@ -1,0 +1,20 @@
+﻿@using Gov.News.Website.Models
+@model NewsletterViewModel
+
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+ }
+<div class="newsletters">
+    <div class="home-features">
+        @Html.Partial("ConnectSocialMedia")
+        @Html.Partial("ResourceLinks")
+        <vc:top-sectors/>
+    </div>
+    <div class="home-body">
+        <h3>Newsletters</h3>
+        @Html.Partial("Newsletter")
+        <br/><br/>
+    </div>
+    <div class="clear"></div>
+</div>
