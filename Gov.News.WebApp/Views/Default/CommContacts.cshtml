@@ -1,0 +1,59 @@
+﻿@using Gov.News.Website;
+@using Gov.News.Website.Models
+@using Gov.News.Api.Models
+@model BaseViewModel
+
+<div class="comm-contacts">
+    <h3 class="hidden-xs">Government Communications and Public Engagement</h3>
+    <div class="header">
+        <h4>Contact List for Media</h4>
+    </div>
+
+    <div class="hidden-xs">
+        <h4 class="col-xs-12 col-sm-4"></h4>
+        <h4 class="col-xs-12 col-sm-4">Primary Contact</h4>
+        <h4 class="col-xs-12 col-sm-4">Alternate Contact</h4>
+    </div>
+
+
+    @foreach (var categoryModel in Model.Ministries)
+    {
+        var ministry = categoryModel.Category as Ministry;
+        if (ministry.ContactUser != null)
+        {
+        <div class="row">
+            <div class="col-xs-12 col-sm-4">
+                <a href="@ministry.GetUri()">@ministry.FullName</a>
+                @if (!string.IsNullOrEmpty(ministry.DisplayAdditionalName))
+                {
+                    <div><i>(@ministry.DisplayAdditionalName)</i></div>
+                }
+                <div>@ministry.MinisterName</div>
+            </div>
+            <div class="col-xs-12 col-sm-4">
+                @Html.Partial("CommContact", ministry.ContactUser)
+            </div>
+            @if (ministry.SecondContactUser != null)
+            {
+            <div class="col-xs-12 col-sm-4">
+                @Html.Partial("CommContact", ministry.SecondContactUser)
+            </div>
+            }
+            @if (!string.IsNullOrEmpty(ministry.WeekendContactNumber))
+            {
+            <div class="col-xs-12 col-sm-6 pull-right">
+                <div><i>Weekends/Holidays: @ministry.WeekendContactNumber</i></div>
+            </div>
+            }
+        </div>
+        }
+    }
+    <div class="clear"></div>
+    <div class="header">
+        <h4>24 hours Media Relations Contact Line</h4>
+        <div class="row">
+            If you are unable to reach a ministry contact above, call media relations at 250-356-2456
+        </div>
+        <br/>
+    </div>
+</div>

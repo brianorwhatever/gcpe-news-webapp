@@ -1,0 +1,27 @@
+﻿@using Gov.News.Website.Helpers;
+@using Gov.News.Website;
+
+@model Post
+
+@{ var thumbnailUri = Model.GetThumbnailUri(); }
+<div class="article">
+    <h2><a href="@Model.GetUri()">@Model.Headline()</a></h2>
+    <div class="item-content">
+        @if (thumbnailUri != null)
+        {
+            <div class='item-asset asset flickr'><a href='@Model.GetUri()'><img src='@thumbnailUri.ToProxyUrl()' /></a></div>
+        }
+        <div class="item-text@(thumbnailUri == null ? "" : " with-image")">
+            @if (Model.HasMediaAssets == true)
+            {
+                <div class="item-medialink media-assets"><a href="@Model.GetUri()#assets">Media Assets</a></div>
+            }
+            <div class="item-date">@Model.PublishDate.Value.DateTime.FormatDateLong()</div>
+            @Model.Summary.AsHtmlParagraphs()
+            @*@Html.ActionLink("Read More", "Story", "Default", null, new { @class = "read-more" })*@
+            <br />
+            <a href="@Model.GetUri()" class="read-more">Read More</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+</div>

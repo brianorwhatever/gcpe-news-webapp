@@ -1,0 +1,55 @@
+﻿@using Gov.News.Website.Models;
+@using Gov.News.Website.Helpers;
+
+@model List<TwitterPostModel>
+
+<div class="feed twitter-feed">
+    <h4>On Twitter</h4>
+    <div class="feed-content">
+        <div class="feed-header">
+            <h5>
+                BC Government News<br />
+                <a href="https://twitter.com/BCGovNews">@@BCGovNews</a>
+            </h5>
+            <a href="https://twitter.com/BCGovNews" class="link-button twitter-follow">Follow on Twitter</a>
+        </div>
+        <div class="feed-body">
+            @foreach (var post in Model)
+            {
+                
+                <div class="twitter-item">
+                    @if (!string.IsNullOrWhiteSpace(post.RetweetedText))
+                    {
+                    <a href="https://twitter.com/@post.ScreenName" target="_blank" class="twitter-item-header">
+                        <div class="twitter-header-image">
+                            <img src="@post.UserImageUri.ToProxyUrl()" />
+                        </div>
+                        <div class="twitter-header-user">
+                            <div class="twitter-user-name">
+                                @post.UserName
+                            </div>
+                            <div class="twitter-user-screen">
+                                @@@post.ScreenName
+                            </div>
+                        </div>
+                    </a>
+                    }
+                    <div class="tweet">
+                        <span class="tweet-time">@post.TimeAgo</span>
+                        @post.Content.AsHtmlParagraphs()
+                        @if (!string.IsNullOrWhiteSpace(post.RetweetedText))
+                        {
+                        <div class="twitter-user-screen">
+                            <p>
+                                <img src="~/Content/Images/SocialMedia/icon-retweet.gif" style="float: left; margin-right: 7px; margin-top: 2px;"/>
+                                @Html.Raw(post.RetweetedText)
+                            </p>
+                        </div>
+                        }
+                    </div>
+                </div>
+                
+            }
+        </div>
+    </div>
+</div>

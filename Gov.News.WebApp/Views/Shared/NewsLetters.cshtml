@@ -1,0 +1,17 @@
+﻿@using Gov.News.Website.Models
+@using Gov.News.Api.Models
+
+@model IEnumerable<ResourceLink>
+
+@if (Model.Any())
+{
+    <div class="resource-links">
+        <h5>Newsletters</h5>
+        <ul>
+            @foreach (var item in Model)
+            {
+                <li><a href="@item.Uri">@item.Text</a></li>
+            }
+        </ul>
+    </div>
+}

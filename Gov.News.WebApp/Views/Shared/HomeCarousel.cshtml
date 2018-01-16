@@ -1,0 +1,58 @@
+﻿@using Gov.News.Website.Models
+@using Gov.News.WebApp.Extensions
+@model HomeViewModel
+
+@if (Model.SlideItems.Any())
+{
+    <div id="carousel-holder">
+        @{
+            var slideIndex = 0;
+        }
+        @foreach (var item in Model.SlideItems)
+        {
+            <div class="home-banner" style="background-image: url(CarouselImage/@item.Key)">
+                <div class="home-banner-content">
+                    <div class="stories">
+                        @if (@item.ActionUri != null)
+                        {
+                            //TODO: Replace (int)item.Justify == 2 with property in SlideItem model
+                            <div class="story@(item.Justify == "right" ? " right" : " left")@((item.FacebookPostUri != null) ? " facebook" : "")">
+                                <div onClick="dcsMultiTrack('DCS.dcssip', '@item.GetActionUri().Host', 'DCS.dcsuri', '@item.GetActionUri().LocalPath', 'WT.dl', 'slider2', 'DCSext.title', '@System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(item.Headline)', 'DCSext.position', '@slideIndex'); window.location.href='@item.ActionUri';" style="cursor:pointer;">
+                                    <h2>@item.Headline</h2>
+                                    @*<p class="item-date">@item.PublishFromDateTime.FormatDateLong()</p>*@
+                                    <p class="summary">@item.Summary</p> 
+                                    <div>
+                                        <a href="#"class="read-more">@item.ActionLabel</a>
+                                    </div>
+                                </div>
+
+                                @if (item.FacebookPostUri != null)
+                                {
+                                <div class="social-media-bar">
+                                    <ul>
+                                        <li class="facebook-info"><a href='@item.GetFacebookPostUri().ToString()' target="_blank">Like or Comment<span class="on-story"> on this story</span><span class="on-facebook"> on Facebook</span></a></li>
+                                        <li class="facebook-action facebook-share"><a href="https://www.facebook.com/sharer/sharer.php?u=@item.GetActionUri().ToString()" onclick="window.open(this.href, 'newwindow', 'width=400, height=550'); return false;">Share</a></li>
+                                        @*<li class="facebook-action facebook-comment">Comment</li>
+                                            <li class="facebook-action facebook-share" data-url="@item.ActionUrl" data-title="@item.Headline">Share</li>
+                                            <li class="facebook-action facebook-like" data-facebook-object-id="@item.FacebookObjectId">Like</li>*@
+                                    </ul>
+                                </div>
+                                @*<div class="facebook-comment-dialog">
+                                        <textarea id="facebook-comment-message-@item.SlideId" placeholder="Comment on this story"></textarea>
+                                                        <input type="submit" class="facebook-comment-trigger" data-slide-id="@item.SlideId" data-facebook-object-id="@item.FacebookObjectId" value="Comment"/>
+                                        <a class="facebook-comment-close" href="#">Close</a>
+                                    </div>*@
+                                }
+                            </div>
+                        }
+                        <div class="story-nav story-previous"></div>
+                        <div class="story-nav story-next"></div>
+                    </div>
+                </div>
+                <div class="bottom-fade"></div>
+            </div>
+            slideIndex ++;
+        }
+    </div>
+    }
+
