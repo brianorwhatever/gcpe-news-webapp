@@ -1,0 +1,248 @@
+﻿@using Gov.News.Website.Helpers;
+@model Gov.News.Website.Models.SearchViewModel
+
+<div class="search">
+    <div class="search-body">
+        <h3>Search</h3>
+
+        @if (ViewBag.Status404NotFound == true)
+        {
+            <div style="font-size: 18px;">That web page doesn't exist.</div>
+            <br />
+            <div style="font-size: 14px;">The URL may be misspelled or the page you're looking for is no longer available. See search results below.</div>
+            <br /><br />
+        }
+
+        @*<div class="search-panel">
+                @using (Html.BeginForm("Search", "Default"))
+                {
+                    <label>You searched for</label>
+                    <input type="text" value="@Model.Query.Text" css="search-box" />
+                }
+            </div>*@
+
+
+        @*<div class="search-numbers">*@
+        @*<p>Showing results @Model.FirstResult - @Model.LastResult for <strong>@Model.Query.Text</strong></p>*@
+
+        @*@if (Model.Query.Text != null)
+            {
+                <span> Text: <strong>@Model.Query.Text </strong></span>
+            }
+
+            @if (Model.Query.NewsType != null)
+            {
+                <span> News: <strong>@Model.Query.NewsType </strong></span>
+            }
+
+            @if (Model.Query.Ministry != null)
+            {
+                <span> Ministry: <strong>@Model.Query.Ministry </strong></span>
+            }
+            @if (Model.Query.Sector != null)
+            {
+                <span> Sector: <strong>@Model.Query.Sector</strong></span>
+            }
+            @if (Model.Query.DateRange != null)
+            {
+                <span>Month: <strong>@Model.Query.DateRange</strong></span>
+            }*@
+
+        @*</div>*@
+    </div>
+
+    @*<div class="search-pagination">
+            <ul>
+                @foreach (var page in Model.Pages)
+                {
+                    <li><a href="#" class="@(page == Model.CurrentPage ? "active" : string.Empty)">@page</a></li>
+                }
+            </ul>
+        </div>*@
+
+    <div class="clear"></div>
+    @*  DEVNOTE: For no filters, add the no-filters class*@
+    <div class="search-filters">
+        @*<h6>Filter</h6>*@
+
+        <div class="search-filter">
+            <h5 class="open">Date</h5>
+            <div class="search-filter-content" style="display:block">
+                <ul>
+                    <li><b>@Model.DateRangeText</b></li>
+                </ul>
+
+                <h6 class="external-link">Archives</h6>
+                <ul>
+                    <li><a href="http://archive.news.gov.bc.ca/Default.aspx">June 10, 2013 to March 31, 2014</a></li>
+                    <li><a href="http://archive.news.gov.bc.ca/Default.aspx?archive=2009-2013">June 11, 2009 to June 9, 2013</a></li>
+                    <li><a href="http://archive.news.gov.bc.ca/archive/2005-2009/">May 18, 2005 to June 9, 2009</a></li>
+                    <li><a href="http://archive.news.gov.bc.ca/archive/2001-2005/">June 5, 2001 to May 10, 2005</a></li>
+                    <li><a href="http://archive.news.gov.bc.ca/archive/pre2001/default.htm">April 29, 1994 to June 5, 2001</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="search-filter">
+            <h5 class="@(!string.IsNullOrEmpty(Model.Query.NewsType) ? "open" : "")">Content</h5>
+            <div class="search-filter-content" style="@(!string.IsNullOrEmpty(Model.Query.NewsType) ? "display:block" : "")">
+                <ul>
+                    @if (!string.IsNullOrEmpty(Model.Query.NewsType))
+                    {
+                        <li><b>Model.Query.NewsType.ToTitleCase()</b></li>
+                    }
+                    else
+                    {
+                        <li>All News</li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <div class="search-filter">
+            <h5 class="@(!string.IsNullOrEmpty(Model.Query.Ministry) ? "open" : "")">Ministry</h5>
+            <div class="search-filter-content" style="@(!string.IsNullOrEmpty(Model.Query.Ministry) ? "display:block" : "")">
+                <ul>
+                    @if (!string.IsNullOrEmpty(Model.Query.Ministry))
+                    {
+                        if (@Model.Ministry != null)
+                        {
+                            <li><b>@Model.Ministry.Name</b></li>
+                        }
+                    }
+                    else
+                    {
+                        <li>All Ministries</li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <div class="search-filter">
+            <h5 class="@(!string.IsNullOrEmpty(Model.Query.Sector) ? "open" : "")">Sector</h5>
+            <div class="search-filter-content" style="@(!string.IsNullOrEmpty(Model.Query.Sector) ? "display:block" : "")">
+                <ul>
+                    @if (!string.IsNullOrEmpty(Model.Query.Sector))
+                    {
+                        if (@Model.Sector != null)
+                        {
+                            <li><b>@Model.Sector.Name</b></li>
+                        }
+                    }
+                    else
+                    {
+                        <li>All Sectors</li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <div style="margin-top: 10px">
+            <a href="/search" class="link-button">RESET SEARCH</a>
+        </div>
+    </div>
+
+    @*  DEVNOTE: For no filters, add the no-filters class*@
+    <div class="home-body search-results">
+
+        <div class="search-panel">
+            @using (Html.BeginForm("Search", "Default", FormMethod.Get))
+            {
+                <label>You searched for</label>
+                    <div class="search-panel-bar">
+                        <input name="q" type="text" value="@Model.Query.Text" placeholder="Search news.gov.bc.ca" />
+                        <input name="ministry" type="hidden" value="@Model.Query.Ministry" />
+                        <input name="sector" type="hidden" value="@Model.Query.Sector" />
+                        <input name="content" type="hidden" value="@Model.Query.NewsType" />
+                        <input name="date" type="hidden" value="@Model.Query.DateRange" />
+                        <div class="search-trigger"> </div>
+                    </div>
+            }
+        </div>
+
+        @if (Model.Results.Count() == 0)
+            {
+            <br /><h4>No results found.</h4>
+        }
+        else
+        {
+            <div class="search-numbers">
+                Showing results @Model.FirstResult - @Model.LastResult of @Model.Count
+            </div>
+        }
+
+        @foreach (var result in Model.Results)
+            {
+            <div class="article">
+                <h2><a href="@result.Uri">@result.Title</a></h2>
+                @if (result.HasMediaAssets)
+                {
+                    <div class="item-medialink media-assets"><a href="@result.Uri#assets">Media Assets</a></div>
+                }
+                <div class="item-date">@result.PublishDate.DateTime.FormatDateLong()</div>
+                <div class="item-content">
+                    @if (result.ThumbnailUri != null)
+                    {
+                        <div class='asset flickr'><a href='@result.Uri'><img src='@result.ThumbnailUri.ToProxyUrl()' /></a></div>
+                    }
+                    <div class="item-text@(result.ThumbnailUri == null ? "" : " with-image")">
+                        @result.Description.AsHtmlParagraphs()
+                        <a href="@result.Uri" class="read-more">Read More</a>
+                    </div>
+                </div>
+                <div class="clear"></div>
+            </div>
+        }
+    </div>
+
+    <div class="search-pagination bottom">
+        <ul>
+
+            @if (Model.Page > 1)
+            {
+                <li><a href="@Model.UrlQueryString((Model.Page - 2) * Model.ResultsPerPage + 1)">&laquo;prev</a></li>
+            }
+
+            @for (int i = Math.Max(1, Model.Page - 4); i <= Math.Min(Model.LastPage, Model.Page + 4); i++)
+            {
+                if (i == Model.Page)
+                {
+                    <li><b>@i</b></li>
+                }
+                else
+                {
+                    <li><a href="@Model.UrlQueryString((i - 1) * Model.ResultsPerPage + 1)">@i</a></li>
+                }
+            }
+
+            @if (Model.Page < Model.LastPage)
+            {
+                <li><a href="@Model.UrlQueryString(Model.Page * Model.ResultsPerPage + 1)">next &raquo;</a></li>
+            }
+
+        </ul>
+    </div>
+
+    <div class="clear"></div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(function () {
+            $(".search-filters .search-filter h5").on('click', function () {
+                var headerToggler = $(this);
+                headerToggler.parent().find('.search-filter-content').toggle();
+                headerToggler.toggleClass('open');
+            });
+            $(".search-panel form").submit(function () {
+                $(this).find(":input").filter(function () { return !this.value; }).attr("disabled", "disabled");
+                return true;
+            });
+        });
+
+        $(".search-trigger").on('click', function () {
+            $(this).parents('form:first').submit();
+        });
+
+    </script>
+}

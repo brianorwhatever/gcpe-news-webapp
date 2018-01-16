@@ -1,0 +1,23 @@
+﻿@using Gov.News.Website.Models
+@using Gov.News.Website.Helpers;
+@model NewsletterViewModel
+<div class="newsletters">
+    <h3><a href=@string.Format("../{0}", Model.Edition.NewsletterKey)>@Model.Edition.NewsletterName</a></h3>
+    <h2>Edition: @Model.Edition.EditionName</h2>
+    <div class="home-features">
+        @Html.Partial("ConnectSocialMedia")
+        @Html.Partial("ResourceLinks")
+        <vc:top-sectors />
+        </div>
+
+        <!--googleon: all-->
+        <div class="home-body">
+            <div class="clear">
+                @Html.Raw(Model.Edition.EditionBody)
+            </div>
+        @*</div>*@
+        </div>
+        <!--googleoff: all-->
+    <div class="clear"></div>
+</div>
+

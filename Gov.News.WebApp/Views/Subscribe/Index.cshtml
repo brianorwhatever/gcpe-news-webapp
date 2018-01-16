@@ -1,0 +1,78 @@
+﻿@using Gov.News.Website.Models.Subscribe
+@using Gov.News.Website.Helpers
+@model SubscribeViewModel
+
+<div class="connect subscribe">
+
+    <div class="home-body" style="width:100%">
+        <h3 style="margin-bottom:10px">Subscribe</h3>
+
+        @if (!(Model.Display == "selected"))
+        {
+            <div style="padding-top:3px;margin-bottom:15px;font-size:14px;background-color:#F9F9F9;color:black;">
+                If you already have a subscription to News On Demand you can <a href="/subscribe/manage" style="font-weight:bold">manage your account or unsubscribe</a>.
+            </div>
+        }
+
+        <form action="/subscribe" method="post">
+            
+            @Html.AntiForgeryToken()
+
+            @if (Model.Display == "selected")
+            {
+                @Html.Partial("_RegisterPartial")
+            }
+            else
+            {
+                @Html.Partial("_SelectionPartial")
+            }
+
+            <div id="noticeOfCollection">
+                <b>Notice of Collection</b>
+
+                <p>
+                    This information is collected by Government Communications and Public Engagement under Section 26(c) of the <i>Freedom of Information and Protection of Privacy Act</i> and will be used to provide you with email updates from the Government of B.C.
+
+                    Should you have any questions about the collection of your personal information, please contact:
+
+                    <div>
+                        Director, Digital Content<br />
+                        Social Media and Digital Services<br />
+                        PO Box 9409, Stn Prov Govt, Victoria,  BC  V8W 9V1<br />
+                        <a href="tel:2503567363">250 356-7363</a> @*or email: <a href="mailto:WebmanagerOnlineChannelOffice@gov.bc.ca">WebmanagerOnlineChannelOffice@gov.bc.ca</a>*@
+                    </div>
+                </p>
+            </div>
+            <br />
+
+            <div style="padding-left: 10px">
+                <div style="font-weight:bold">What email address would you like to use for notifications?</div>
+                <div style="padding-top:15px"><input type="email" placeholder="example@domain.com" name="EmailAddress" style="width:100%;max-width:350px" value="@Model.Selection.EmailAddress" /></div>
+
+                <br />
+
+                <button id="save" type="submit" class="btn" style="background-color:rgb(56, 89, 138); color:white" onclick="return ValidateForm('#message')">Subscribe</button>
+                <label id="message" style="margin-left:20px; color:red;"></label>
+            </div>
+
+            <div style="margin-top:30px; font-size:14px;background-color:#F9F9F9;color:black;">
+                If you have difficulties subscribing, please <a href="/contact" style="font-weight:bold">contact us</a>.
+            </div>
+
+        </form>
+
+    </div>
+    <div class="clear"></div>
+</div>
+
+@section Scripts {
+    <script src="~/Scripts/connect.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.expandable-section').removeClass('collapsed').addClass('expanded');
+            $('.link-button.collapse').hide();
+
+            hookSubscribeToAllNewsOnDemand();           
+        });
+    </script>
+}
