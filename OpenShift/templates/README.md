@@ -12,7 +12,7 @@ The following projects contain the Deployment Configurations (dc) for the variou
 - gcpe-news-prod (Production)
  
 
-Steps to configure the deployment:
+Steps to configure the project:
 ----------------------------------
 
 Ensure that you have access to the build and deployment templates.
@@ -35,6 +35,17 @@ Switch to the Tools project by running:
 This will create the objects necessary to build the product.
 
  You can now login to the OpenShift web interface and observe the progress of the initial build.
+
+##Important Note - Jenkins##
+
+The OpenShift platform will automatically create a Jenkins deployment once the pipeline build configurations are created.  This Jenkins deployment may not have access to enough metaspace memory, and may be prone to failure over time because of that.  This problem is known to occur more often if you are using the OpenShift OAUTH plugin for authentication in Jenkins, as is the standard with the BC Government Pathfinder platform.
+
+To guard against this, add the following environment variable to the Jenkins deployment:
+
+`JAVA_OPTS` : `-XX:MaxMetaspaceSize=512m`
+
+You may also want to increase the RAM limits for the Jenkins deployment (4Gi recommended).  This can be done by using the "Edit Resource Limits" action menu option when viewing the deployment in the OpenShift web console.
+
 
 **Deployment**
 
