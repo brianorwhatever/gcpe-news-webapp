@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Gov.News.Api;
 using Gov.News.Api.Models;
@@ -59,7 +60,7 @@ namespace Gov.News.Website
             StartSignalR().GetAwaiter().GetResult();
             _expiringCache.Add(typeof(ResourceLink), new ExpiringList<object>());
             _expiringCache.Add(typeof(Newsletter), new ExpiringList<object>());
-            _expiringCache.Add(typeof(Article), new ExpiringList<object>());
+            _cache.Add(typeof(Asset), new LimitedSizeDictionary<string, DataModel>(1000));
         }
 
         /// <summary>
@@ -76,23 +77,19 @@ namespace Gov.News.Website
                             .Build();
 
 
-            RegisterNotification<Ministry>(true);
+            RegisterNotification<Home>(false);
             RegisterNotification<Sector>(true);
-            RegisterNotification<Post>(false);
-            RegisterNotification<Slide>(true);
-
             RegisterNotification<Service>(true);
             RegisterNotification<Theme>(false);
             RegisterNotification<Tag>(false);
-            RegisterNotification<Home>(false);
+            RegisterNotification<Ministry>(true);
+
             RegisterNotification<Minister>(false);
-            RegisterNotification<FlickrAsset>(false);
+            RegisterNotification<Post>(false);
+            RegisterNotification<Slide>(true);
+
             RegisterNotification<FacebookPost>(false);
-            //RegisterNotification<FacebookPage>(false);
             RegisterNotification<TwitterFeed>(false, 20);
-            RegisterNotification<EditionBody>(false, 20);
-            RegisterNotification<EditionImage>(false, 20);
-            RegisterNotification<ArticleBody>(false, 20);
 
             apiConnection.Closed += new Func<Exception, Task>(OnSignalRConnectionClosed);
             await apiConnection.StartAsync();
@@ -277,19 +274,19 @@ namespace Gov.News.Website
         {
             return await GetAsync(id, () => ApiClient.Slide.GetOneAsync(id, APIVersion));
         }
+        public async Task<Edition> GetEditionAsync(string newsletterKey, string editionKey)
+        {
+            return await ApiClient.Edition.GetOneAsync(newsletterKey, editionKey, APIVersion);
+        }
+
         public async Task<EditionImage> GetEditionImageAsync(string key)
         {
-            return await GetAsync(key, () => ApiClient.EditionImage.GetOneAsync(key, APIVersion));
+            return await ApiClient.Edition.GetImageAsync(key, APIVersion);
         }
 
-        public async Task<EditionBody> GetEditionBodyAsync(string key)
+        public async Task<Article> GetArticleAsync(string newsletterKey, string editionKey, string articleKey)
         {
-            return await GetAsync(key, () => ApiClient.EditionBody.GetOneAsync(key, APIVersion));
-        }
-
-        public async Task<ArticleBody> GetArticleBodyAsync(string key)
-        {
-            return await GetAsync(key, () => ApiClient.ArticleBody.GetOneAsync(key, APIVersion));
+            return await ApiClient.Article.GetOneAsync(newsletterKey, editionKey, articleKey, APIVersion);
         }
 
         public async Task<TwitterFeed> GetTwitterFeedAsync()
@@ -301,11 +298,6 @@ namespace Gov.News.Website
         {
             return await GetAsync(uri, () => ApiClient.FacebookPost.GetByUriAsync(APIVersion, uri));
         }
-
-        /*public async Task<FacebookPage> GetFacebookPageAsync(string key)
-        {
-            return await GetAsync(key, ApiClient.FacebookPage.GetOneAsync(key, APIVersion));
-        }*/
 
         public async Task<Post> GetPostAsync(string key)
         {
@@ -430,18 +422,30 @@ namespace Gov.News.Website
             return new Uri(url);
         }
 
-        public async Task<FlickrAsset> GetFlickrAssetsAsync(string assetUri)
+        public async Task<Asset> GetFlickrAssetAsync(string assetUri)
         {
             if (!string.IsNullOrEmpty(assetUri))
             {
-                try
-                {
-                    return await GetAsync(assetUri, () => ApiClient.FlickrAsset.GetOneAsync(APIVersion, assetUri));
-                }
-                catch (Exception) { }
+                return await GetAsync(assetUri, () => FetchFlickrAssetAsync(assetUri));
             }
 
             return null;
+        }
+
+        public async Task<Asset> FetchFlickrAssetAsync(string assetUri)
+        {
+            var flickrAsset = new Asset(assetUri, null, null);
+            using (var httpClient = new HttpClient())
+            {
+                var request = new HttpRequestMessage(HttpMethod.Head, assetUri);
+                var response = await httpClient.SendAsync(request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    flickrAsset.Length = response.Content.Headers.ContentLength ?? 0;
+                }
+            }
+            return flickrAsset;
         }
 
         public async Task<AzureAsset> GetAzureAssetAsync(string path)
@@ -472,21 +476,6 @@ namespace Gov.News.Website
         public async Task<IEnumerable<Newsletter>> GetNewslettersAsync()
         {
             return await GetExpiringListAsync(() => ApiClient.Newsletter.GetAllAsync(APIVersion));
-        }
-
-        public async Task<IEnumerable<Edition>> GetEditionsAsync(string newsletterKey)
-        {
-            return await ApiClient.Edition.GetForNewsletterAsync(newsletterKey, APIVersion);
-        }
-
-        public async Task<Edition> GetEditionAsync(string newsletterKey, string editionKey)
-        {
-            return await ApiClient.Edition.GetOneAsync(newsletterKey, editionKey, APIVersion);
-        }
-
-        public async Task<IEnumerable<Article>> GetArticlesAsync()
-        {
-            return await GetExpiringListAsync(() => ApiClient.Article.GetAllAsync(APIVersion));
         }
 
         /// <summary>

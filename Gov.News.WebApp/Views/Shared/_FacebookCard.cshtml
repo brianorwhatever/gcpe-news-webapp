@@ -1,7 +1,6 @@
 ﻿@using Gov.News.Website.Helpers;
 @using Gov.News.Website;
 @using Gov.News.Api.Models
-@using Gov.News.WebApp.Extensions
 
 @model FacebookPost
 
@@ -9,7 +8,7 @@
     <div class='facebook-post' style='position: relative;'>
         <div class='facebook-article'>
             <div class='feed-header'>
-                <a href='@Model.PosterUrl' target='_blank' class='link-button facebook-like'>Like on Facebook</a>
+                <a href='@Model.PosterUrl()' target='_blank' class='link-button facebook-like'>Like on Facebook</a>
                 <h5>
                     <img src='@Model.PosterLogo.ToUri().ToProxyUrl()'/>
                     <span class="poster-block">

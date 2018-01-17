@@ -74,64 +74,52 @@ namespace Gov.News.Website.Controllers
 
         public async Task<NewsletterViewModel> GetEditionsModel(string newsletterKey)
         {
-            var model = await GetBaseModel();
+            var model = await GetBaseModel(newsletterKey);
             model.Title = "Editions";
 
-            model.Editions = await Repository.GetEditionsAsync(newsletterKey);
-            if (model.Editions == null)
-                return null;
-
-            model.Newsletter = model.NewsletterListings.SingleOrDefault(x => x.Key == newsletterKey);
-            if (model.Newsletter == null)
-                return null;
             return model;
         }
 
         public async Task<NewsletterViewModel> GetEditionModel(string newsletterKey, string editionKey)
         {
-            var model = await GetBaseModel();
+            var model = await GetBaseModel(newsletterKey);
             model.Title = "Editions";
 
             model.Edition = await Repository.GetEditionAsync(newsletterKey, editionKey);
             if (model.Edition == null)
                 return null;
 
-            var editionBody = await Repository.GetEditionBodyAsync(newsletterKey + "/" + editionKey);
-            if (editionBody == null)
-                return null;
-
-            model.Edition.EditionBody = editionBody.HtmlBody.Replace("<!--REPLACE-WITH-PUBLIC-URL-->", new Uri(Configuration["NewsHostUri"]).ToString().TrimEnd('/'));
+            model.Edition.HtmlBody = model.Edition.HtmlBody.Replace("<!--REPLACE-WITH-PUBLIC-URL-->", new Uri(Configuration["NewsHostUri"]).ToString().TrimEnd('/'));
             return model;
         }
 
         public async Task<NewsletterViewModel> GetArticleModel(string newsletterKey, string editionKey, string articleKey)
         {
-            var model = await GetBaseModel();
+            var model = await GetBaseModel(newsletterKey);
             model.Title = "Articles";
 
-            var allArticles = await Repository.GetArticlesAsync();
-            
-            var articleModel = allArticles.FirstOrDefault(a => a.NewsletterKey == newsletterKey && a.EditionKey == editionKey && a.ArticleKey == articleKey);
+            var articleModel = await Repository.GetArticleAsync(newsletterKey, editionKey, articleKey);
 
             if (articleModel == null)
                 return null;
 
-            var articleBody = await Repository.GetArticleBodyAsync(newsletterKey + "/" + editionKey + "/" + articleKey);
-            if (articleBody == null)
-                return null;
-
-            articleModel.HtmlBody = articleBody.HtmlBody.Replace("<!--REPLACE-WITH-PUBLIC-URL-->", new Uri(Configuration["NewsHostUri"]).ToString().TrimEnd('/'));
+            articleModel.HtmlBody = articleModel.HtmlBody.Replace("<!--REPLACE-WITH-PUBLIC-URL-->", new Uri(Configuration["NewsHostUri"]).ToString().TrimEnd('/'));
 
             model.Article = articleModel;
             return model;
         }
 
-        private async Task<NewsletterViewModel> GetBaseModel()
+        private async Task<NewsletterViewModel> GetBaseModel(string newsletterKey = null)
         {
             var model = new NewsletterViewModel();
             await LoadAsync(model);
             model.NewsletterListings = await Repository.GetNewslettersAsync();
-
+            if (newsletterKey != null)
+            {
+                model.Newsletter = model.NewsletterListings.SingleOrDefault(x => x.Key == newsletterKey);
+                if (model.Newsletter == null)
+                    return null;
+            }
             return model;
         }
     }

@@ -17,7 +17,7 @@ namespace Gov.News.Website.Helpers
         {
             System.Text.StringBuilder wrapper = new System.Text.StringBuilder();
             Uri youtubeImageUri = null;
-            string mediaProviderUrl = "";            
+            string mediaProviderUrl = "";
             string privacyUrl = "http://news.gov.bc.ca/privacy";
             string placeholderThumbnailUrl = "/Content/Images/Gov/BC_Gov_News_1280x720.png";
             string mediaType = "";
@@ -38,7 +38,7 @@ namespace Gov.News.Website.Helpers
                     break;
             }
 
-            wrapper.AppendFormat("<div class=\"{0}-wrapper asset {0} {1}\" data-media-type=\"{0}\" data-media-id=\"{2}\">", mediaProvider, mediaType, mediaId);            
+            wrapper.AppendFormat("<div class=\"{0}-wrapper asset {0} {1}\" data-media-type=\"{0}\" data-media-id=\"{2}\">", mediaProvider, mediaType, mediaId);
             wrapper.Append("<div class=\"media-player-container\">");
             wrapper.Append("</div>");
             wrapper.Append("<div class=\"placeholder-container\">");
@@ -130,7 +130,7 @@ namespace Gov.News.Website.Helpers
             var newhtml = AssetRegex.Replace(bodyHtml, new MatchEvaluator(match =>
             {
                 string result;
-                
+
                 string url = match.Groups["url"].Value;
 
                 try
@@ -202,9 +202,9 @@ namespace Gov.News.Website.Helpers
                     {
                         if (facebookDetailsDictionary != null)
                         {
-                            var facebookPostDetail = facebookDetailsDictionary.FirstOrDefault(d => d.Key == url).Value;
-                            if (facebookPostDetail != null)
-                                result = GetEmbeddedFacebookHtmlString(facebookPostDetail);
+                            var facebookPost = facebookDetailsDictionary.FirstOrDefault(d => d.Key == url).Value;
+                            if (facebookPost != null)
+                                result = GetEmbeddedFacebookHtmlString(facebookPost);
                             else
                                 result = string.Format(
                                             "<div>" +
@@ -283,9 +283,9 @@ namespace Gov.News.Website.Helpers
                         {
                             assetHtml = string.Format(
                                             "<div class='asset flickr background'>" +
-                                               // "<a href='{0}'>" +
+                                                    // "<a href='{0}'>" +
                                                     "<div class='image-div' style='background-image: url({1})'></div>" +
-                                              //  "</a>" +
+                                            //  "</a>" +
                                             "</div>"
                                             , flickrUrl, uri.ToProxyUrl());
                         }
@@ -293,9 +293,9 @@ namespace Gov.News.Website.Helpers
                         {
                             assetHtml = string.Format(
                                             "<div class='asset flickr'>" +
-                                               // "<a href='{0}'>" +
+                                                   // "<a href='{0}'>" +
                                                    "<img src='{1}'/>" +
-                                               // "</a>" +
+                                            // "</a>" +
                                             "</div>"
                                             , flickrUrl, uri.ToProxyUrl());
                         }
@@ -430,47 +430,46 @@ namespace Gov.News.Website.Helpers
             return new HtmlString(assetHtml);
         }
 
-        public static HtmlString RenderEmbeddedFacebookAsset(FacebookPost facebookPostDetail)
+        public static HtmlString RenderEmbeddedFacebookAsset(FacebookPost facebookPost)
         {
-            return new HtmlString(GetEmbeddedFacebookHtmlString(facebookPostDetail));
+            return new HtmlString(GetEmbeddedFacebookHtmlString(facebookPost));
         }
 
-        static string GetEmbeddedFacebookHtmlString(FacebookPost facebookPostDetail)
+        static string GetEmbeddedFacebookHtmlString(FacebookPost facebookPost)
         {
-
             return "<div class='feature-post' style='display: block;'>" +
                         "<div class='facebook-post' style='position: relative;'>" +
                             "<div class='facebook-article'>" +
                                 "<div class='feed-header'>" +
-                                    "<a href='" + facebookPostDetail.PosterUrl + "' target='_blank' class='link-button facebook-like'>Like on Facebook</a>" +
+                                    "<a href='" + facebookPost.PosterUrl() + "' target='_blank' class='link-button facebook-like'>Like on Facebook</a>" +
                                         "<h5>" +
-                                             "<img src='" + facebookPostDetail.PosterLogo.ToUri().ToProxyUrl() + "' />" +
-                                             facebookPostDetail.Poster + "<br />" +
+                                             "<img src='" + facebookPost.PosterLogo.ToUri().ToProxyUrl() + "' />" +
+                                             facebookPost.Poster + "<br />" +
 
-                                            "<span class='post-details' style='padding:0'>" + facebookPostDetail.PosterSubtitle + " &#9679;" + string.Format("{0:n0}", facebookPostDetail.PosterLikes) + " Likes</span>" +
+                                            "<span class='post-details' style='padding:0'>" + facebookPost.PosterSubtitle + " &#9679;" + string.Format("{0:n0}", facebookPost.PosterLikes) + " Likes</span>" +
                                         "</h5>" +
                                     "</div>" +
                                     "<div class='clearfix'></div>" +
 
                                     "<div style='float:left; margin:10px;display:none;'>" +
-                                        "<img src='" + facebookPostDetail.PosterLogo.ToUri().ToProxyUrl() + "' /><br />" +
-                                        "<span class='post-details' style='padding-left:0; padding-top:5px;'>" + facebookPostDetail.PosterSubtitle + "</span>" + /*@* TODO &#9679; @string.Format("{0:n0}", Model.FacebookPost.PosterLikes) Likes*@*/
+                                        "<img src='" + facebookPost.PosterLogo.ToUri().ToProxyUrl() + "' /><br />" +
+                                        "<span class='post-details' style='padding-left:0; padding-top:5px;'>" + facebookPost.PosterSubtitle + "</span>" + /*@* TODO &#9679; @string.Format("{0:n0}", Model.FacebookPost.PosterLikes) Likes*@*/
                                     "</div>" +
-                                    //(facebookPostDetail.Type == "photo" && !string.IsNullOrWhiteSpace(facebookPostDetail.PictureUrl) ? "<img src='" + facebookPostDetail.PostImageFileName + "'/><br />" : "") +
-                                    ConvertUrlsToLinks(facebookPostDetail.Content).Replace("\n", "<br />").AsHtmlParagraphs() +
+                                    //(facebookPost.Type == "photo" && !string.IsNullOrWhiteSpace(facebookPost.PictureUrl) ? "<img src='" + facebookPost.PostImageFileName + "'/><br />" : "") +
+                                    ConvertUrlsToLinks(facebookPost.Content).Replace("\n", "<br />").AsHtmlParagraphs() +
 
                                     "<div class='clearfix'></div>" +
                                     "\n<div class='sharing-options'><ul>" +
-                                    /*  <li class="facebook-action facebook-like" data-facebook-object-id="facebookPostDetail.FacebookObjectId"><a href = "#" > Like </ a ></ li >
-                                        < li class="facebook-action facebook-comment"><a href = "#" > Comment </ a ></ li >
-                                            < li class="facebook-action facebook-share" data-url="facebookPostDetail.PosterUrl"><a href = "#" > Share </ a ></ li >
-                                            </ ul >
-                                        </ div > *@*/
-                                    /* "<div class='facebook-comment-dialog'>" +
-                                         "<textarea id='facebook-comment-message-1' placeholder='Comment on this story'></textarea>" +
-                                         "<input type='submit' class='facebook-comment-trigger' data-slider-id='1' data-facebook-object-id='" + facebookPostDetail.FacebookObjectId + "' value='Comment' />" +
-                                         "<a class='facebook-comment-close' href='#'>Close</a>" */
-                                        "<li class='facebook-info'><a href = '" + facebookPostDetail.Key + "' target='_blank'>Like or Comment<span class='on-story'> on this post</span><span class='on-facebook'> on Facebook</span></a></li>" +
+                                        /*  <li class="facebook-action facebook-like" data-facebook-object-id="facebookPost.FacebookObjectId"><a href = "#" > Like </ a ></ li >
+                                            < li class="facebook-action facebook-comment"><a href = "#" > Comment </ a ></ li >
+                                                < li class="facebook-action facebook-share" data-url="facebookPost.PosterUrl()"><a href = "#" > Share </ a ></ li >
+                                                </ ul >
+                                            </ div > *@*/
+                                        /* "<div class='facebook-comment-dialog'>" +
+                                             "<textarea id='facebook-comment-message-1' placeholder='Comment on this story'></textarea>" +
+                                             "<input type='submit' class='facebook-comment-trigger' data-slider-id='1' data-facebook-object-id='" + facebookPost.FacebookObjectId + "' value='Comment' />" +
+                                             "<a class='facebook-comment-close' href='#'>Close</a>" */
+                                        "<li class='facebook-info'><a href = '" + facebookPost.Key + "' target='_blank'>Like or Comment<span class='on-story'> on this post</span><span class='on-facebook'> on Facebook</span></a></li>" +
                                     "</ul ></div >" +
                                 "</div>" +
                             "</div>" +
@@ -504,4 +503,3 @@ namespace Gov.News.Website.Helpers
         }
     }
 }
- 

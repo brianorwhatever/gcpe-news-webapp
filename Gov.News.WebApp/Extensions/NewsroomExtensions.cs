@@ -147,22 +147,6 @@ namespace Gov.News.Website
             return uri;
         }
 
-        public static Uri GetUri(this FlickrAsset flickrAsset)
-        {
-            return new Uri(String.Format("https://www.flickr.com/photos/{0}/{1}/",
-                "bcgovphotos",
-                flickrAsset.PhotoSecret));
-        }
-
-        public static Uri GetResourceUri(this FlickrAsset flickrAsset)
-        {
-            return new Uri(String.Format("https://farm{0}.staticflickr.com/{1}/{2}_{3}_n.jpg",
-                flickrAsset.PhotoFarm,
-                flickrAsset.PhotoServer,
-                flickrAsset.PhotoSecret,
-                flickrAsset.PhotoUserPathAlias));
-        }
-
         public static Uri GetPermanentUri(this Post entry)
         {
             if (entry.Reference.StartsWith("NEWS-"))
@@ -216,6 +200,16 @@ namespace Gov.News.Website
             return container.GetBlockBlobReference(azureAsset.Key);
         }
 
+
+        public static string PosterUrl(this FacebookPost facebookPost)
+        {
+            int posterIdx = facebookPost.Key.IndexOf("facebook.com/"); // facebookPost.Key is the postUrl
+            if (posterIdx != -1)
+            {
+                posterIdx = facebookPost.Key.IndexOf('/', posterIdx + "facebook.com/".Length);
+            }
+            return posterIdx != -1 ? facebookPost.Key.Substring(0, posterIdx) : null;
+        }
 
         public static Uri ToUri(this string uri)
         {

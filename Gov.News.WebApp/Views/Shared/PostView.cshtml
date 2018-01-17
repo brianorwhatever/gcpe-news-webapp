@@ -284,7 +284,7 @@
                             @Html.Raw(Model.FacebookAsset.Poster)<br />
                             <span>@Model.FacebookAsset.PosterSubtitle &#9679; @string.Format("{0:n0}", Model.FacebookAsset.PosterLikes) Likes</span>
                         </h5>
-                        <a href="@Model.FacebookAsset.PosterUrl" class="link-button facebook-like">Like on Facebook</a>
+                        <a href="@Model.FacebookAsset.PosterUrl()" class="link-button facebook-like">Like on Facebook</a>
                     </div>
 
                     @AssetHelper.ConvertUrlsToLinks(Model.FacebookAsset.Content).AsHtmlParagraphs().ShowLinks()
@@ -367,7 +367,7 @@
             <a href="#" class="link-button collapse">Contract Story</a>
         </div>
 
-        @if (!string.IsNullOrWhiteSpace(Model.Post.LearnMoreItems))
+        @*@if (!string.IsNullOrWhiteSpace(Model.Post.LearnMoreItems))
         {
             <!--googleon: all-->
             <div class="learn-more collapsed">
@@ -402,7 +402,7 @@
                 @Html.Raw(Model.Post.Quotes)
             </div>
             <!--googleoff: all-->
-        }
+        }*@
         <div class="comm-contacts-body-section">
         @if (firstDoc.Contacts.Any())
         {
