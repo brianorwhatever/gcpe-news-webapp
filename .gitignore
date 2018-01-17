@@ -38,6 +38,12 @@ bld/
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
+#functional-tests
+functional-tests/.gradle/
+functional-tests/gebReports/
+functional-tests/build/
+functional-tests/obj/
+
 # NUNIT
 *.VisualState.xml
 TestResult.xml
