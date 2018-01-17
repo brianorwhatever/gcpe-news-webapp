@@ -8,7 +8,6 @@
 import org.openqa.selenium.Dimension
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.firefox.FirefoxDriver
-import org.openqa.selenium.phantomjs.PhantomJSDriver
 import org.openqa.selenium.remote.DesiredCapabilities
 
 waiting {
@@ -31,13 +30,6 @@ environments {
 	firefox {
 		driver = { new FirefoxDriver() }
 	}
-
-    phantomJs {
-		driver = { def d = new PhantomJSDriver(new DesiredCapabilities());
-			d.manage().window().size = new Dimension(1280, 1024);
-			return d
-		}
-    }
 }
 
 // To run the tests with all browsers just run:
