@@ -1,0 +1,223 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2b1ccda8-c0cc-44a6-9d00-659966d202da}</ProjectGuid>
+    <ProjectHome />
+    <ProjectView>ShowAllFiles</ProjectView>
+    <StartupFile>index.js</StartupFile>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">14.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <NodeExePath>
+    </NodeExePath>
+    <NodeExeArguments>
+    </NodeExeArguments>
+    <StartWebBrowser>False</StartWebBrowser>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <ItemGroup>
+    <Content Include="Readme.md" />
+    <Content Include="build\reports\chromeTest\tests\index.html" />
+    <Content Include="build\reports\chromeTest\tests\classes\FlowSpecs.html" />
+    <Content Include="build\reports\chromeTest\tests\css\base-style.css" />
+    <Content Include="build\reports\chromeTest\tests\css\style.css" />
+    <Compile Include="build\reports\chromeTest\tests\js\report.js" />
+    <Content Include="build\reports\chromeTest\tests\packages\default-package.html" />
+    <Content Include="build\reports\phantomJsTest\tests\index.html" />
+    <Content Include="build\reports\phantomJsTest\tests\classes\FlowSpecs.html" />
+    <Content Include="build\reports\phantomJsTest\tests\classes\SearchResultsPaginationSpec.html" />
+    <Content Include="build\reports\phantomJsTest\tests\classes\SearchResultsSpec.html" />
+    <Content Include="build\reports\phantomJsTest\tests\classes\WellSearchSpec.html" />
+    <Content Include="build\reports\phantomJsTest\tests\css\base-style.css" />
+    <Content Include="build\reports\phantomJsTest\tests\css\style.css" />
+    <Compile Include="build\reports\phantomJsTest\tests\js\report.js" />
+    <Content Include="build\reports\phantomJsTest\tests\packages\default-package.html" />
+    <Content Include="build\test-results\chromeTest\TEST-FlowSpecs.xml" />
+    <Content Include="build\test-results\phantomJsTest\TEST-FlowSpecs.xml" />
+    <Content Include="build\webdriver\phantomjs\third-party.txt" />
+    <Content Include="build\webdriver\phantomjs\README.md" />
+    <Compile Include="build\webdriver\phantomjs\examples\arguments.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\child_process-examples.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\colorwheel.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\countdown.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\detectsniff.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\echoToFile.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\features.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\fibo.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\hello.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\injectme.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\loadspeed.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\loadurlwithoutcss.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\modernizr.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\module.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\netlog.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\netsniff.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\openurlwithproxy.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\outputEncoding.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\pagecallback.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\page_events.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\phantomwebintro.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\post.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\postjson.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\postserver.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\printenv.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\printheaderfooter.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\printmargins.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\rasterize.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\render_multi_url.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\responsive-screenshot.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\run-jasmine.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\run-jasmine2.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\run-qunit.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\scandir.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\server.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\serverkeepalive.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\simpleserver.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\sleepsort.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\stdin-stdout-stderr.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\universe.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\unrandomize.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\useragent.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\version.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\waitfor.js" />
+    <Compile Include="build\webdriver\phantomjs\examples\walk_through_frames.js" />
+    <Content Include="documentation\images\defineFlows.png" />
+    <Content Include="documentation\images\testResultSample.png" />
+    <Content Include="documentation\images\testResultWithFailures.png" />
+    <Content Include="gebReports\FlowSpecs\001-001-SearchClick test-failure.html" />
+    <Content Include="gebReports\FlowSpecs\001-002-SearchClick test-end.html" />
+    <Content Include="gebReports\FlowSpecs\001-001-SearchClick test-failure.png" />
+    <Content Include="gebReports\FlowSpecs\001-002-SearchClick test-end.png" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\001-001-Scenario 1_ Page links_ Multiple matching results - Address 123 - 1 to Max-end.html" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\002-001-Scenario 1_ Page links_ Multiple matching results - Address 123 - 1 to 2-end.html" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\003-001-Scenario 1_ Page links_ Multiple matching results - Address 123 - 2 to 3-end.html" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\004-001-Scenario 1_ Page links_ Multiple matching results - Address 123 - 1 to 3-end.html" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\005-001-Scenario 1_ Page links_ Multiple matching results - Address 123 - 3 to 1-end.html" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\006-001-Scenario 1_ Page links_ Multiple matching results - Address 123 - 3 to 2-end.html" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\007-001-Scenario 2_ Next Page links_ Multiple matching results - Address 123 - Next is disabled-end.html" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\008-001-Scenario 2_ Next Page links_ Multiple matching results - Address 123 - Next button shows-end.html" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\009-001-Scenario 3_ Previous Page links_ Multiple matching results - Address 123 - previous is disabled-end.html" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\010-001-Scenario 3_ Previous Page links_ Multiple matching results - Address 123 - Previous button shows-end.html" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\001-001-Scenario 1_ Page links_ Multiple matching results - Address 123 - 1 to Max-end.png" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\002-001-Scenario 1_ Page links_ Multiple matching results - Address 123 - 1 to 2-end.png" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\003-001-Scenario 1_ Page links_ Multiple matching results - Address 123 - 2 to 3-end.png" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\004-001-Scenario 1_ Page links_ Multiple matching results - Address 123 - 1 to 3-end.png" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\005-001-Scenario 1_ Page links_ Multiple matching results - Address 123 - 3 to 1-end.png" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\006-001-Scenario 1_ Page links_ Multiple matching results - Address 123 - 3 to 2-end.png" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\007-001-Scenario 2_ Next Page links_ Multiple matching results - Address 123 - Next is disabled-end.png" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\008-001-Scenario 2_ Next Page links_ Multiple matching results - Address 123 - Next button shows-end.png" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\009-001-Scenario 3_ Previous Page links_ Multiple matching results - Address 123 - previous is disabled-end.png" />
+    <Content Include="gebReports\SearchResultsPaginationSpec\010-001-Scenario 3_ Previous Page links_ Multiple matching results - Address 123 - Previous button shows-end.png" />
+    <Content Include="gebReports\SearchResultsSpec\001-001-Scenario 1_ No _zero_ matching results - No entry-failure.html" />
+    <Content Include="gebReports\SearchResultsSpec\001-002-Scenario 1_ No _zero_ matching results - No entry-end.html" />
+    <Content Include="gebReports\SearchResultsSpec\001-001-Scenario 1_ No _zero_ matching results - No entry-failure.png" />
+    <Content Include="gebReports\SearchResultsSpec\001-002-Scenario 1_ No _zero_ matching results - No entry-end.png" />
+    <Content Include="src\test\groovy\pages\external\NewsArchivePage.groovy" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="build" />
+    <Folder Include="build\classes" />
+    <Folder Include="build\classes\test" />
+    <Folder Include="build\classes\test\pages" />
+    <Folder Include="build\classes\test\pages\app" />
+    <Folder Include="build\classes\test\pages\external" />
+    <Folder Include="build\reports" />
+    <Folder Include="build\reports\chromeTest" />
+    <Folder Include="build\reports\chromeTest\tests" />
+    <Folder Include="build\reports\chromeTest\tests\classes" />
+    <Folder Include="build\reports\chromeTest\tests\css" />
+    <Folder Include="build\reports\chromeTest\tests\js" />
+    <Folder Include="build\reports\chromeTest\tests\packages" />
+    <Folder Include="build\reports\phantomJsTest" />
+    <Folder Include="build\reports\phantomJsTest\tests" />
+    <Folder Include="build\reports\phantomJsTest\tests\classes" />
+    <Folder Include="build\reports\phantomJsTest\tests\css" />
+    <Folder Include="build\reports\phantomJsTest\tests\js" />
+    <Folder Include="build\reports\phantomJsTest\tests\packages" />
+    <Folder Include="build\resources" />
+    <Folder Include="build\resources\test" />
+    <Folder Include="build\test-results" />
+    <Folder Include="build\test-results\chromeTest" />
+    <Folder Include="build\test-results\chromeTest\binary" />
+    <Folder Include="build\test-results\phantomJsTest" />
+    <Folder Include="build\test-results\phantomJsTest\binary" />
+    <Folder Include="build\tmp" />
+    <Folder Include="build\tmp\chromeTest" />
+    <Folder Include="build\tmp\compileTestGroovy" />
+    <Folder Include="build\tmp\compileTestGroovy\groovy-java-stubs" />
+    <Folder Include="build\tmp\phantomJsTest" />
+    <Folder Include="build\webdriver" />
+    <Folder Include="build\webdriver\chromedriver" />
+    <Folder Include="build\webdriver\phantomjs" />
+    <Folder Include="build\webdriver\phantomjs\bin" />
+    <Folder Include="build\webdriver\phantomjs\examples" />
+    <Folder Include="build\webdriver\phantomjs\phantomjs-2.1.1-windows" />
+    <Folder Include="build\webdriver\phantomjs\phantomjs-2.1.1-windows\bin" />
+    <Folder Include="build\webdriver\phantomjs\phantomjs-2.1.1-windows\examples" />
+    <Folder Include="documentation" />
+    <Folder Include="documentation\images" />
+    <Folder Include="Gcpe.News.WebApp\" />
+    <Folder Include="Gcpe.News.WebApp\functional-tests" />
+    <Folder Include="gebReports" />
+    <Folder Include="gebReports\FlowSpecs" />
+    <Folder Include="gebReports\SearchResultsPaginationSpec" />
+    <Folder Include="gebReports\SearchResultsSpec" />
+    <Folder Include="gebReports\WellSearchSpec" />
+    <Folder Include="gradle" />
+    <Folder Include="gradle\wrapper" />
+    <Folder Include="src" />
+    <Folder Include="src\test" />
+    <Folder Include="src\test\groovy" />
+    <Folder Include="src\test\groovy\pages" />
+    <Folder Include="src\test\groovy\pages\app" />
+    <Folder Include="src\test\groovy\pages\external\" />
+    <Folder Include="src\test\resources" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <!--Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them.-->
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
+  <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsTools.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:48022/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>True</UseCustomServer>
+          <CustomServerUrl>http://localhost:1337</CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}" User="">
+        <WebProjectProperties>
+          <StartPageUrl>
+          </StartPageUrl>
+          <StartAction>CurrentPage</StartAction>
+          <AspNetDebugging>True</AspNetDebugging>
+          <SilverlightDebugging>False</SilverlightDebugging>
+          <NativeDebugging>False</NativeDebugging>
+          <SQLDebugging>False</SQLDebugging>
+          <ExternalProgram>
+          </ExternalProgram>
+          <StartExternalURL>
+          </StartExternalURL>
+          <StartCmdLineArguments>
+          </StartCmdLineArguments>
+          <StartWorkingDirectory>
+          </StartWorkingDirectory>
+          <EnableENC>False</EnableENC>
+          <AlwaysStartWebServerOnDebug>False</AlwaysStartWebServerOnDebug>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
