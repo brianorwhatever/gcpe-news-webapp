@@ -14,9 +14,9 @@
             <h5>Editions</h5>
             <div class="Editions-listing">
                 <ul>
-                    @foreach (var item in Model.Editions)
+                    @foreach (var item in Model.Newsletter.Editions)
                     {
-                        <div><h6> <li><a href=@string.Format("/{0}/{1}/{2}","newsletters", item.NewsletterKey, item.EditionKey)>  @item.EditionName</a></li></h6></div>
+                        <div><h6> <li><a href=@string.Format("/{0}/{1}/{2}","newsletters", Model.Newsletter.Key, item.Key)> @item.Value</a></li></h6></div>
                     }
                 </ul>
 

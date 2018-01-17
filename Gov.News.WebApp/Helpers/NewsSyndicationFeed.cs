@@ -127,15 +127,16 @@ namespace Gov.News.Website
             Uri itemUri = entry.GetUri();
             item.Links.Add(new SyndicationLink(itemUri, "alternate", "", "text/html", 0));
 
-            var flickrAsset = await _repository.GetFlickrAssetsAsync(entry.AssetUrl);
-            if (flickrAsset != null)
+            var thumbnailUri = entry.GetThumbnailUri();
+            if (thumbnailUri != null)
             {
-                item.Links.Add(new SyndicationLink(flickrAsset.GetResourceUri(), "enclosure", flickrAsset.Label, flickrAsset.ContentType, (long) flickrAsset.ContentLength));
-            }
-            else
-            {
-                var thumbnailUri = entry.GetThumbnailUri();
-                if (thumbnailUri != null)
+                if (thumbnailUri.Host.EndsWith("staticflickr.com"))
+                {
+                    //TODO: No name for asset
+                    Asset flickrAsset = await _repository.GetFlickrAssetAsync(entry.AssetUrl);
+                    item.Links.Add(new SyndicationLink(thumbnailUri, "enclosure", "", "image/jpeg", (long)flickrAsset.Length));
+                }
+                else
                 {
                     //TODO: Get meta information for image from Graph API
                     item.Links.Add(new SyndicationLink(thumbnailUri, "enclosure", "", "image/jpeg", 0));

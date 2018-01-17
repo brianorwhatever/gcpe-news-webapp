@@ -1,8 +1,7 @@
-﻿@using Gov.News.Website.Helpers;
-@using Gov.News.Website.Models
+﻿@using Gov.News.Website.Models
 @model NewsletterViewModel
 <div class="newsletters">
-    <h3><a href=@string.Format("../")>@Model.Article.NewsletterName</a></h3>
+    <h3><a href=@string.Format("../")>@Model.Newsletter.Name</a></h3>
     <h2>Edition: @Model.Article.EditionName</h2>
     <div class="home-features">
         @Html.Partial("ConnectSocialMedia")
