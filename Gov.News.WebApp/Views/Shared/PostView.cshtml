@@ -258,7 +258,7 @@
 
         @if (ministry.NewsletterLinks.Any())
         {
-            @Html.Partial("NewsLetters", ministry.NewsletterLinks)
+            @Html.Partial("NewsLetterLinks", ministry.NewsletterLinks)
         }
 
     </div>
@@ -473,27 +473,25 @@
         {
             <div id="assets" class="assets collapsed">
                 <h4>Media Assets</h4>
-                @if (Model.AzureAssets.Any())
+                @if (Model.Post.AzureAssets.Any())
                 {
                     <div class="media-assets-container">
-
                         <ul>
-
-                            @foreach (var asset in Model.AzureAssets)
+                            @foreach (var azureAsset in Model.Post.AzureAssets)
                             {
                                 <li>
                                     <div>
-                                        <b>@asset.Label</b>
+                                        <b>@azureAsset.Label</b>
                                     </div>
                                     @*<div>
                                         @asset.Timestamp.FormatDateLong()
                                     </div>*@
                                     <div>
-                                        <a rel="nofollow" href="@asset.GetUri()" download>Download (<span>@asset.Length.Value.ToBytesReadable()</span>)</a>
-                                        @if(asset.ContentDeliveryUri != null)
+                                        <a rel="nofollow" href="@azureAsset.GetUri()" download>Download (<span>@azureAsset.Length.Value.ToBytesReadable()</span>)</a>
+                                        @if(Repository.ContentDeliveryUri != null)
                                         {
                                             <span>|</span>
-                                            @FormattingExtensions.ShowLinks(new Microsoft.AspNetCore.Html.HtmlString($"<a rel='nofollow' href='{asset.ContentDeliveryUri}' download>Mirror</a>"))
+                                            @FormattingExtensions.ShowLinks(new Microsoft.AspNetCore.Html.HtmlString($"<a rel='nofollow' href='{azureAsset.GetUri(Repository.ContentDeliveryUri)}' download>Mirror</a>"))
                                         }
                                     </div>
                                 </li>

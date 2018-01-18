@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Gov.News.Api.Models;
-using Microsoft.Extensions.Configuration;
-using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace Gov.News.Website
 {
@@ -96,10 +94,13 @@ namespace Gov.News.Website
             return uri;
         }
 
-        public static Uri GetUri(this AzureAsset asset)
+        public static Uri GetUri(this Asset asset)
         {
-            var uri = Properties.Settings.Default.NewsHostUri;
+            return GetUri(asset, Properties.Settings.Default.NewsHostUri);
+        }
 
+        public static Uri GetUri(this Asset asset, Uri uri)
+        {
             uri = AppendUriSegment(uri, "assets");
 
             uri = AppendUriSegment(uri, asset.Key.Substring(0, asset.Key.LastIndexOf('/') + 1));
@@ -169,9 +170,9 @@ namespace Gov.News.Website
             {
                 //Find the end of sentence
                 int index = (int)count;
-                for(; index < words.Count(); index ++)
+                for (; index < words.Count(); index++)
                 {
-                    if(words[index].EndsWith("."))
+                    if (words[index].EndsWith("."))
                     {
                         break;
                     }
@@ -186,20 +187,6 @@ namespace Gov.News.Website
             }
             return shortSummary;
         }
-
-        public static  CloudBlob GetBlobReference(this AzureAsset azureAsset, IConfiguration Configuration)
-        {
-            // Get the asset container URI from configuration.
-            Uri assetsContainerUri = new Uri(Configuration["NewsAssetsContainer"]);
-
-            if (assetsContainerUri == null)
-                throw new InvalidOperationException();
-
-            CloudBlobContainer container = new CloudBlobContainer(assetsContainerUri);
-
-            return container.GetBlockBlobReference(azureAsset.Key);
-        }
-
 
         public static string PosterUrl(this FacebookPost facebookPost)
         {

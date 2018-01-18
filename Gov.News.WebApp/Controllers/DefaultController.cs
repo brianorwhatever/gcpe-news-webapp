@@ -27,7 +27,7 @@ namespace Gov.News.Website.Controllers
             if (!Regex.IsMatch(reference, @"\d+"))
                 throw new ArgumentException();
 
-            var pair = await Repository.ApiClient.Post.GetKeyFromReferenceAsync(string.Format("NEWS-{0}", reference), Repository.APIVersion);
+            var pair = await Repository.ApiClient.Posts.GetKeyFromReferenceAsync(string.Format("NEWS-{0}", reference), Repository.APIVersion);
             if (pair == null)
                 return await NotFound();
 
@@ -108,7 +108,7 @@ namespace Gov.News.Website.Controllers
         {
             List<Uri> model = new List<Uri>();
 
-            var defaultPostKeys = await Repository.ApiClient.Post.GetAllKeysAsync("home", "default", Repository.APIVersion);
+            var defaultPostKeys = await Repository.ApiClient.Posts.GetAllKeysAsync("home", "default", Repository.APIVersion);
 
             foreach (var pair in defaultPostKeys)
             {

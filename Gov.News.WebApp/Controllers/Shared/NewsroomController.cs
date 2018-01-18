@@ -228,5 +228,11 @@ namespace Gov.News.Website.Controllers.Shared
 
             return model;
         }
+        public async Task<System.IO.Stream> GetAzureStream(string blobName)
+        {
+            var client = new System.Net.Http.HttpClient();
+
+            return await client.GetStreamAsync(new Uri(Repository.ContentDeliveryUri, blobName));
+        }
     }
 }

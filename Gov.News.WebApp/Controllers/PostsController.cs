@@ -119,11 +119,9 @@ namespace Gov.News.Website.Controllers.Shared
             model.LeadMinistry = ministryModel;
             model.Minister = await Repository.GetMinisterAsync(ministry.Key);
 
-            model.AzureAssets = await Repository.GetAzureAssetsFromPostAsync(post);
+            model.RelatedMinistries = await Repository.GetPostMinistriesAsync(post);
 
-            model.RelatedMinistries = await Repository.GetMinistriesAsync(post);
-
-            model.RelatedSectors = await Repository.GetSectorsAsync(post);
+            model.RelatedSectors = await Repository.GetPostSectorsAsync(post);
 
             //Load [RelatedArticlesLength] posts, excluding the current post
             if (ministryModel.FeaturePost != null)

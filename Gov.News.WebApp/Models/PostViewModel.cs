@@ -38,9 +38,6 @@ namespace Gov.News.Website.Models
         }
 
         public CategoryModel LeadMinistry { get; set; }
-        //public IEnumerable<FlickrAsset> FlickrAssets { get; set; }
-        //public IEnumerable<YoutubeAsset> YoutubeAssets { get; set; }
-        public IEnumerable<AzureAsset> AzureAssets { get; set; }
 
         public IEnumerable<Post> RelatedArticles { get; set; }
 
