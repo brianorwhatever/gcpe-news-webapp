@@ -1,6 +1,6 @@
 cls
-rem gradlew -DchromeTest.single=ResourcesFlowSpecs chromeTest -d
+gradlew -DchromeTest.single=FooterFlowSpecs chromeTest -d
 
-gradlew chromeTest -d
+rem gradlew chromeTest -d
 
 rem gradlew phantomJs
