@@ -5,6 +5,7 @@ import pages.app.HomePage
 import pages.app.LivePage
 import pages.app.SectorsPage
 import pages.app.SubscribePage
+import pages.external.GovBCHomePage
 import pages.external.NewsArchivePage
 
 import spock.lang.Unroll
@@ -13,6 +14,26 @@ import org.openqa.selenium.*
 class FlowSpecs extends GebReportingSpec {
 
 	@Unroll
+
+	def "BCGovNews test"(){
+	    given: "I start on the Sectors page"
+			to SectorsPage
+		
+		when: "I click on the link BC Gov News the top left"
+			waitFor { $("a", id:"headerNewsHome").click() }
+        then:
+			at HomePage	
+	}
+
+	def "BritishColumbia test"(){
+	    given: "I start on the home page"
+			to HomePage
+		
+		when: "I click on the link provincial logo in the top left"
+			waitFor { $("a", id:"headerBCGov").click() }
+        then:
+			at GovBCHomePage
+	}
 
 	def "HomeClick test"(){
 	given: 

@@ -25,7 +25,7 @@ class CarouselNextPrevSpec extends GebReportingSpec {
 		When I click on the Next slide arrow (right side)
 		Then next slide is displayed (image and content)
 		And I click on the Previous slide arrow (left side)
-		Then the same slide is displayed as was showing when I frist loaded the home page.
+		Then the same slide is displayed as was showing when I first loaded the home page.
 	*/
 
 	def "Carousel Next Previous"() {
