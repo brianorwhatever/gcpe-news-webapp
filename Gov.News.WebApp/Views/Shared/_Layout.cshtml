@@ -17,6 +17,7 @@
         <meta property="og:image" content="@Html.Raw(Model.OGMetaImageUrl)" />
     }
     @RenderSection("TwitterMeta", false)
+    @RenderSection("FacebookMeta", false)
 
     @if (@Model.CanonicalUri != null)
     {
