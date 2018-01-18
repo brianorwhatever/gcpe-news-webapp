@@ -43,7 +43,7 @@ namespace Gov.News.Website.Middleware
 
             var request = context.HttpContext.Request;
 
-            Program.ReportException(request, ex);
+            //Program.ReportException(request, ex);
         }
     }
 }

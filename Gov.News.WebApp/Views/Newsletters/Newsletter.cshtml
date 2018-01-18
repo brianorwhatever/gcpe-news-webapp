@@ -1,19 +1,18 @@
 ﻿@using Gov.News.Website.Models
 @model NewsletterViewModel
 
-@foreach (var ministryNewsletters in Model.NewsletterListings.Where(l => l.LatestEditionKey != null).GroupBy(x => x.MinistryName).OrderBy(x => x.Key))
+@foreach (var ministryNewsletters in Model.NewsletterListings.Where(l => l.Editions.Any()).GroupBy(x => x.MinistryName).OrderBy(x => x.Key))
 {
-    
         <div class="header">
             <h4>@ministryNewsletters.Key</h4>
             @foreach (var item in ministryNewsletters)
             {
-                    <h2><a href=@string.Format("{0}/{1}", "newsletters", item.Key)>@item.Name</a></h2>
-                    <p>@item.Description</p>
-                    <a href=@string.Format("../newsletters/{0}/{1}", item.Key, item.LatestEditionKey) class="read-more">Latest Edition: @item.LatestEditionName</a>
-                    <br />
+                var latestEdition = item.Editions.First();
+                <h2><a href=@string.Format("{0}/{1}", "newsletters", item.Key)>@item.Name</a></h2>
+                <p>@item.Description</p>
+                <a href=@string.Format("../newsletters/{0}/{1}", item.Key, @latestEdition.Key) class="read-more">Latest Edition: @latestEdition.Value</a>
+                <br />
             }
         </div>
-    
 }
 

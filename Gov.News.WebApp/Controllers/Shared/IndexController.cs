@@ -214,14 +214,14 @@ namespace Gov.News.Website.Controllers.Shared
                 model.PostSectors = new Dictionary<Post, IEnumerable<Category>>();
                 if (model.TopStory != null)
                 {
-                    IEnumerable<Category> sectors = await Repository.GetSectorsAsync(model.TopStory);
+                    IEnumerable<Category> sectors = await Repository.GetPostSectorsAsync(model.TopStory);
                     model.PostSectors.Add(model.TopStory, sectors);
                 }
 
                 IEnumerable<Category> postSectors = null;
                 if (model.FeatureStory != null && !model.PostSectors.TryGetValue(model.FeatureStory, out postSectors))
                 {
-                    postSectors = await Repository.GetSectorsAsync(model.FeatureStory);
+                    postSectors = await Repository.GetPostSectorsAsync(model.FeatureStory);
                     model.PostSectors.Add(model.FeatureStory, postSectors);
                 }
 
@@ -231,7 +231,7 @@ namespace Gov.News.Website.Controllers.Shared
                     {
                         if (!model.PostSectors.TryGetValue(post, out postSectors))
                         {
-                            postSectors = await Repository.GetSectorsAsync(post);
+                            postSectors = await Repository.GetPostSectorsAsync(post);
                             model.PostSectors.Add(post, postSectors);
                         }
                     }
@@ -315,8 +315,8 @@ namespace Gov.News.Website.Controllers.Shared
                 var model = new List<TwitterPostModel>();
                 if (twitterFeed != null)
                 {
-                    try
-                    {
+                    //try
+                    //{
                         JArray jsonDat = JArray.Parse(twitterFeed.TimelineJson);
 
                         for (int x = 0; x < jsonDat.Count(); x++)
@@ -415,11 +415,11 @@ namespace Gov.News.Website.Controllers.Shared
                                 RetweetedText = screenname == initialScreenName ? "" : "Retweeted by <a href=\"https://twitter.com/" + entryScreenName + "\" target=\"_blank\" color=\"gray\">" + entryUserName + "</a>"
                             });
                         }
-                    }
+                    /*}
                     catch (Exception ex)
                     {
                         Program.ReportException(null, ex);
-                    }
+                    }*/
                 }
                 ////TODO: Replace mock data with calls to Twitter API
                 //var model = new List<TwitterPostModel>

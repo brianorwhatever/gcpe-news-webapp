@@ -1,62 +1,46 @@
 ﻿#define USE_AZURE
 
-using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.IO;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.StaticFiles;
-
-using Gov.News.Api.Models;
 using Microsoft.Extensions.Configuration;
 
 namespace Gov.News.Website.Controllers
 {
     public class AssetsController : Shared.NewsroomController
     {
-        public AssetsController(Repository repository, IConfiguration configuration): base(repository, configuration)
+        public AssetsController(Repository repository, IConfiguration configuration) : base(repository, configuration)
         {
         }
 
         public async Task<ActionResult> Single(string path)
         {
-            var asset = await Repository.GetAzureAssetAsync(path);
-
-            if (asset == null)
+#if USE_AZURE
+            if (path.Any(e => Path.GetInvalidPathChars().Contains(e)))
                 return await SearchNotFound();
 
-            if (Properties.Settings.Default.NewsMediaHostUri.Host.EndsWith(".blob.core.windows.net"))
+            string fileName = Path.GetFileName(path);
+            string contentType;
+
+            if (!new FileExtensionContentTypeProvider().TryGetContentType(fileName, out contentType))
+                contentType = "application/octet-stream";
+
+            try
             {
-                //goto CDN.
-                string url = Repository.GetBlobSasUri(asset).ToString();
-                return Redirect(url);
-            }
-            else
-            {
-
-#if USE_AZURE
-                if (path.Any(e => Path.GetInvalidPathChars().Contains(e)))
-                    return await SearchNotFound();
-
-                string fileName = Path.GetFileName(path);
-                string contentType;
-
-                if (!new FileExtensionContentTypeProvider().TryGetContentType(fileName, out contentType))
-                    contentType = "application/octet-stream";
-
-                var stream = await Repository.GetAzureAssetStream(asset, Configuration);
-
-                if (stream == null)
-                    return await SearchNotFound();
-
+                var stream = await GetAzureStream("assets/" + path);
                 return File(stream, contentType);
-#else
-                string url = Uri(Properties.Settings.Default.NewsMediaHostUri, "assets/" + asset.Key).ToString();
-                return Redirect(url);
-#endif
             }
+            catch
+            {
+                return await SearchNotFound();
+            }
+
+#else
+            string url = Uri(Properties.Settings.Default.NewsMediaHostUri, path).ToString();
+            return Redirect(url);
+#endif
         }
 
         public ActionResult License()

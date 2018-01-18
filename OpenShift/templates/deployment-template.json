@@ -78,6 +78,86 @@
                                 "containerPort": 8080,
                                 "protocol": "TCP"
                             }
+                        ],						
+                        "env": [
+                            {
+                                "name": "ASPNETCORE_ENVIRONMENT",
+                                "value": "Development"
+                            },
+                            {
+                                "name": "NewsHostUri",
+                                "value": ""
+                            },
+                            {
+                                "name": "NewsMediaHostUri",
+                                "value": ""
+                            },
+                            {
+                                "name": "NewsApi",
+                                "value": ""
+                            },
+                            {
+                                "name": "NewsMediaProxyKey",
+                                "value": ""
+                            },
+                            {
+                                "name": "CalendarUri",
+                                "value": ""
+                            },
+                            {
+                                "name": "GoogleSearchApplianceUri",
+                                "value": ""
+                            },
+                            {
+                                "name": "NewsFilesContainer",
+                                "value": ""
+                            },
+                            {
+                                "name": "NewsAssetsContainer",
+                                "value": ""
+                            },
+                            {
+                                "name": "NewsContentDeliveryNetwork",
+                                "value": ""
+                            },
+                            {
+                                "name": "MediaAssetsLicenseUri",
+                                "value": "https://news.gov.bc.ca/files/News_Footage_License_British_Columbia.pdf"
+                            },
+                            {
+                                "name": "ArchiveHostUri",
+                                "value": ""
+                            },
+                            {
+                                "name": "NewslettersHostUri",
+                                "value": ""
+                            },
+                            {
+                                "name": "BingSiteVerification"
+                            },
+                            {
+                                "name": "ContentFilesUnc"
+                            },
+                            {
+                                "name": "LocalDataModelCacheUnc",
+                                "value": "/tmp/"
+                            },
+                            {
+                                "name": "SignalREnabled",
+                                "value": "true"
+                            },
+                            {
+                                "name": "RssFeedCutoffDate",
+                                "value": "2015-06-22 13:55:00"
+                            },
+                            {
+                                "name": "CalendarUri",
+                                "value": ""
+                            },
+                            {
+                                "name": "ContactUri",
+                                "value": ""
+                            }
                         ],
                         "resources": {
                             "limits": {

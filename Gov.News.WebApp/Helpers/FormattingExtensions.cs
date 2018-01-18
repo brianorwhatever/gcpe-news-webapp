@@ -137,7 +137,7 @@ namespace Gov.News.Website.Helpers
             }
             catch (Exception ex)
             {
-                Program.ReportException(null, ex);
+                //Program.ReportException(null, ex);
                 return bodyHtmlString;
             }
         }

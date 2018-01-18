@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Gov.News.Api.Models;
-using Microsoft.Extensions.Configuration;
-using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace Gov.News.Website
 {
@@ -96,10 +94,13 @@ namespace Gov.News.Website
             return uri;
         }
 
-        public static Uri GetUri(this AzureAsset asset)
+        public static Uri GetUri(this Asset asset)
         {
-            var uri = Properties.Settings.Default.NewsHostUri;
+            return GetUri(asset, Properties.Settings.Default.NewsHostUri);
+        }
 
+        public static Uri GetUri(this Asset asset, Uri uri)
+        {
             uri = AppendUriSegment(uri, "assets");
 
             uri = AppendUriSegment(uri, asset.Key.Substring(0, asset.Key.LastIndexOf('/') + 1));
@@ -147,22 +148,6 @@ namespace Gov.News.Website
             return uri;
         }
 
-        public static Uri GetUri(this FlickrAsset flickrAsset)
-        {
-            return new Uri(String.Format("https://www.flickr.com/photos/{0}/{1}/",
-                "bcgovphotos",
-                flickrAsset.PhotoSecret));
-        }
-
-        public static Uri GetResourceUri(this FlickrAsset flickrAsset)
-        {
-            return new Uri(String.Format("https://farm{0}.staticflickr.com/{1}/{2}_{3}_n.jpg",
-                flickrAsset.PhotoFarm,
-                flickrAsset.PhotoServer,
-                flickrAsset.PhotoSecret,
-                flickrAsset.PhotoUserPathAlias));
-        }
-
         public static Uri GetPermanentUri(this Post entry)
         {
             if (entry.Reference.StartsWith("NEWS-"))
@@ -185,9 +170,9 @@ namespace Gov.News.Website
             {
                 //Find the end of sentence
                 int index = (int)count;
-                for(; index < words.Count(); index ++)
+                for (; index < words.Count(); index++)
                 {
-                    if(words[index].EndsWith("."))
+                    if (words[index].EndsWith("."))
                     {
                         break;
                     }
@@ -203,19 +188,15 @@ namespace Gov.News.Website
             return shortSummary;
         }
 
-        public static  CloudBlob GetBlobReference(this AzureAsset azureAsset, IConfiguration Configuration)
+        public static string PosterUrl(this FacebookPost facebookPost)
         {
-            // Get the asset container URI from configuration.
-            Uri assetsContainerUri = new Uri(Configuration["NewsAssetsContainer"]);
-
-            if (assetsContainerUri == null)
-                throw new InvalidOperationException();
-
-            CloudBlobContainer container = new CloudBlobContainer(assetsContainerUri);
-
-            return container.GetBlockBlobReference(azureAsset.Key);
+            int posterIdx = facebookPost.Key.IndexOf("facebook.com/"); // facebookPost.Key is the postUrl
+            if (posterIdx != -1)
+            {
+                posterIdx = facebookPost.Key.IndexOf('/', posterIdx + "facebook.com/".Length);
+            }
+            return posterIdx != -1 ? facebookPost.Key.Substring(0, posterIdx) : null;
         }
-
 
         public static Uri ToUri(this string uri)
         {

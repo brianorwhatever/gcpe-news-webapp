@@ -12,7 +12,7 @@ The following projects contain the Deployment Configurations (dc) for the variou
 - gcpe-news-prod (Production)
  
 
-Steps to configure the deployment:
+Steps to configure the project:
 ----------------------------------
 
 Ensure that you have access to the build and deployment templates.
@@ -36,6 +36,17 @@ This will create the objects necessary to build the product.
 
  You can now login to the OpenShift web interface and observe the progress of the initial build.
 
+##Important Note - Jenkins##
+
+The OpenShift platform will automatically create a Jenkins deployment once the pipeline build configurations are created.  This Jenkins deployment may not have access to enough metaspace memory, and may be prone to failure over time because of that.  This problem is known to occur more often if you are using the OpenShift OAUTH plugin for authentication in Jenkins, as is the standard with the BC Government Pathfinder platform.
+
+To guard against this, add the following environment variable to the Jenkins deployment:
+
+`JAVA_OPTS` : `-XX:MaxMetaspaceSize=512m`
+
+You may also want to increase the RAM limits for the Jenkins deployment (4Gi recommended).  This can be done by using the "Edit Resource Limits" action menu option when viewing the deployment in the OpenShift web console.
+
+
 **Deployment**
 
 Once you have a valid image built, you can proceed with Deployment.
@@ -54,13 +65,14 @@ EXAMPLE - to allow the production project access to the images, run:
 
 
 In the command prompt, type:
-`oc process -f deployment-template.json -v DEPLOYMENT_TAG=dev | oc create -f -`
+`oc process -f deployment-template.json -p DEPLOYMENT_TAG=dev | oc create -f -`
 
 (If deploying to Test or Prod, substitute test or prod for dev as the value of DEPLOYMENT_TAG)
+This command will need to be executed from the directory containing the deploymnet-template.json file in your local Repo.
+'eg. C:\Repos\appname\OpenShift'
 
 This should produce a deployment configurations and service.  
 Verify that the Overview looks correct in the OpenShift web UI for the project you provisioned
-
 
 You can now trigger deployments.
 

@@ -149,71 +149,6 @@
     "kind": "BuildConfig",
     "apiVersion": "v1",
     "metadata": {
-        "name": "news-webapp",
-        "creationTimestamp": null,
-        "labels": {
-            "app": "news-webapp"
-        }
-    },
-    "spec": {
-        "triggers": [
-            {
-                "type": "GitHub",
-                "github": {
-                    "secret": "3XtnspHIC8mT7UdgI8hT"
-                }
-            },
-            {
-                "type": "Generic",
-                "generic": {
-                    "secret": "S9eYwKjY8a-hCGo-JSsC"
-                }
-            },
-            {
-                "type": "ImageChange",
-                "imageChange": {}
-            },
-            {
-                "type": "ConfigChange"
-            }
-        ],
-        "runPolicy": "Serial",
-        "source": {
-            "type": "Git",
-            "git": {
-                "uri": "https://github.com/bcgov/gcpe-news-webapp.git"
-            }
-        },
-        "strategy": {
-            "type": "Source",
-            "sourceStrategy": {
-                "from": {
-                    "kind": "ImageStreamTag",
-                    "name": "s2i-dotnetcore-autorest:latest"
-                },
-                "env": [
-                    {
-                        "name": "DOTNET_STARTUP_PROJECT",
-                        "value": "Gov.News.WebApp"
-                    }
-                ]
-            }
-        },
-        "output": {},
-        "resources": {},
-        "postCommit": {},
-        "nodeSelector": null,
-        "successfulBuildsHistoryLimit": 5,
-        "failedBuildsHistoryLimit": 5
-    },
-    "status": {
-        "lastVersion": 0
-    }
-},
-{
-    "kind": "BuildConfig",
-    "apiVersion": "v1",
-    "metadata": {
         "name": "news-webapp-develop",
         "creationTimestamp": null,
         "labels": {
@@ -255,7 +190,7 @@
             "sourceStrategy": {
                 "from": {
                     "kind": "ImageStreamTag",
-                    "name": "s2i-dotnetcore-autorest:latest"
+                    "name": "dotnet-20-rhel7:latest"
                 },
                 "env": [
                     {
@@ -265,7 +200,12 @@
                 ]
             }
         },
-        "output": {},
+        "output": {
+            "to": {
+                "kind": "ImageStreamTag",
+                "name": "news-webapp:latest"
+            }
+        },
         "resources": {},
         "postCommit": {},
         "nodeSelector": null,
@@ -321,7 +261,144 @@
             "sourceStrategy": {
                 "from": {
                     "kind": "ImageStreamTag",
-                    "name": "s2i-dotnetcore-autorest:latest"
+                    "name": "dotnet-20-rhel7:latest"
+                },
+                "env": [
+                    {
+                        "name": "DOTNET_STARTUP_PROJECT",
+                        "value": "Gov.News.WebApp"
+                    }
+                ]
+            }
+        },
+        "output": {
+            "to": {
+                "kind": "ImageStreamTag",
+                "name": "news-webapp:latest"
+            }
+        },
+        "resources": {},
+        "postCommit": {},
+        "nodeSelector": null,
+        "successfulBuildsHistoryLimit": 5,
+        "failedBuildsHistoryLimit": 5
+    },
+    "status": {
+        "lastVersion": 0
+    }
+},
+{
+    "kind": "BuildConfig",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "news-webapp-sonar-develop",
+        "creationTimestamp": null,
+        "labels": {
+            "app": "news-webapp"
+        }
+    },
+    "spec": {
+        "triggers": [
+            {
+                "type": "GitHub",
+                "github": {
+                    "secret": "3XtnspHIC8mT7UdgI8hT"
+                }
+            },
+            {
+                "type": "Generic",
+                "generic": {
+                    "secret": "S9eYwKjY8a-hCGo-JSsC"
+                }
+            },
+            {
+                "type": "ImageChange",
+                "imageChange": {}
+            },
+            {
+                "type": "ConfigChange"
+            }
+        ],
+        "runPolicy": "Serial",
+        "source": {
+            "type": "Git",
+            "git": {
+                "uri": "https://github.com/bcgov/gcpe-news-webapp.git",
+				"ref": "develop"
+            }
+        },
+        "strategy": {
+            "type": "Source",
+            "sourceStrategy": {
+                "from": {
+                    "kind": "ImageStreamTag",
+                    "name": "dotnet-sonar:latest"
+                },
+                "env": [
+                    {
+                        "name": "DOTNET_STARTUP_PROJECT",
+                        "value": "Gov.News.WebApp"
+                    }
+                ]
+            }
+        },
+        "output": {},
+        "resources": {},
+        "postCommit": {},
+        "nodeSelector": null,
+        "successfulBuildsHistoryLimit": 5,
+        "failedBuildsHistoryLimit": 5
+    },
+    "status": {
+        "lastVersion": 0
+    }
+},
+{
+    "kind": "BuildConfig",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "news-webapp-sonar-master",
+        "creationTimestamp": null,
+        "labels": {
+            "app": "news-webapp"
+        }
+    },
+    "spec": {
+        "triggers": [
+            {
+                "type": "GitHub",
+                "github": {
+                    "secret": "3XtnspHIC8mT7UdgI8hT"
+                }
+            },
+            {
+                "type": "Generic",
+                "generic": {
+                    "secret": "S9eYwKjY8a-hCGo-JSsC"
+                }
+            },
+            {
+                "type": "ImageChange",
+                "imageChange": {}
+            },
+            {
+                "type": "ConfigChange"
+            }
+        ],
+        "runPolicy": "Serial",
+        "source": {
+            "type": "Git",
+            "git": {
+                "uri": "https://github.com/bcgov/gcpe-news-webapp.git",
+				"ref": "master"
+            }
+        },
+        "strategy": {
+            "type": "Source",
+            "sourceStrategy": {
+                "from": {
+                    "kind": "ImageStreamTag",
+                    "name": "dotnet-sonar:latest"
                 },
                 "env": [
                     {
@@ -471,7 +548,7 @@
         "strategy": {
             "type": "JenkinsPipeline",
             "jenkinsPipelineStrategy": {
-                "jenkinsfilePath": "Jenkinsfile-master"
+                "jenkinsfilePath": "Jenkinsfile-develop"
             }
         },
         "output": {},

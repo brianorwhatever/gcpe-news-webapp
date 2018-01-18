@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Gov.News.Api;
 using Gov.News.Api.Models;
@@ -17,49 +18,31 @@ namespace Gov.News.Website
         public DateTime ExpirationDate = DateTime.Now;
         public bool IsNotExpired() { return ExpirationDate > DateTime.Now; }
     }
-    class LimitedSizeDictionary<TKey, TValue> : Dictionary<TKey, TValue> where TValue : DataModel
-    {
-        int maxSize;
-        public LimitedSizeDictionary(int _maxSize) : base(_maxSize)
-        {
-            maxSize = _maxSize;
-        }
-
-        public new void Add(TKey key, TValue value)
-        {
-            if (Count > maxSize)
-            {
-                foreach (var elt in this.OrderBy(m => m.Value.Timestamp).TakeLast(maxSize / 2))
-                {
-                    Remove(elt.Key);
-                }
-            }
-            base.Add(key, value);
-        }
-    }
 
     public class Repository
     {
         public const string APIVersion = "1.0";
         public IClient ApiClient { get; private set; }
         public HubConnection apiConnection;
+        static public Uri ContentDeliveryUri = null;
 
-        private Dictionary<Type, LimitedSizeDictionary<string, DataModel>> _cache = new Dictionary<Type, LimitedSizeDictionary<string, DataModel>>();
+        private Dictionary<Type, IDictionary<string, object>> _cache = new Dictionary<Type, IDictionary<string, object>>();
         private Dictionary<Type, ExpiringList<object>> _expiringCache = new Dictionary<Type, ExpiringList<object>>();
         private Dictionary<string, Task> ConcurrentRequests = new Dictionary<string, Task>();
 
         private readonly ILogger<Repository> _logger;
         private readonly ILoggerFactory _factory;
 
-        public Repository(IClient apiClient, IMemoryCache memoryCache, ILogger<Repository> logger, ILoggerFactory factory)
+        public Repository(IClient apiClient, IMemoryCache memoryCache, IConfiguration configuration, ILogger<Repository> logger, ILoggerFactory factory)
         {
             _logger = logger;
             _factory = factory;
             ApiClient = apiClient;
+            ContentDeliveryUri = new Uri(configuration["NewsContentDeliveryNetwork"]);
             StartSignalR().GetAwaiter().GetResult();
             _expiringCache.Add(typeof(ResourceLink), new ExpiringList<object>());
             _expiringCache.Add(typeof(Newsletter), new ExpiringList<object>());
-            _expiringCache.Add(typeof(Article), new ExpiringList<object>());
+            _cache.Add(typeof(Asset), new Dictionary<string, object>());
         }
 
         /// <summary>
@@ -76,36 +59,32 @@ namespace Gov.News.Website
                             .Build();
 
 
-            RegisterNotification<Ministry>(true);
+            RegisterNotification<Home>(false);
             RegisterNotification<Sector>(true);
-            RegisterNotification<Post>(false);
-            RegisterNotification<Slide>(true);
-
             RegisterNotification<Service>(true);
             RegisterNotification<Theme>(false);
             RegisterNotification<Tag>(false);
-            RegisterNotification<Home>(false);
+            RegisterNotification<Ministry>(true);
+
             RegisterNotification<Minister>(false);
-            RegisterNotification<FlickrAsset>(false);
+            RegisterNotification<Post>(false);
+            RegisterNotification<Slide>(true);
+
             RegisterNotification<FacebookPost>(false);
-            //RegisterNotification<FacebookPage>(false);
-            RegisterNotification<TwitterFeed>(false, 20);
-            RegisterNotification<EditionBody>(false, 20);
-            RegisterNotification<EditionImage>(false, 20);
-            RegisterNotification<ArticleBody>(false, 20);
+            RegisterNotification<TwitterFeed>(false);
 
             apiConnection.Closed += new Func<Exception, Task>(OnSignalRConnectionClosed);
             await apiConnection.StartAsync();
             _logger.LogInformation("SignalR Client Started");
         }
 
-        public void RegisterNotification<T>(bool invalidateOnUpdate = false, int maxSize = 100) where T : DataModel
+        public void RegisterNotification<T>(bool invalidateOnUpdate = false) where T : DataModel
         {
             var type = typeof(T);
-            LimitedSizeDictionary<string, DataModel> cacheForType;
+            IDictionary<string, object> cacheForType;
             if (!_cache.TryGetValue(type, out cacheForType))
             {
-                cacheForType = new LimitedSizeDictionary<string, DataModel>(maxSize);
+                cacheForType = new Dictionary<string, object>();
                 _cache.Add(type, cacheForType);
             }
 
@@ -176,30 +155,43 @@ namespace Gov.News.Website
             return result;
         }
 
-        public async Task<T> GetAsync<T>(string key, Func<Task<T>> taskFn) where T : DataModel
+        public async Task<T> GetDataModelAsync<T>(string key, Func<Task<T>> taskFn, int maxSize = 100) where T : DataModel
         {
-            LimitedSizeDictionary<string, DataModel> cacheForType = _cache[typeof(T)];
+            IDictionary<string, object> cacheForType = _cache[typeof(T)];
+            if (cacheForType.Count > maxSize)
+            {
+                IDictionary<string, DataModel> dataModelCacheForType = (IDictionary<string, DataModel>)cacheForType;
+                foreach (var elt in dataModelCacheForType.OrderBy(m => m.Value.Timestamp).TakeLast(maxSize / 2))
+                {
+                    cacheForType.Remove(elt.Key);
+                }
+            }
+            return await GetAsync(key, taskFn, cacheForType);
+        }
+
+        public async Task<T> GetAsync<T>(string key, Func<Task<T>> taskFn, IDictionary<string, object> cacheForType)
+        {
             lock (cacheForType)
             {
-                DataModel cachedEntry;
+                object cachedEntry;
                 if (cacheForType.TryGetValue(key, out cachedEntry))
                 {
                     return (T)cachedEntry;
                 }
             }
-            DataModel model = await RunTaskHandlingConcurrentRequests(taskFn, key);
+            T model = await RunTaskHandlingConcurrentRequests(taskFn, key);
 
             lock (cacheForType)
             {
                 if (!cacheForType.ContainsKey(key))
                     cacheForType.Add(key, model);
             }
-            return (T)model;
+            return model;
         }
 
         public async Task<IEnumerable<T>> GetListAsync<T>(Func<Task<IList<T>>> taskFn) where T : DataModel, new()
         {
-            LimitedSizeDictionary<string, DataModel> cacheForType = _cache[typeof(T)];
+            IDictionary<string, object> cacheForType = _cache[typeof(T)];
             lock (cacheForType)
             {
                 if (cacheForType.Count() != 0)
@@ -250,46 +242,46 @@ namespace Gov.News.Website
 
         public async Task<Ministry> GetMinistryAsync(string key)
         {
-            return await GetAsync(key, () => ApiClient.Ministry.GetOneAsync(key, APIVersion));
+            return await GetDataModelAsync(key, () => ApiClient.Ministries.GetOneAsync(key, APIVersion));
         }
 
         public async Task<Minister> GetMinisterAsync(string ministryKey)
         {
-            return await GetAsync(ministryKey, () => ApiClient.Minister.GetOneAsync(ministryKey, APIVersion));
+            return await GetDataModelAsync(ministryKey, () => ApiClient.Ministries.GetMinisterAsync(ministryKey, APIVersion));
         }
 
         public async Task<Sector> GetSectorAsync(string key)
         {
-            return await GetAsync(key, () => ApiClient.Sector.GetOneAsync(key, APIVersion));
+            return await GetDataModelAsync(key, () => ApiClient.Sectors.GetOneAsync(key, APIVersion));
         }
 
         public async Task<Calendar> GetCalendarAsync(string key)
         {
-            return null; // await GetAsync(key, ()=>ApiClient.Calendar.GetOneAsync(key.Replace('/','-'), APIVersion));
+            return null; // await GetDataModelAsync(key, ()=>ApiClient.Calendar.GetOneAsync(key.Replace('/','-'), APIVersion));
         }
 
         public async Task<Home> GetHomeAsync()
         {
-            return await GetAsync("default", () => ApiClient.Home.GetAsync(APIVersion));
+            return await GetDataModelAsync("default", () => ApiClient.Home.GetAsync(APIVersion));
         }
 
         public async Task<Slide> GetSlideAsync(string id)
         {
-            return await GetAsync(id, () => ApiClient.Slide.GetOneAsync(id, APIVersion));
+            return await GetDataModelAsync(id, () => ApiClient.Slides.GetOneAsync(id, APIVersion));
         }
+        public async Task<Edition> GetEditionAsync(string newsletterKey, string editionKey)
+        {
+            return await ApiClient.Newsletters.GetEditionAsync(newsletterKey, editionKey, APIVersion);
+        }
+
         public async Task<EditionImage> GetEditionImageAsync(string key)
         {
-            return await GetAsync(key, () => ApiClient.EditionImage.GetOneAsync(key, APIVersion));
+            return await ApiClient.Newsletters.GetImageAsync(key, APIVersion);
         }
 
-        public async Task<EditionBody> GetEditionBodyAsync(string key)
+        public async Task<Article> GetArticleAsync(string newsletterKey, string editionKey, string articleKey)
         {
-            return await GetAsync(key, () => ApiClient.EditionBody.GetOneAsync(key, APIVersion));
-        }
-
-        public async Task<ArticleBody> GetArticleBodyAsync(string key)
-        {
-            return await GetAsync(key, () => ApiClient.ArticleBody.GetOneAsync(key, APIVersion));
+            return await ApiClient.Newsletters.GetArticleAsync(newsletterKey, editionKey, articleKey, APIVersion);
         }
 
         public async Task<TwitterFeed> GetTwitterFeedAsync()
@@ -299,13 +291,8 @@ namespace Gov.News.Website
 
         public async Task<FacebookPost> GetFacebookPostAsync(string uri)
         {
-            return await GetAsync(uri, () => ApiClient.FacebookPost.GetByUriAsync(APIVersion, uri));
+            return await GetDataModelAsync(uri, () => ApiClient.FacebookPosts.GetByUriAsync(APIVersion, uri));
         }
-
-        /*public async Task<FacebookPage> GetFacebookPageAsync(string key)
-        {
-            return await GetAsync(key, ApiClient.FacebookPage.GetOneAsync(key, APIVersion));
-        }*/
 
         public async Task<Post> GetPostAsync(string key)
         {
@@ -313,7 +300,7 @@ namespace Gov.News.Website
             {
                 try
                 {
-                    return await GetAsync(key, () => ApiClient.Post.GetOneAsync(key, APIVersion));
+                    return await GetDataModelAsync(key, () => ApiClient.Posts.GetOneAsync(key, APIVersion));
                 }
                 catch (Exception) { }
             }
@@ -322,7 +309,7 @@ namespace Gov.News.Website
 
         public async Task<string> GetLatestMediaUriAsync(string mediaType)
         {
-            return await ApiClient.Post.GetLatestMediaUriAsync(mediaType, APIVersion);
+            return await ApiClient.Posts.GetLatestMediaUriAsync(mediaType, APIVersion);
         }
 
         public async Task AddPostAsync(string postKey, List<Post> posts)
@@ -352,19 +339,19 @@ namespace Gov.News.Website
 
         public async Task<FacebookPost> GetNewestFacebookPost()
         {
-            return await ApiClient.FacebookPost.GetNewestAsync(APIVersion);
+            return await ApiClient.FacebookPosts.GetNewestAsync(APIVersion);
         }
 
         public async Task<IEnumerable<Ministry>> GetMinistriesAsync(bool loadFeaturePosts = false, bool loadTopPosts = true)
         {
-            var ministries = await GetListAsync(() => ApiClient.Ministry.GetAllAsync(APIVersion));
+            var ministries = await GetListAsync(() => ApiClient.Ministries.GetAllAsync(APIVersion));
             await EnsurePostsAreCachedAsync(ministries, loadFeaturePosts, loadTopPosts);
             return ministries;
         }
 
-        public async Task<IEnumerable<Category>> GetSectorsAsync(bool loadFeaturePosts = false, bool loadTopPosts = true)
+        public async Task<IEnumerable<Sector>> GetSectorsAsync(bool loadFeaturePosts = false, bool loadTopPosts = true)
         {
-            var sectors = await GetListAsync(() => ApiClient.Sector.GetAllAsync(APIVersion));
+            var sectors = await GetListAsync(() => ApiClient.Sectors.GetAllAsync(APIVersion));
             await EnsurePostsAreCachedAsync(sectors, loadFeaturePosts, loadTopPosts);
             return sectors;
         }
@@ -372,7 +359,7 @@ namespace Gov.News.Website
         private async Task EnsurePostsAreCachedAsync(IEnumerable<Category> categories, bool loadFeaturePosts, bool loadTopPosts)
         {
             var postsRefToAsk = new List<string>();
-            LimitedSizeDictionary<string, DataModel> cacheForType = _cache[typeof(Post)];
+            IDictionary<string, object> cacheForType = _cache[typeof(Post)];
             lock (cacheForType)
             {
                 foreach (var category in categories)
@@ -389,7 +376,7 @@ namespace Gov.News.Website
             }
             if (postsRefToAsk.Count > 0)
             {
-                var postsAsked = await ApiClient.Post.GetPostsAsync(APIVersion, postsRefToAsk);
+                var postsAsked = await ApiClient.Posts.GetAsync(APIVersion, postsRefToAsk);
 
                 lock (cacheForType)
                 {
@@ -406,87 +393,67 @@ namespace Gov.News.Website
 
         public async Task<IEnumerable<Theme>> GetThemesAsync()
         {
-            return await GetListAsync(() => ApiClient.Theme.GetAllAsync(APIVersion));
+            return await GetListAsync(() => ApiClient.Themes.GetAllAsync(APIVersion));
         }
 
         public async Task<IEnumerable<Tag>> GetTagsAsync()
         {
-            return await GetListAsync(() => ApiClient.Tag.GetAllAsync(APIVersion));
+            return await GetListAsync(() => ApiClient.Tags.GetAllAsync(APIVersion));
         }
 
         public async Task<IEnumerable<Service>> GetServicesAsync()
         {
-            return await GetListAsync(() => ApiClient.Service.GetAllAsync(APIVersion));
+            return await GetListAsync(() => ApiClient.Services.GetAllAsync(APIVersion));
         }
 
         public async Task<IEnumerable<Slide>> GetSlidesAsync()
         {
-            return await GetListAsync(() => ApiClient.Slide.GetAllAsync(APIVersion));
+            return await GetListAsync(() => ApiClient.Slides.GetAllAsync(APIVersion));
         }
 
-        public Uri GetBlobSasUri(AzureAsset azureAsset)
-        {
-            string url = ApiClient.AzureAsset.GetBlobSasUri(APIVersion, azureAsset.Key);
-            return new Uri(url);
-        }
-
-        public async Task<FlickrAsset> GetFlickrAssetsAsync(string assetUri)
+        public async Task<Asset> GetFlickrAssetAsync(string assetUri)
         {
             if (!string.IsNullOrEmpty(assetUri))
             {
-                try
-                {
-                    return await GetAsync(assetUri, () => ApiClient.FlickrAsset.GetOneAsync(APIVersion, assetUri));
-                }
-                catch (Exception) { }
+                return await GetAsync(assetUri, () => FetchFlickrAssetAsync(assetUri), _cache[typeof(Asset)]);
             }
-
             return null;
         }
 
-        public async Task<AzureAsset> GetAzureAssetAsync(string path)
+        public async Task<Asset> FetchFlickrAssetAsync(string assetUri)
         {
-            return await GetAsync(path, () => ApiClient.AzureAsset.GetOneAsync(path, APIVersion));
+            var flickrAsset = new Asset(assetUri, null, null);
+            using (var httpClient = new HttpClient())
+            {
+                var request = new HttpRequestMessage(HttpMethod.Head, assetUri);
+                var response = await httpClient.SendAsync(request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    flickrAsset.Length = response.Content.Headers.ContentLength ?? 0;
+                }
+            }
+            return flickrAsset;
         }
 
-        public async Task<IEnumerable<AzureAsset>> GetAzureAssetsFromPostAsync(Post post)
+        public async Task<IEnumerable<Ministry>> GetPostMinistriesAsync(Post post)
         {
-            return await ApiClient.AzureAsset.GetFromPostAsync(post.Key, APIVersion);
+            return (await GetMinistriesAsync()).Where(m => post.MinistryKeys.Contains(m.Key));
         }
 
-        public async Task<IEnumerable<Ministry>> GetMinistriesAsync(Post post)
+        public async Task<IEnumerable<Sector>> GetPostSectorsAsync(Post post)
         {
-            return await ApiClient.Ministry.GetFromPostAsync(post.Key, APIVersion);
-        }
-
-        public async Task<IEnumerable<Sector>> GetSectorsAsync(Post post)
-        {
-            return await ApiClient.Sector.GetFromPostAsync(post.Key, APIVersion);
+            return (await GetSectorsAsync()).Where(s => post.SectorKeys.Contains(s.Key));
         }
 
         public async Task<IEnumerable<ResourceLink>> GetResourceLinksAsync()
         {
-            return await GetExpiringListAsync(() => ApiClient.ResourceLink.GetAllAsync(APIVersion));
+            return await GetExpiringListAsync(() => ApiClient.ResourceLinks.GetAllAsync(APIVersion));
         }
 
         public async Task<IEnumerable<Newsletter>> GetNewslettersAsync()
         {
-            return await GetExpiringListAsync(() => ApiClient.Newsletter.GetAllAsync(APIVersion));
-        }
-
-        public async Task<IEnumerable<Edition>> GetEditionsAsync(string newsletterKey)
-        {
-            return await ApiClient.Edition.GetForNewsletterAsync(newsletterKey, APIVersion);
-        }
-
-        public async Task<Edition> GetEditionAsync(string newsletterKey, string editionKey)
-        {
-            return await ApiClient.Edition.GetOneAsync(newsletterKey, editionKey, APIVersion);
-        }
-
-        public async Task<IEnumerable<Article>> GetArticlesAsync()
-        {
-            return await GetExpiringListAsync(() => ApiClient.Article.GetAllAsync(APIVersion));
+            return await GetExpiringListAsync(() => ApiClient.Newsletters.GetAllAsync(APIVersion));
         }
 
         /// <summary>
@@ -505,36 +472,7 @@ namespace Gov.News.Website
                 count = ProviderHelpers.MaximumLatestNewsItemsLoadMore;
                 if (skip == 0) count += ProviderHelpers.MaximumLatestNewsItems;
             }
-            return await ApiClient.Post.GetLatestPostsAsync(indexKind, indexKey, APIVersion, postKind, count, skip);
-        }
-
-        public async Task<System.IO.Stream> GetAzureFileStream(string blobName, IConfiguration Configuration)
-        {
-            var container = new Microsoft.WindowsAzure.Storage.Blob.CloudBlobContainer(new Uri(Configuration["NewsFilesContainer"]));
-
-            var blob = container.GetBlobReference(blobName);
-
-            if (!await blob.ExistsAsync())
-                return null;
-
-            var client = new System.Net.Http.HttpClient();
-
-            return await client.GetStreamAsync(new Uri(Configuration["NewsContentDeliveryNetwork"] + "files/" + blobName));
-        }
-
-        public async Task<System.IO.Stream> GetAzureAssetStream(AzureAsset asset, IConfiguration Configuration)
-        {
-
-            var azureAsset = (AzureAsset)asset;
-
-            var blob = azureAsset.GetBlobReference(Configuration);
-
-            if (!await blob.ExistsAsync())
-                return null;
-
-            var client = new System.Net.Http.HttpClient();
-
-            return await client.GetStreamAsync(azureAsset.ContentDeliveryUri);
+            return await ApiClient.Posts.GetLatestAsync(indexKind, indexKey, APIVersion, postKind, count, skip);
         }
     }
 }
