@@ -65,13 +65,14 @@ EXAMPLE - to allow the production project access to the images, run:
 
 
 In the command prompt, type:
-`oc process -f deployment-template.json -v DEPLOYMENT_TAG=dev | oc create -f -`
+`oc process -f deployment-template.json -p DEPLOYMENT_TAG=dev | oc create -f -`
 
 (If deploying to Test or Prod, substitute test or prod for dev as the value of DEPLOYMENT_TAG)
+This command will need to be executed from the directory containing the deploymnet-template.json file in your local Repo.
+'eg. C:\Repos\appname\OpenShift'
 
 This should produce a deployment configurations and service.  
 Verify that the Overview looks correct in the OpenShift web UI for the project you provisioned
-
 
 You can now trigger deployments.
 
