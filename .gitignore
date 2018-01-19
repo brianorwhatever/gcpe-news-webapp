@@ -286,3 +286,7 @@ __pycache__/
 
 # SonarQube
 *.sonarqube
+
+# AppSettings
+appsettings.json
+appsettings.*.json
