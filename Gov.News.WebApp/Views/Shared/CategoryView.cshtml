@@ -5,16 +5,16 @@
 @model ListViewModel
 
 @section Meta
-{
+    {
     @if (Model.FeedUri != null)
     {
         <link rel="alternate" type="application/rss+xml" href="@Model.FeedUri" title="@Model.Title | BC Gov News" />
     }
 }
 
-@{    
-    if (Model.Index is Ministry)
-    {        
+@{
+    if (Model.Category is Ministry)
+    {
         @Html.Partial("Ministry")
     }
     else //Sector, Tag, Theme, etc.

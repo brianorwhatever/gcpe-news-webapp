@@ -17,12 +17,12 @@
 
         foreach (var ministry in Model.Ministries)
         {
-            lists.Add(new { Category = "ministries", Key = ministry.Category.Key, Name = ministry.Category.FullName });
+            lists.Add(new { Category = "ministries", Key = ministry.Index.Key, Name = ministry.Index.Name });
         }
 
         foreach (var sector in Model.Sectors)
         {
-            lists.Add(new { Category = "sectors", Key = sector.Key, Name = sector.FullName });
+            lists.Add(new { Category = "sectors", Key = sector.Key, Name = sector.Name });
         }
 
         if (Model.Tags != null)

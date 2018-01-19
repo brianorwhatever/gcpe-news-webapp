@@ -50,8 +50,8 @@ namespace Gov.News.Website.Controllers
         // using the request query parameters
         public async Task<ActionResult> Index(string[] ministries, string[] sectors, string[] tags, string[] services, string[] emergency, string[] newsletters, string display)
         {
-            bool servicesSelected = services.Count() != 0;
-            if (servicesSelected || newsletters.Count() != 0)
+            bool servicesSelected = services.Any();
+            if (servicesSelected || newsletters.Any())
             {
                 // do not show Ministries and Sectors
                 ministries = null;
@@ -147,8 +147,8 @@ namespace Gov.News.Website.Controllers
                     IList<string> lists;
                     if (info.IsAllNews.Value)
                     {
-                        model.Selection.Ministries = model.Ministries.Select(m => m.Category.Key);
-                        model.Selection.Sectors = model.Sectors.Select(m => m.Key);
+                        model.Selection.Ministries = model.Ministries.Select(m => m.Index.Key);
+                        model.Selection.Sectors = model.Sectors.Select(m => m.Index.Key);
                         model.Selection.Tags = model.Tags.Select(m => m.Key);
                     }
                     else

@@ -16,34 +16,36 @@
     <div class="home-body">
         <h2 class="ministry-name-mobile">@Model.Title</h2>
 
-        @if (ViewBag.Type != null && ViewBag.Type == "factsheets")
+        @if (ViewBag.Type == null)
+        {
+            @if (Model.IndexModel.TopPost != null)
+            {
+            <div class="top-article">
+                @Html.Partial("PostCard", Model.IndexModel.TopPost)
+            </div>
+            }
+
+            @if (Model.IndexModel.FeaturePost != null)
+            {
+            <div class="feature-article">
+                @Html.Partial("PostCard", Model.IndexModel.FeaturePost)
+            </div>
+            }
+        }
+        else if (ViewBag.Type == "factsheets")
         {
             <h3>Factsheets</h3>
         }
 
-        @if (Model.TopStory != null)
-        {
-            <div class="top-article">
-                @Html.Partial("Article", Model.TopStory)
-            </div>
-        }
-
-        @if (Model.FeatureStory != null)
-        {
-            <div class="feature-article">
-                @Html.Partial("Article", Model.FeatureStory)
-            </div>
-        }
-
         <div class="other-articles">
             <div class="regular-articles">
-                @foreach (var article in Model.LatestNews.Take(3))
+                @foreach (var article in Model.LatestPosts.Take(3))
                 {
-                    @Html.Partial("Article", article)
+                    @Html.Partial("PostCard", article)
                 }
-                @foreach (var post in Model.LatestNews.Skip(3))
+                @foreach (var post in Model.LatestPosts.Skip(3))
                 {
-                    @Html.Partial("Article", post, new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "Display", "false" } })
+                    @Html.Partial("PostCard", post, new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "Display", "false" } })
                 }
             </div>
 

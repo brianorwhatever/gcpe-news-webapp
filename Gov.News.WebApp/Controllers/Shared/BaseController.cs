@@ -26,37 +26,22 @@ namespace Gov.News.Website.Controllers.Shared
         {
             using (Profiler.StepStatic("Create Ministry Models"))
             {
-                var ministries = await Repository.GetMinistriesAsync(true);
-                foreach (var ministry in ministries)
-                {
-                    var topPost = await Repository.GetPostAsync(ministry.TopPostKey);
-                    var featurePost = await Repository.GetPostAsync(ministry.FeaturePostKey);
-                    model.Ministries.Add(new CategoryModel(ministry, topPost, featurePost));
-                }
-                /*
-                // turn ministries into a collection of keys.
-                List<string> categories = new List<string>();
-                foreach (var item in ministries)
-                {
-                    categories.Add(item.Key);
-                }
+                var ministryModels = await Repository.GetMinistriesAsync();
+                List<string> postKeys = IndexModel.GetTopPostKeysToLoad(ministryModels).ToList();
+                postKeys.AddRange(IndexModel.GetFeaturePostKeysToLoad(ministryModels));
+                IEnumerable<Post> posts = await Repository.GetPostsAsync(postKeys);
 
-                var topMinistriesPosts = await Repository.GetMinistryTopPosts(ministries.Cast<Category>().ToList());
-                var featureMinistriesPosts = await Repository.GetMinistryTopPosts(ministries.Cast<Category>().ToList());
-
-                foreach (var ministry in ministries)
+                foreach (var ministryModel in ministryModels)
                 {
-                    var ministryModel = new CategoryModel(ministry);
-                    ministryModel.TopPost = await PostModel.CreateAsync(topMinistriesPosts[ministry], Repository);
-                    ministryModel.FeaturePost = await PostModel.CreateAsync(featureMinistriesPosts[ministry], Repository);
-                    //TODO: Determine if it's necessary to populate LatestNews
+                    ministryModel.SetTopPost(posts);
+                    ministryModel.SetFeaturePost(posts);
                     model.Ministries.Add(ministryModel);
                 }
-                */
             }
 
             model.ResourceLinks = await Repository.GetResourceLinksAsync();
-            model.WebcastingLive = Hubs.LiveHub.IsWebcasting;
+            var homeSettings = (await Repository.GetHomeAsync()).Index as Home;
+            model.WebcastingLive = !string.IsNullOrEmpty(homeSettings.LiveWebcastM3uPlaylist);
         }
 
         public class NewsroomFilter : MemoryStream

@@ -160,8 +160,8 @@
             }
         </div>
 
-        @if (Model.Results.Count() == 0)
-            {
+        @if (!Model.Results.Any())
+        {
             <br /><h4>No results found.</h4>
         }
         else

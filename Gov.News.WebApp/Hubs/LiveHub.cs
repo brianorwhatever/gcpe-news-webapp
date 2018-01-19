@@ -1,12 +1,11 @@
 ﻿#if USE_SIGNALR
 using Microsoft.AspNet.SignalR;
 # endif
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Gov.News.Api.Models;
 using Microsoft.Extensions.Hosting;
 
 namespace Gov.News.Website.Hubs
@@ -26,10 +25,10 @@ namespace Gov.News.Website.Hubs
             _repository = repository;
         }
 
-        public static bool IsWebcasting
+        /*public static bool IsWebcasting
         {
             get { return _isWebcasting; }
-        }
+        }*/
 
         private static volatile IEnumerable<string> _webcastingPlaylists = null;
         public static IEnumerable<string> WebcastingPlaylists
@@ -83,7 +82,7 @@ namespace Gov.News.Website.Hubs
                 }
                 try
                 {
-                    var homeSettings= await _repository.GetHomeAsync();
+                    var homeSettings= (await _repository.GetHomeAsync()).Index as Home;
                     var manifest_url_setting = homeSettings.LiveWebcastFlashMediaManifestUrl;
                     if (manifest_url_setting == null)
                     {

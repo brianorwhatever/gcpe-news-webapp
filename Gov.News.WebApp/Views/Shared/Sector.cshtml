@@ -1,5 +1,4 @@
 ﻿@using Gov.News.Website.Models
-@using Gov.News.Api.Models
 
 @model ListViewModel
 
@@ -11,34 +10,35 @@
     </div>
 
     <div class="home-body">
-        @if (ViewBag.Type != null && ViewBag.Type == "factsheets")
+        @if (ViewBag.Type == null)
         {
-            <h3>Factsheets</h3>
-        }
-
-        @if (Model.TopStory != null)
-        {
+            @if (Model.IndexModel.TopPost != null)
+            {
             <div class="top-article">
-                @Html.Partial("Article", Model.TopStory)
+                @Html.Partial("PostCard", Model.IndexModel.TopPost)
             </div>
+            }
+            @if (Model.IndexModel.FeaturePost != null)
+            {
+                <div class="feature-article">
+                    @Html.Partial("PostCard", Model.IndexModel.FeaturePost)
+                </div>
+            }
         }
-
-        @if (Model.FeatureStory != null)
+        else if (ViewBag.Type == "factsheets")
         {
-            <div class="feature-article">
-                @Html.Partial("Article", Model.FeatureStory)
-            </div>
+        <h3>Factsheets</h3>
         }
 
         <div class="other-articles">
             <div class="regular-articles">
-                @foreach (var article in Model.LatestNews.Take(3))
+                @foreach (var article in Model.LatestPosts.Take(3))
                 {
-                    @Html.Partial("Article", article)
+                    @Html.Partial("PostCard", article)
                 }
-                @foreach (var post in Model.LatestNews.Skip(3))
+                @foreach (var post in Model.LatestPosts.Skip(3))
                 {
-                    @Html.Partial("Article", post, new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "Display", "false" } })
+                    @Html.Partial("PostCard", post, new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "Display", "false" } })
                 }
             </div>
 
@@ -51,18 +51,13 @@
                 }
                 else
                 {
-                    if (Model.Index is Category)
+                    if (Model.Category is Ministry)
                     {
-                        var category = (Category)Model.Index;
-
-                        if (category.Kind == "ministries")
-                        {
-                            @Html.ActionLink("Search News", "Search", "Default", new { ministry = Model.Category.Key }, new { @class = "read-more" })
-                        }
-                        else if (category.Kind == "sectors")
-                        {
-                            @Html.ActionLink("Search News", "Search", "Default", new { sector = Model.Category.Key }, new { @class = "read-more" })
-                        }
+                        @Html.ActionLink("Search News", "Search", "Default", new { ministry = Model.Category.Key }, new { @class = "read-more" })
+                    }
+                    else if (Model.Category is Sector)
+                    {
+                        @Html.ActionLink("Search News", "Search", "Default", new { sector = Model.Category.Key }, new { @class = "read-more" })
                     }
                     <a no href="#" rel="nofollow" class="load-more link-button">Load More News</a>
                 }

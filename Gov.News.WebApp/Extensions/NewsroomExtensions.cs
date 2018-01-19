@@ -110,40 +110,33 @@ namespace Gov.News.Website
             return uri;
         }
 
-        public static Uri GetUri(this Category category)
+        public static Uri GetUri(this DataIndex index)
         {
             var uri = Properties.Settings.Default.NewsHostUri;
 
-            if (category.Kind == "ministries")
+            var ministry = index as Ministry;
+            if (ministry != null)
             {
-                if (category.Key != "office-of-the-premier")
+                if (index.Key != "office-of-the-premier")
                 {
                     uri = AppendUriSegment(uri, "ministries");
 
-                    var parentMinistryKey = ((Ministry)category).ParentMinistryKey;
-                    if (parentMinistryKey != null)
+                    if (ministry.ParentMinistryKey != null)
                     {
-                        uri = AppendUriSegment(uri, UrlEncoder.Default.Encode(parentMinistryKey));
+                        uri = AppendUriSegment(uri, UrlEncoder.Default.Encode(ministry.ParentMinistryKey));
                     }
                 }
             }
-            else if (category.Kind == "tags")
+            else if (index.Kind == "tags" && index.Key == "speeches")
             {
-                if (category.Key == "speeches")
-                {
-                    uri = AppendUriSegment(uri, "office-of-the-premier");
-                }
-                else
-                {
-                    uri = AppendUriSegment(uri, "tags");
-                }
+                uri = AppendUriSegment(uri, "office-of-the-premier");
             }
             else
             {
-                uri = AppendUriSegment(uri, category.Kind);
+                uri = AppendUriSegment(uri, index.Kind);
             }
 
-            uri = AppendUriSegment(uri, UrlEncoder.Default.Encode(category.Key));
+            uri = AppendUriSegment(uri, UrlEncoder.Default.Encode(index.Key));
 
             return uri;
         }

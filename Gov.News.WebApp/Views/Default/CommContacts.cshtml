@@ -18,12 +18,12 @@
 
     @foreach (var categoryModel in Model.Ministries)
     {
-        var ministry = categoryModel.Category as Ministry;
+        var ministry = categoryModel.Index as Ministry;
         if (ministry.ContactUser != null)
         {
         <div class="row">
             <div class="col-xs-12 col-sm-4">
-                <a href="@ministry.GetUri()">@ministry.FullName</a>
+                <a href="@ministry.GetUri()">@ministry.Name</a>
                 @if (!string.IsNullOrEmpty(ministry.DisplayAdditionalName))
                 {
                     <div><i>(@ministry.DisplayAdditionalName)</i></div>

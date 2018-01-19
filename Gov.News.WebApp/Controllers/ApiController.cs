@@ -1,8 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Gov.News.Website.Controllers
 {
@@ -12,9 +9,6 @@ namespace Gov.News.Website.Controllers
         [HttpGet("live/playlist")]
         public IEnumerable<string> GetLivePlaylist()
         {
-            if (!Hubs.LiveHub.IsWebcasting)
-                return new string[0];
-
             return Hubs.LiveHub.WebcastingPlaylists;
         }
     }

@@ -107,21 +107,16 @@ namespace Gov.News.Website.Controllers.Shared
 
             await LoadAsync(model);
 
-            var ministry = await Repository.GetMinistryAsync(post.LeadMinistryKey);
-            var ministryModel = new CategoryModel(ministry,
-                await Repository.GetPostAsync(ministry.TopPostKey), await Repository.GetPostAsync(ministry.FeaturePostKey));
+            IndexModel ministryModel = await Repository.GetMinistryAsync(post.LeadMinistryKey);
+            await ministryModel.LoadTopAndFeaturePosts(Repository);
 
-            var posts = await Repository.GetLatestPostsAsync(ministry.Kind, ministry.Key, null, 3);
-            foreach (var news in posts)
-            {
-                ministryModel.LatestNews.Add(news);
-            }
+            var posts = (await Repository.GetLatestPostsAsync(ministryModel, null)).ToList();
             model.LeadMinistry = ministryModel;
-            model.Minister = await Repository.GetMinisterAsync(ministry.Key);
+            model.Minister = await Repository.GetMinisterAsync(post.LeadMinistryKey);
 
-            model.RelatedMinistries = await Repository.GetPostMinistriesAsync(post);
+            model.RelatedMinistryKeys = (await Repository.GetPostMinistriesAsync(post)).Select(m => m.Index.Key);
 
-            model.RelatedSectors = await Repository.GetPostSectorsAsync(post);
+            model.RelatedSectorKeys = (await Repository.GetPostSectorsAsync(post)).Select(m => m.Index.Key);
 
             //Load [RelatedArticlesLength] posts, excluding the current post
             if (ministryModel.FeaturePost != null)
@@ -142,7 +137,7 @@ namespace Gov.News.Website.Controllers.Shared
                 }
             }
 
-            model.Footer = await GetFooter(ministry);
+            model.Footer = await GetFooter(ministryModel.Index as Category);
 
             model.FacebookPostDetailsDictionary = await GetFacebookAssetDetails(post.Documents);
 

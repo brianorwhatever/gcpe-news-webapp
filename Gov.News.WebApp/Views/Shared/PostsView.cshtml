@@ -1,5 +1,4 @@
 ﻿@using Gov.News.Website.Models
-@using Gov.News.Api.Models
 @model ListViewModel
 
 @section Meta
@@ -20,13 +19,13 @@
 
     <div class="other-articles">
         <div class="regular-articles">
-            @foreach (var post in Model.LatestNews.Take(3))
+            @foreach (var post in Model.LatestPosts.Take(3))
             {
-                @Html.Partial("Article", post)
+                @Html.Partial("PostCard", post)
             }
-            @foreach (var post in Model.LatestNews.Skip(3))
+            @foreach (var post in Model.LatestPosts.Skip(3))
             {
-                @Html.Partial("Article", post, new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "Display", "false" } })
+                @Html.Partial("PostCard", post, new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "Display", "false" } })
             }
         </div>
 

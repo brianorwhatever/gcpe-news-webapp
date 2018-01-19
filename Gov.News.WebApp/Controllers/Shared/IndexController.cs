@@ -146,9 +146,9 @@ namespace Gov.News.Website.Controllers.Shared
                 //if (offset > 20)
                 //   return new EmptyResult();
 
-                var index = await GetDataIndex(key);
+                var indexModel = await GetIndexModel(key);
 
-                var model = await GetMoreArticlesModel(index, postKind, offset);
+                var model = await GetMoreArticlesModel(indexModel, postKind, offset);
 
                 return PartialView("MoreArticles", model);
             }
@@ -158,39 +158,35 @@ namespace Gov.News.Website.Controllers.Shared
             }
         }
 
-        private async Task<HomeViewModel> GetMoreArticlesModel(DataIndex _index, string postKind, int skipCount = 0)
+        private async Task<HomeViewModel> GetMoreArticlesModel(IndexModel indexModel, string postKind, int skipCount = 0)
         {
-            var model = new HomeViewModel() { Index = _index };
-            model.TopStory = await Repository.GetPostAsync(_index.TopPostKey);
-            model.FeatureStory = await Repository.GetPostAsync(_index.FeaturePostKey);
+            var model = new HomeViewModel() { IndexModel = indexModel };
 
-            string indexKind = (_index is Category) ? ((Category)_index).Kind : "home";
-
-            model.LatestNews = await Repository.GetLatestPostsAsync(indexKind, _index.Key, postKind, 0, skipCount);
-
+            model.LatestPosts = await Repository.GetLatestPostsAsync(indexModel, postKind, skipCount);
             return model;
         }
 
         public async Task<HomeViewModel> GetHomePosts(string postKind)
         {
-            Home _index = await Repository.GetHomeAsync();
+            IndexModel homeModel = await Repository.GetHomeAsync();
 
-            var model = new HomeViewModel() { Index = _index };
+            var model = new HomeViewModel() { IndexModel = homeModel };
             await LoadAsync(model);
             await LoadSocialFeeds(model);
 
-            IList<Post> data = await Repository.GetLatestPostsAsync("home", _index.Key, postKind);
+            model.LatestPosts = await Repository.GetLatestPostsAsync(homeModel, postKind);
 
             if (string.IsNullOrEmpty(postKind))
             {
                 model.Title = "Home";
+
                 model.FeedUri = ProviderHelpers.Uri(new Uri (Configuration["NewsHostUri"]), "feed");
 
-                model.TopStory = await Repository.GetPostAsync(_index.TopPostKey);
-                model.FeatureStory = await Repository.GetPostAsync(_index.FeaturePostKey);
+                await homeModel.LoadTopAndFeaturePosts(Repository);
+
                 model.SlideItems = await Repository.GetSlidesAsync();
 
-                await LoadSectors(model);
+                //await LoadSectors(model);
                 //await ProviderHelpers.LoadMediaAssets(model);
             }
             else
@@ -199,7 +195,6 @@ namespace Gov.News.Website.Controllers.Shared
                 model.FeedUri = ProviderHelpers.Uri(new Uri(Configuration["NewsHostUri"]), postKind + "/" + "feed");
             }
 
-            model.LatestNews = data;
             //model.MoreNewsUri = ProviderHelpers.Uri(Properties.Settings.Default.NewsHostUri, "releases/archive");
 
             model.Footer = await GetFooter(null);
@@ -207,7 +202,7 @@ namespace Gov.News.Website.Controllers.Shared
             return model;
         }
 
-        public async Task LoadSectors(HomeViewModel model)
+        /*public async Task LoadSectors(HomeViewModel model)
         {
             using (Profiler.StepStatic("Loading Sectors"))
             {
@@ -237,43 +232,37 @@ namespace Gov.News.Website.Controllers.Shared
                     }
                 }
             }
-        }
+        }*/
 
         private async Task<SyndicationFeedViewModel> GetFeedModel(string key, string postKind)
         {
-            var index = await GetDataIndex(key);
-            string indexKind = (index is Category) ? ((Category)index).Kind : "home";
+            IndexModel indexModel = await GetIndexModel(key);
 
             var model = new SyndicationFeedViewModel();
             model.AlternateUri = new Uri(Configuration["NewsHostUri"]);
 
+            var posts = new List<Post>();
             if (string.IsNullOrEmpty(postKind))
             {
-                model.Title = index.FullName;
+                model.Title = indexModel.Index.Name;
+                await indexModel.LoadTopAndFeaturePosts(Repository);
+                if (indexModel.TopPost != null)
+                    posts.Add(indexModel.TopPost);
 
-                var posts = new List<Post>();
-
-                var topPost = await Repository.GetPostAsync(index.TopPostKey);
-                if (topPost != null)
-                    posts.Add(topPost);
-
-                var featurePost = await Repository.GetPostAsync(index.FeaturePostKey);
-                if (featurePost != null)
-                    posts.Add(featurePost);
-
-                posts.AddRange(await Repository.GetLatestPostsAsync(indexKind, index.Key, postKind, ProviderHelpers.MaximumSyndicationItems - posts.Count()));
-                model.Entries = posts;
+                if (indexModel.FeaturePost != null)
+                    posts.Add(indexModel.FeaturePost);
             }
             else
             {
-                model.Title = index.FullName + " " + char.ToUpper(postKind[0]) + postKind.Substring(1);
-                model.Entries = await Repository.GetLatestPostsAsync(indexKind, index.Key, postKind, ProviderHelpers.MaximumSyndicationItems);
+                model.Title = indexModel.Index.Name + " " + char.ToUpper(postKind[0]) + postKind.Substring(1);
             }
+            posts.AddRange(await Repository.GetLatestPostsAsync(indexModel, postKind));
+            model.Entries = posts.Take(ProviderHelpers.MaximumSyndicationItems);
 
             return model;
         }
 
-        protected async Task<DataIndex> GetDataIndex(string key)
+        protected async Task<IndexModel> GetIndexModel(string key)
         {
             if (this is DefaultController || this is PostsController)
             {
@@ -288,6 +277,8 @@ namespace Gov.News.Website.Controllers.Shared
                         return await Repository.GetMinistryAsync(key);
                     case "sectors":
                         return await Repository.GetSectorAsync(key);
+                    case "services":
+                        return await Repository.GetServiceAsync(key);
                     case "tags":
                         return await Repository.GetTagAsync(key);
                     case "themes":

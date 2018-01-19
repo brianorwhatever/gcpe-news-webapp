@@ -88,9 +88,11 @@
                         <a href="javascript:void(0)" id="mini-menu-ministries">Ministries</a>
                         <div class="level-trigger"></div>
                         <ul>
-                            @foreach (var ministry in Model.Ministries.Where(m => ((Ministry)m.Category).ParentMinistryKey == null))
+                            @foreach (var ministryModel in Model.Ministries)
                             {
-                                <li><a href="@ministry.Category.GetUri()">@ministry.Category.Name</a><div class="no-trigger"></div></li>
+                                var ministry = ministryModel.Index as Ministry;
+                                if (ministry == null || ministry.ParentMinistryKey != null) { continue; };
+                                <li><a href="@ministry.GetUri()">@ministry.Name</a><div class="no-trigger"></div></li>
                             }
                         </ul>
                     </li>
@@ -144,8 +146,10 @@
             <div id="ministries-menu" class="menu">
                 <div class="menu-items">
                     <ul>
-                        @foreach (var ministry in Model.Ministries.Where(m => ((Ministry)m.Category).ParentMinistryKey == null))
+                        @foreach (var ministryModel in Model.Ministries)
                         {
+                            var ministry = ministryModel.Index as Ministry;
+                            if (ministry == null || ministry.ParentMinistryKey != null) { continue; };
                             @*TODO: implement menu items loading
                                     <li>
                                     @Ajax.ActionLink(ministry.Name,
@@ -160,7 +164,7 @@
                                             LoadingElementId = "menu-ajax-loading"
                                         })
                                 </li>*@
-                            <li><a href="@ministry.Category.GetUri()">@ministry.Category.Name</a></li>
+                            <li><a href="@ministry.GetUri()">@ministry.Name</a></li>
                         }
                     </ul>
                     @*<a href="/ministries" class="link-button">VIEW BC NEWS BY MINISTRY</a>*@
@@ -173,7 +177,7 @@
                         <div id="menu-ajax-content">
                         </div>*@
 
-                    @foreach (var ministry in Model.Ministries.Where(m => ((Ministry)m.Category).ParentMinistryKey == null))
+                    @foreach (var ministry in Model.Ministries.Where(m => ((Ministry)m.Index).ParentMinistryKey == null))
                     {
                         @Html.Partial("MenuContent", ministry)
                     }

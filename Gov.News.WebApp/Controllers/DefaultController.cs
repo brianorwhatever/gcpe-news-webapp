@@ -390,11 +390,11 @@ namespace Gov.News.Website.Controllers
                         new Link() {Url ="http://www.emergencyinfobc.gov.bc.ca/category/alerts/feed", Title = "EmergencyInfoBC" },
                         new Link() {Url ="http://www.healthlinkbc.ca/publichealthalerts", Title = "HealthLinkBC" },
                     };
-            var ministries = model.Ministries.Select(m => m.Category).OrderBy(c => c.Name == "Office of the Premier" ? 0 : 1).ThenBy(c => c.FullName);
-            var sectors = await Repository.GetSectorsAsync();
-            var categories = ministries.Union(sectors.OrderBy(c => c.FullName)).ToList();
+            var ministries = model.Ministries.Select(m => m.Index).OrderBy(c => c.Name == "Office of the Premier" ? 0 : 1).ThenBy(c => c.Name);
+            var sectors = (await Repository.GetSectorsAsync()).Select(m => m.Index);
+            var categories = ministries.Union(sectors.OrderBy(c => c.Name)).ToList();
             foreach (var category in categories)
-                rssLinks.Add(new Link() { Url = category.GetUri().ToString().TrimEnd('/') + "/feed", Title = category.FullName });
+                rssLinks.Add(new Link() { Url = category.GetUri().ToString().TrimEnd('/') + "/feed", Title = category.Name });
 
             model.RssLinks = rssLinks.ToArray();
 
@@ -418,12 +418,11 @@ namespace Gov.News.Website.Controllers
             model.Title = "Top Stories";
             model.AlternateUri = null;
 
-            var posts = new List<Post>();
-            await Repository.AddPostAsync((await Repository.GetHomeAsync()).TopPostKey, posts);
-            await Repository.AddTopPostsAsync(await Repository.GetMinistriesAsync(), posts);
-            await Repository.AddTopPostsAsync(await Repository.GetSectorsAsync(), posts);
+            List<string> postKeys = IndexModel.GetTopPostKeysToLoad(await Repository.GetMinistriesAsync()).ToList();
+            postKeys.AddRange(IndexModel.GetTopPostKeysToLoad(await Repository.GetSectorsAsync()));
+            (await Repository.GetHomeAsync()).AddTopPostKeyToLoad(postKeys);
 
-            model.Entries = posts;
+            model.Entries = await Repository.GetPostsAsync(postKeys.Take(ProviderHelpers.MaximumSyndicationItems));
 
             return model;
         }
@@ -435,11 +434,11 @@ namespace Gov.News.Website.Controllers
             model.Title = "Featured Stories";
             model.AlternateUri = null;
 
-            var posts = new List<Post>();
-            await Repository.AddPostAsync((await Repository.GetHomeAsync()).TopPostKey, posts);
-            await Repository.AddFeaturePostsAsync(await Repository.GetMinistriesAsync(), posts);
-            await Repository.AddFeaturePostsAsync(await Repository.GetSectorsAsync(), posts);
-            model.Entries = posts;
+            List<string> postKeys = IndexModel.GetFeaturePostKeysToLoad(await Repository.GetMinistriesAsync()).ToList();
+            postKeys.AddRange(IndexModel.GetFeaturePostKeysToLoad(await Repository.GetSectorsAsync()));
+            (await Repository.GetHomeAsync()).AddFeaturePostKeyToLoad(postKeys);
+
+            model.Entries = await Repository.GetPostsAsync(postKeys.Take(ProviderHelpers.MaximumSyndicationItems));
 
             return model;
         }

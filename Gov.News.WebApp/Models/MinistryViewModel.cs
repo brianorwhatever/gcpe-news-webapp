@@ -1,9 +1,5 @@
-﻿using Gov.News.Api.Models;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using Gov.News.Api.Models;
 
 namespace Gov.News.Website.Models
 {

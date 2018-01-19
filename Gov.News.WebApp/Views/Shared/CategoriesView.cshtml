@@ -13,41 +13,48 @@
     <div class="home-body">
         
         @*TODO: Replace Model.Categories.First().GetType().Name with DisplayName property*@
-        <h3>News by @Model.Categories.First().GetType().Name</h3>
+        <h3>News by @Model.Categories.First().Index.GetType().Name</h3>
         
-        @foreach (var category in Model.CategoryPosts)
+        @foreach (var category in Model.Categories)
         {
             <div class="grouped-articles">
                 <h4>
-                    <a href="@category.Key.GetUri()">
-                        @category.Key.Name
+                    <a href="@category.Index.GetUri()">
+                        @category.Index.Name
                     </a>
                 </h4>
-                @if (category.Value.ToArray()[0] != null)
+                @if (category.TopPost != null)
                 {
                     <div class="top-article">
-                        @Html.Partial("Article", category.Value.ToArray()[0])
+                        @Html.Partial("PostCard", category.TopPost)
                     </div>
                 }
                 <div class="other-articles">
-                    @for (int i = 1; i < category.Value.Count(); i++)
+                    @if (category.FeaturePost != null)
                     {
-                        <div class=@(i == 1 ? "feature-article" : "regular-articles")>
-                       @Html.Partial("Article", category.Value.ToArray()[i])
+                        <div class="feature-article">
+                            @Html.Partial("PostCard", category.FeaturePost)
+                        </div>
+                    }
+                    @{Post firstLatest = category.LatestNews.FirstOrDefault();}
+                    @if (firstLatest != null)
+                    {
+                        <div class="regular-articles">
+                            @Html.Partial("PostCard", firstLatest)
                         </div>
                     }
                 </div>
             </div>
 
             <div class="news-control">
-                <a href="@category.Key.GetUri()" class="load-more link-button">Browse More News</a>
-                @if (category.Key is Ministry)
+                <a href="@category.Index.GetUri()" class="load-more link-button">Browse More News</a>
+                @if (category.Index is Ministry)
                 {
-                    @Html.ActionLink("Search News", "Search", "Default", new { ministry = category.Key.Key }, new { @class = "read-more" })
+                    @Html.ActionLink("Search News", "Search", "Default", new { ministry = category.Index.Key }, new { @class = "read-more" })
                 }
-                else if (category.Key.Kind == "sectors")
+                else if (category.Index.Kind == "sectors")
                 {
-                    @Html.ActionLink("Search News", "Search", "Default", new { sector = category.Key.Key }, new { @class = "read-more" })
+                    @Html.ActionLink("Search News", "Search", "Default", new { sector = category.Index.Key }, new { @class = "read-more" })
                 }
                 <div class="clear"> </div>
             </div>

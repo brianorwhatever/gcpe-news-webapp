@@ -65,12 +65,12 @@
 
                         foreach (var ministry in Model.Ministries)
                         {
-                            lists.Add(new { Category = "ministries", Key = ministry.Category.Key, Name = ministry.Category.Name.Replace("Minister of State for ", "") });
+                            lists.Add(new { Category = "ministries", Key = ministry.Index.Key, Name = ministry.Index.Name.Replace("Minister of State for ", "") });
                         }
 
                         foreach (var sector in Model.Sectors)
                         {
-                            lists.Add(new { Category = "sectors", Key = sector.Key, Name = sector.Name });
+                            lists.Add(new { Category = "sectors", Key = sector.Index.Key, Name = sector.Index.Name });
                         }
 
                         if (Model.Tags != null)
@@ -157,7 +157,7 @@
         <a href="#" class="link-button collapse" onclick="">Show less about EMBC</a>-->
 
     </div>
-                            }
+}
 
 @if (Model.Selection.Services != null)
 {
@@ -178,7 +178,7 @@
                     <ul class="external-links">
                         @for (int i = 0; i < halfList; i++)
                         {
-                            var service = Model.Services.ElementAt(i);
+                            var service = Model.Services.ElementAt(i).Index;
                             <li><label><input type="checkbox" value="@service.Key" name="Services" checked="@Model.Selection.Contains("services", service.Key)" />&nbsp;@service.Name</label></li>
                         }
                     </ul>
@@ -187,7 +187,7 @@
                     <ul class="external-links">
                         @for (int i = halfList; i < Model.Services.Count(); i++)
                         {
-                            var service = Model.Services.ElementAt(i);
+                            var service = Model.Services.ElementAt(i).Index;
                             <li><label><input type="checkbox" value="@service.Key" name="Services" checked="@Model.Selection.Contains("services", service.Key)" />&nbsp;@service.Name</label></li>
                         }
                     </ul>
@@ -203,7 +203,7 @@
         <a href="#" class="link-button collapse" onclick="">Show Less about Updates</a>
 
     </div>
-                        }
+}
 
 @if (Model.Selection.Newsletters != null)
 {

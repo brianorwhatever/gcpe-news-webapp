@@ -37,7 +37,7 @@ namespace Gov.News.Website.Models
             }
         }
 
-        public CategoryModel LeadMinistry { get; set; }
+        public IndexModel LeadMinistry { get; set; }
 
         public IEnumerable<Post> RelatedArticles { get; set; }
 
@@ -49,9 +49,9 @@ namespace Gov.News.Website.Models
 
         public IDictionary<string, FacebookPost> FacebookPostDetailsDictionary { get; set; }
 
-        public IEnumerable<Ministry> RelatedMinistries { get; set; }
+        public IEnumerable<string> RelatedMinistryKeys { get; set; }
 
-        public IEnumerable<Category> RelatedSectors { get; set; }
+        public IEnumerable<string> RelatedSectorKeys { get; set; }
 
         //TODO: Implement Tags meta for GSA
         //public IEnumerable<Tag> Tags { get; set; }
@@ -70,9 +70,9 @@ namespace Gov.News.Website.Models
         public override string SubscribePath()
         {
             return "/subscribe?ministries="
-                + string.Join("&ministries=", RelatedMinistries.Select(e => e.Key))
+                + string.Join("&ministries=", RelatedMinistryKeys)
                 + "&sectors="
-                + string.Join("&sectors=", RelatedSectors.Select(e => e.Key));
+                + string.Join("&sectors=", RelatedSectorKeys);
         }
 
         public string ProxyUrl()

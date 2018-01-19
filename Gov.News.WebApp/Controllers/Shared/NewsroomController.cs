@@ -120,10 +120,10 @@ namespace Gov.News.Website.Controllers.Shared
             model.Query = query;
 
             if (!string.IsNullOrEmpty(query.Ministry))
-                model.Ministry = await Repository.GetMinistryAsync(query.Ministry);
+                model.Ministry = (await Repository.GetMinistryAsync(query.Ministry)).Index as Ministry;
 
             if (!string.IsNullOrEmpty(query.Sector))
-                model.Sector = await Repository.GetSectorAsync(query.Sector);
+                model.Sector = (await Repository.GetSectorAsync(query.Sector)).Index as Sector;
 
             if (!string.IsNullOrEmpty(query.DateRange))
             {

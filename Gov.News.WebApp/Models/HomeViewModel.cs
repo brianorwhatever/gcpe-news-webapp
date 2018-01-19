@@ -7,6 +7,5 @@ namespace Gov.News.Website.Models
     {
         public IEnumerable<Slide> SlideItems { get; set; }
         public Calendar CalendarModel { get; set; }
-        public IDictionary<Post, IEnumerable<Category>> PostSectors { get; set; }
     }
 }

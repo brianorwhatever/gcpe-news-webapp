@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Gov.News.Api.Models;
 
 namespace Gov.News.Website.Models
 {
     public class ListViewModel : BaseViewModel
     {
-        public DataIndex Index { get; set; }
-        public Post TopStory { get; set; }
-        public Post FeatureStory { get; set; }
-        public IEnumerable<Post> LatestNews { get; set; }
+        public IndexModel IndexModel { get; set; }
+
+        // for all postTypes (not just the cached LatestNews)
+        public IEnumerable<Post> LatestPosts { get; set; }
         public System.Uri FeedUri { get; set; }
         public Category Category { get; set; }
 
@@ -67,7 +68,7 @@ namespace Gov.News.Website.Models
         */
         public override string SubscribePath()
         {
-            if (Category is Category)
+            if (Category != null)
             {
                 return "/subscribe?" + Category.Kind + "=" + Category.Key;
             }

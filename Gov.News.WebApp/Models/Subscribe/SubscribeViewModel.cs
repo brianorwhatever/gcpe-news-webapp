@@ -1,8 +1,6 @@
-﻿using Gov.News.Api.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Gov.News.Api.Models;
 
 namespace Gov.News.Website.Models.Subscribe
 {
@@ -12,9 +10,9 @@ namespace Gov.News.Website.Models.Subscribe
 
         public IEnumerable<Newsletter> Newsletters { get; set; }
 
-        public IEnumerable<Category> Sectors { get; set; }
+        public IEnumerable<IndexModel> Sectors { get; set; }
 
-        public IEnumerable<Category> Services { get; set; }
+        public IEnumerable<IndexModel> Services { get; set; }
 
         public IEnumerable<KeyValuePair2> Tags { get; set; }
 

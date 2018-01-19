@@ -24,62 +24,59 @@ namespace Gov.News.Website.Controllers
             if (this.GetType().GetTypeInfo().IsDefined(typeof(ObsoleteAttribute), false))
                 return NotFound();
 
-            Category index = null;
+            IndexModel indexModel = null;
 
             if (category == "ministries")
             {
-                index = await Repository.GetMinistryAsync(key);
+                indexModel = await Repository.GetMinistryAsync(key);
             }
             else if (category == "sectors")
             {
-                index = await Repository.GetSectorAsync(key);
+                indexModel = await Repository.GetSectorAsync(key);
+            }
+            else if (category == "services")
+            {
+                indexModel = await Repository.GetServiceAsync(key);
             }
             else if (category == "tags")
             {
-                index = await Repository.GetTagAsync(key);
+                indexModel = await Repository.GetTagAsync(key);
             }
             else if (category == "themes")
             {
-                index = await Repository.GetThemeAsync(key);
+                indexModel = await Repository.GetThemeAsync(key);
             }
             else
             {
                 throw new NotImplementedException();
             }
 
-            var model = await GetModel(index, postKind);
+            var model = await GetModel(indexModel, postKind);
 
             if (model == null)
                 return await SearchNotFound();
 
-            if (string.Equals(postKind, "factsheets", StringComparison.OrdinalIgnoreCase))
-                ViewBag.IsFactsheetsPage = true;  // hack? :)
-
-            ViewBag.Type = postKind ?? "";
+            ViewBag.Type = postKind;
             return View("CategoryView", model);
         }
 
-        public async Task<ListViewModel> GetModel(Category category, string postKind)
+        public async Task<ListViewModel> GetModel(IndexModel indexModel, string postKind)
         {
-            var model = category is Ministry ? new MinistryViewModel() : new ListViewModel();
+            Category category = indexModel.Index as Category;
+            ListViewModel model = category is Ministry ? new MinistryViewModel() : new ListViewModel();
             await LoadAsync(model);
 
             model.CanonicalUri = category.GetUri();
             model.FeedUri = ProviderHelpers.Uri(category.GetUri(), "feed");
-            model.Index = category;
+            model.IndexModel = indexModel;
             model.Title = category.Name;
             model.Category = category;
 
             if (category is Ministry)
                 await LoadMinisterData((MinistryViewModel)model, (Ministry)category);
 
-            if (string.IsNullOrEmpty(postKind))
-            {
-                model.TopStory = await Repository.GetPostAsync(category.TopPostKey);
-                model.FeatureStory = await Repository.GetPostAsync(category.FeaturePostKey);
-            }
             model.Footer = await GetFooter(category);
-            model.LatestNews = await Repository.GetLatestPostsAsync(category.Kind, category.Key, postKind);
+            model.LatestPosts = await Repository.GetLatestPostsAsync(indexModel, postKind);
 
             await LoadSocialFeeds(model);
 
@@ -94,7 +91,10 @@ namespace Gov.News.Website.Controllers
 
                 model.Minister = await Repository.GetMinisterAsync(ministry.Key);
 
-                model.ChildMinistry = ministry.ChildMinistryKey != null ? await Repository.GetMinistryAsync(ministry.ChildMinistryKey) : null;
+                if (ministry.ChildMinistryKey != null)
+                {
+                    model.ChildMinistry = (await Repository.GetMinistryAsync(ministry.ChildMinistryKey)).Index as Ministry;
+                }
 
                 if (model.ChildMinistry != null && "Speeches".Equals(model.ChildMinistry.Key, StringComparison.CurrentCultureIgnoreCase))
                     model.ChildMinistry = null;
@@ -118,32 +118,24 @@ namespace Gov.News.Website.Controllers
             return model;
         }
 
-        private async Task<Dictionary<Category, IEnumerable<Post>>> GetCategoryPosts(IEnumerable<Category> categories)
+        private async Task LoadCategoryPosts(IEnumerable<IndexModel> categoryModels)
         {
             using (Profiler.StepStatic("Get Category Posts"))
             {
-                var categoryPosts = new Dictionary<Category, IEnumerable<Post>>();
+                var topFeaturePostKeys = new List<string>();
 
-                foreach (var category in categories)
+                foreach (var categoryModel in categoryModels)
                 {
                     //TODO: Choose post type based on 'type' supplied to controller.
 
-                    List<Post> posts = new List<Post>();
-
-                    if (category.TopPostKey != null)
-                    {
-                        posts.Add(await Repository.GetPostAsync(category.TopPostKey));
-                    }
-
-                    if (category.FeaturePostKey != null)
-                    {
-                        posts.Add(await Repository.GetPostAsync(category.FeaturePostKey));
-                    }
+                    //List<Post> posts = new List<Post>();
+                    categoryModel.AddTopPostKeyToLoad(topFeaturePostKeys);
+                    categoryModel.AddFeaturePostKeyToLoad(topFeaturePostKeys);
 
                     //var keys = posts.Select(e => e.Key).Where(e => e != null).ToList();
                     //posts.AddRange(await category.Default.TakeLastAsync(3 - keys.Count(), 0, keys));
 
-                    IList<Post> last = await Repository.GetLatestPostsAsync(category.Kind, category.Key, null, CategoriesPostsLength - posts.Count());
+                    await Repository.GetLatestPostsAsync(categoryModel, null);
 
                     /*await PostModel.CreateAsync(await category.DefaultProperty.TakeLastAsync(CategoriesPostsLength));
                     foreach (var post in last)
@@ -156,12 +148,15 @@ namespace Gov.News.Website.Controllers
 
                         posts.Add(post);
                     }*/
-                    posts.AddRange(last);
 
-                    categoryPosts.Add(category, posts);
+                    //categoryPosts.Add(category, last.Take(CategoriesPostsLength));
                 }
-
-                return categoryPosts;
+                var topFeaturePosts = await Repository.GetPostsAsync(topFeaturePostKeys);
+                foreach (var categoryModel in categoryModels)
+                {
+                    categoryModel.SetTopPost(topFeaturePosts);
+                    categoryModel.SetFeaturePost(topFeaturePosts);
+                }
             }
         }
 
@@ -171,28 +166,28 @@ namespace Gov.News.Website.Controllers
 
             if (category == "ministries")
             {
-                model.Categories = (await Repository.GetMinistriesAsync()).Where(m => m.ParentMinistryKey == null).OrderByDescending(m => m.Name == "Office of the Premier");
+                model.Categories = (await Repository.GetMinistriesAsync()).Where(m => ((Ministry)m.Index).ParentMinistryKey == null).OrderByDescending(m => m.Index.Name == "Office of the Premier");
             }
             else if (category == "sectors")
             {
-                model.Categories = (await Repository.GetSectorsAsync()).ToList();
+                model.Categories = await Repository.GetSectorsAsync();
             }
             else if (category == "services")
             {
-                model.Categories = (await Repository.GetServicesAsync()).ToList();
+                model.Categories = await Repository.GetServicesAsync();
             }
             else if (category == "themes")
             {
-                model.Categories = (await Repository.GetThemesAsync()).ToList();
+                model.Categories = await Repository.GetThemesAsync();
             }
             else if (category == "tags")
             {
-                model.Categories = (await Repository.GetTagsAsync()).ToList();
+                model.Categories = await Repository.GetTagsAsync();
             }
 
             model.Title = category.ToUpper()[0] + category.Substring(1);
 
-            model.CategoryPosts = await GetCategoryPosts(model.Categories);
+            await LoadCategoryPosts(model.Categories);
 
             return model;
         }

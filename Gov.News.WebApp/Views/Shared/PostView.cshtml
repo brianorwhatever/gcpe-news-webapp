@@ -24,6 +24,7 @@
     {
         backgrounders = backgrounders.Skip(1).ToList();
     }
+    var leadMinistry = (Ministry)Model.LeadMinistry.Index;
 }
 
 @section Meta
@@ -36,10 +37,10 @@
     <meta name="DC.date.issued" content="@Model.Post.PublishDate.Value.ToString("yyyy-MM-dd")" />
 
     @*TODO: Replace FullName with MetaLeadMinistry*@
-    <meta name="DCTERMS.creator" content="@(((Ministry)Model.LeadMinistry.Category).FullName.Replace(",", " "))" />
+    <meta name="DCTERMS.creator" content="@leadMinistry.Name.Replace(",", " ")" />
 
     <meta name="NEWSTERMS.contentPath" content="@Model.ContentPath" />
-    <meta name="NEWSTERMS.ministryKeys" content="@string.Join(",", Model.RelatedMinistries.Select(e=>e.Key))" />
+    <meta name="NEWSTERMS.ministryKeys" content="@string.Join(",", Model.RelatedMinistryKeys)" />
     @*<meta name="NEWSTERMS.sectorKeys" content="@string.Join(",", Model.Sectors.Select(e=>e.Key))" />*@
 }
 
@@ -75,7 +76,7 @@
             <div class="story-top">
                 <div class="story-details">
                     <div class="segment titles">
-                        <h3>@Model.LeadMinistry.Category.Name</h3>
+                        <h3>@leadMinistry.Name</h3>
                         <h2 class="story-lang primary">@Model.Title</h2>
                         @if (firstFrenchDoc != null)
                         {
@@ -90,7 +91,7 @@
                         <div class="border-hider"> </div>
                     </div>
                     <div class="segment more">
-                        @if (Model.LeadMinistry.Category.IsActive == true)
+                        @if (leadMinistry.IsActive == true)
                         {
                             @Html.ActionLink("More from this Ministry", "Ministry", "Default", null, new { @class = "more-ministry-trigger" })
                         }
@@ -124,7 +125,7 @@
                         <div class="more-menu-side">
                             @if (Model.Minister != null)
                             {
-                                @Html.Partial("Minister", new Tuple<Ministry, Minister>((Ministry)Model.LeadMinistry.Category, Model.Minister))
+                                @Html.Partial("Minister", new Tuple<Ministry, Minister>(leadMinistry, Model.Minister))
                             }
                         </div>
                         <div class="more-menu-content">
@@ -141,13 +142,13 @@
         <a href="#" class="print-document" alt="Print" title="Print">Print</a>
 
 
-        @if (Model.LeadMinistry.Category.IsActive == true)
+        @if (leadMinistry.IsActive == true)
         {
-            <h3><a href="@Model.LeadMinistry.Category.GetUri()">@Model.LeadMinistry.Category.FullName </a></h3>
+            <h3><a href= "@leadMinistry.GetUri()">@leadMinistry.Name</a></h3>
         }
         else
         {
-            <h3>@Model.LeadMinistry.Category.FullName  <b>Note:</b> This News Release has been archived - the Ministry no longer exists</h3>
+            <h3>@leadMinistry.Name <b>Note:</b> This News Release has been archived - the Ministry no longer exists</h3>
         }
 
         <div class="print-title">British Columbia News</div>
@@ -254,23 +255,21 @@
         </div>
         }
 
-        @{var ministry = (Ministry)Model.LeadMinistry.Category;}
+        @Html.Partial("MoreFromThis", leadMinistry)
 
-        @Html.Partial("MoreFromThis", ministry)
-
-        @if (ministry.TopicLinks.Any())
+        @if (leadMinistry.TopicLinks.Any())
         {
-            @Html.Partial("PopularTopics", ministry.TopicLinks)
+            @Html.Partial("PopularTopics", leadMinistry.TopicLinks)
         }
 
-        @if (ministry.ServiceLinks.Any())
+        @if (leadMinistry.ServiceLinks.Any())
         {
-            @Html.Partial("Resources", ministry.ServiceLinks)
+            @Html.Partial("Resources", leadMinistry.ServiceLinks)
         }
 
-        @if (ministry.NewsletterLinks.Any())
+        @if (leadMinistry.NewsletterLinks.Any())
         {
-            @Html.Partial("NewsLetterLinks", ministry.NewsletterLinks)
+            @Html.Partial("NewsLetterLinks", leadMinistry.NewsletterLinks)
         }
 
     </div>
@@ -431,7 +430,7 @@
         }
         </div>
 
-        @if (backgrounders.Count() != 0)
+        @if (backgrounders.Any())
         {
             <h4>Backgrounders</h4>
             for (var i = 0; i < backgrounders.Count(); i++)
@@ -560,7 +559,7 @@
                     }
                 </div>
 
-                @if (Model.LeadMinistry.Category != null && Model.Footer.LatestFlickrUri != null)
+                @if (leadMinistry != null && Model.Footer.LatestFlickrUri != null)
                 {
                     <div class="related-image">
                         @AssetHelper.RenderPostAsset(Model.Footer.LatestFlickrUri)

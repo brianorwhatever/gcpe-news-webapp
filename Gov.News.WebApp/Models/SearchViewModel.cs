@@ -57,7 +57,7 @@ namespace Gov.News.Website.Models
 
 
         public Ministry Ministry {get; set;}
-        public Category Sector { get; set; }
+        public Sector Sector { get; set; }
         public string DateRangeText { get; set; }
         public SearchViewModel()
         {

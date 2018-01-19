@@ -5,9 +5,7 @@ namespace Gov.News.Website.Models
 {
     public class CategoriesViewModel : BaseViewModel
     {
-        public IEnumerable<Category> Categories { get; set; }
-
-        public IDictionary<Category, IEnumerable<Post>> CategoryPosts { get; set; }
+        public IEnumerable<IndexModel> Categories { get; set; }
 
         public FooterViewModel Footer { get; set; }
     }

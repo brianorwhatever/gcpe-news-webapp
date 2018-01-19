@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Gov.News.Api.Models;
 using Gov.News.Website;
 using Gov.News.Website.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -20,15 +22,15 @@ namespace ViewComponentSample.ViewComponents
             var items = await GetItemsAsync();
             return View("TopSectors", items);
         }
-        private async Task<ICollection<CategoryModel>> GetItemsAsync()
+        private async Task<IEnumerable<IndexModel>> GetItemsAsync()
         {
-            var sectors = await _repository.GetSectorsAsync(false);
+            var sectorModels = await _repository.GetSectorsAsync();
 
-            var sectorModels = new List<CategoryModel>();
-            foreach (var sector in sectors)
+            IEnumerable<Post> topPosts = await _repository.GetPostsAsync(IndexModel.GetTopPostKeysToLoad(sectorModels));
+
+            foreach (var sectorModel in sectorModels)
             {
-                var sectorModel = new CategoryModel(sector, await _repository.GetPostAsync(sector.TopPostKey));
-                sectorModels.Add(sectorModel);
+                sectorModel.SetTopPost(topPosts);
             }
             return sectorModels;
         }
