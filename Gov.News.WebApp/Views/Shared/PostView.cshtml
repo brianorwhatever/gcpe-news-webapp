@@ -485,7 +485,7 @@
         {
             <div id="assets" class="assets collapsed">
                 <h4>Media Assets</h4>
-                @if (Model.Post.AzureAssets.Any())
+                @if (Model.Post.AzureAssets != null && Model.Post.AzureAssets.Any())
                 {
                     <div class="media-assets-container">
                         <ul>
