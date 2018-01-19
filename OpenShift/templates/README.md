@@ -46,6 +46,10 @@ To guard against this, add the following environment variable to the Jenkins dep
 
 You may also want to increase the RAM limits for the Jenkins deployment (4Gi recommended).  This can be done by using the "Edit Resource Limits" action menu option when viewing the deployment in the OpenShift web console.
 
+### BDD Troubleshooting ###
+
+The BDD tests for this project rely on gradle.  If you have problems running the functional tests (with a symptom of file not found), deleting gradlew and adding it back to the repository my resolve the issue, if the root cause is file line breaks.
+
 
 **Deployment**
 

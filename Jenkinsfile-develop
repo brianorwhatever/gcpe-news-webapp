@@ -27,7 +27,6 @@ node('bddstack') {
         echo "Build: ${BUILD_ID}"
         checkout scm
         dir('functional-tests') {
-		input "Proceed?"
 	    try {
                 sh './gradlew --debug --stacktrace chromeHeadlessTest'
 	    } finally {
