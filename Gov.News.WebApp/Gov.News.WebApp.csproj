@@ -7,6 +7,7 @@
     <OutputType>Exe</OutputType>
     <PackageId>Gov.News.WebApp</PackageId>
 	<ProjectGuid>{E31A0E45-B91A-4734-B837-BC5353FA01C7}</ProjectGuid>
+	<UserSecretsId>a712ae68-c86e-4809-974e-e28843c4254a</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -43,6 +44,7 @@
 
   <ItemGroup>
     <DotNetCliToolReference Include="BundlerMinifier.Core" Version="2.2.301" />
+    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
