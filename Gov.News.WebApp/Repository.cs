@@ -255,6 +255,16 @@ namespace Gov.News.Website
             return await GetDataModelAsync(key, () => ApiClient.Sectors.GetOneAsync(key, APIVersion));
         }
 
+        public async Task<Tag> GetTagAsync(string key)
+        {
+            return await GetDataModelAsync(key, () => ApiClient.Tags.GetOneAsync(key, APIVersion));        
+        }
+
+        public async Task<Theme> GetThemeAsync(string key)
+        {
+            return await GetDataModelAsync(key, () => ApiClient.Themes.GetOneAsync(key, APIVersion));
+        }
+
         public async Task<Calendar> GetCalendarAsync(string key)
         {
             return null; // await GetDataModelAsync(key, ()=>ApiClient.Calendar.GetOneAsync(key.Replace('/','-'), APIVersion));

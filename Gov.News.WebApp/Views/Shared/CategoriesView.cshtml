@@ -30,16 +30,10 @@
                     </div>
                 }
                 <div class="other-articles">
-                    @if (category.Value.ToArray()[1] != null)
+                    @for (int i = 1; i < category.Value.Count(); i++)
                     {
-                        <div class="feature-article">
-                            @Html.Partial("Article", category.Value.ToArray()[1])
-                        </div>
-                    }
-                    @for (int i = 2; i < category.Value.Count(); i++)
-                    {
-                        <div class="regular-articles">
-                            @Html.Partial("Article", category.Value.ToArray()[i])
+                        <div class=@(i == 1 ? "feature-article" : "regular-articles")>
+                       @Html.Partial("Article", category.Value.ToArray()[i])
                         </div>
                     }
                 </div>

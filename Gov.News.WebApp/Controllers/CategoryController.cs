@@ -34,11 +34,19 @@ namespace Gov.News.Website.Controllers
             {
                 index = await Repository.GetSectorAsync(key);
             }
+            else if (category == "tags")
+            {
+                index = await Repository.GetTagAsync(key);
+            }
+            else if (category == "themes")
+            {
+                index = await Repository.GetThemeAsync(key);
+            }
             else
             {
                 throw new NotImplementedException();
-            //    index = await Repository.GetCategoryAsync(category, key);
             }
+
             var model = await GetModel(index, postKind);
 
             if (model == null)

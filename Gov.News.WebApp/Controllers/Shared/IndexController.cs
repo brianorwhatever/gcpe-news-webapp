@@ -288,6 +288,10 @@ namespace Gov.News.Website.Controllers.Shared
                         return await Repository.GetMinistryAsync(key);
                     case "sectors":
                         return await Repository.GetSectorAsync(key);
+                    case "tags":
+                        return await Repository.GetTagAsync(key);
+                    case "themes":
+                        return await Repository.GetThemeAsync(key);
                 }
                 throw new NotImplementedException();
             }
