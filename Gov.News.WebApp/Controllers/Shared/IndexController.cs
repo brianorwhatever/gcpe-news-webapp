@@ -242,7 +242,7 @@ namespace Gov.News.Website.Controllers.Shared
         private async Task<SyndicationFeedViewModel> GetFeedModel(string key, string postKind)
         {
             var index = await GetDataIndex(key);
-            string indexKind = (index is Category) ? ((Category)index).Kind : "";
+            string indexKind = (index is Category) ? ((Category)index).Kind : "home";
 
             var model = new SyndicationFeedViewModel();
             model.AlternateUri = new Uri(Configuration["NewsHostUri"]);
