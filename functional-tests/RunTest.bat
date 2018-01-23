@@ -1,5 +1,5 @@
 cls
-gradlew -DchromeTest.single=FooterFlowSpecs chromeTest -d
+gradlew -DchromeTest.single=CarouselURLsWorkSpec chromeTest -d
 
 rem gradlew chromeTest -d
 
