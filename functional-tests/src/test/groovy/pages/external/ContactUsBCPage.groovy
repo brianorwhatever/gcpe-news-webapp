@@ -4,6 +4,6 @@ import geb.Page
 
 class ContactUsBCPage extends Page {
 
-	static at = { title == "Government of British Columbia Forms" }
+	static at = { title.startsWith("B.C. Government Forms") && title.endsWith("Government of British Columbia") }
     static url = "https://forms.gov.bc.ca/"	
 }
