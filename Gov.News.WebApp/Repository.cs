@@ -145,10 +145,9 @@ namespace Gov.News.Website
             IDictionary<string, object> cacheForType = _cache[typeof(IndexModel)];
             lock (cacheForType)
             {
-                foreach (var indexModel in cacheForType.Values.ToList())
+                foreach (var key in cacheForType.Keys.ToList())
                 {
-                    var index = ((IndexModel)indexModel).Index;
-                    cacheForType[index.Key] = new IndexModel(index);
+                    cacheForType[key] = new IndexModel(((IndexModel)cacheForType[key]).Index);
                 }
             }
         }
@@ -194,10 +193,12 @@ namespace Gov.News.Website
             IDictionary<string, object> cacheForType = _cache[typeof(T)];
             if (cacheForType.Count > maxSize)
             {
-                IDictionary<string, DataModel> dataModelCacheForType = (IDictionary<string, DataModel>)cacheForType;
-                foreach (var elt in dataModelCacheForType.OrderBy(m => m.Value.Timestamp).TakeLast(maxSize / 2))
+                lock (cacheForType)
                 {
-                    cacheForType.Remove(elt.Key);
+                    foreach (var elt in cacheForType.OrderByDescending(m => ((T)m.Value).Timestamp).TakeLast(maxSize / 2))
+                    {
+                        cacheForType.Remove(elt.Key);
+                    }
                 }
             }
             return await GetAsync(key, taskFn, cacheForType);
@@ -243,7 +244,7 @@ namespace Gov.News.Website
 
             lock (cacheForType)
             {
-                if (cacheForType.Any())
+                if (!cacheForType.Any())
                 {
                     foreach (T item in list)
                     {
@@ -381,7 +382,7 @@ namespace Gov.News.Website
             {
                 try
                 {
-                    return await GetDataModelAsync(key, () => ApiClient.Posts.GetOneAsync(key, APIVersion));
+                    return await GetDataModelAsync(key, () => ApiClient.Posts.GetOneAsync(key, APIVersion), MAX_NUM_CACHED_POSTS_PER_INDEX * 50);
                 }
                 catch (Exception) { }
             }
