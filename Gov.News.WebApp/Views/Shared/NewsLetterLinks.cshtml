@@ -1,5 +1,4 @@
-﻿@using Gov.News.Website.Models
-@using Gov.News.Api.Models
+﻿@using Gov.News.Api.Models
 
 @model IEnumerable<ResourceLink>
 
@@ -10,7 +9,7 @@
         <ul>
             @foreach (var item in Model)
             {
-                <li><a href="@item.Uri">@item.Text</a></li>
+                <li><a href="@item.Uri">@item.Key</a></li>
             }
         </ul>
     </div>

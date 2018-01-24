@@ -6,7 +6,7 @@
         @{int i = 0; }
         @foreach (var link in Model.ResourceLinks)
         {
-            <li><a id='Resource_@(i)' href="@link.Uri">@link.Text</a></li>
+            <li><a id='Resource_@(i)' href="@link.Uri">@link.Key</a></li>
             i++;
         }
     </ul>
