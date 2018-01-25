@@ -146,16 +146,6 @@ namespace Gov.News.Website.Controllers
         {
             List<string> model = new List<string>();
 
-            // Disabled due to GetSubscribe and GetNewsletters not being implemented
-            /*
-            model.Add(SiteStatusString("NewsOnDemand: ", showErrors, ref start, () =>
-            {
-                var nodSubscribe = Repository.GetSubscribe();
-                var nodConfig = (Newtonsoft.Json.Linq.JObject)nodSubscribe.GetConfigurationValues();
-                return nodConfig["Configuration"].Select(t => new KeyValuePair<string, string>(t["ConfigKey"].ToString(), t["ConfigValue"].ToString())).First().ToString();
-            }));
-            */
-
             model.Add(SiteStatusString("Newsletters count:  ", showErrors, () =>
             {
                 IEnumerable<Newsletter> newsletters = Repository.GetNewslettersAsync().Result;
