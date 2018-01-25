@@ -21,7 +21,7 @@ namespace Gov.News.Website
         public HubConnection apiConnection;
         static public Uri ContentDeliveryUri = null;
 
-        private Dictionary<Type, IDictionary<string, object>> _cache = new Dictionary<Type, IDictionary<string, object>>();
+        internal Dictionary<Type, IDictionary<string, object>> _cache = new Dictionary<Type, IDictionary<string, object>>();
         private Dictionary<Type, IDictionary<string, object>> _indexCache = new Dictionary<Type, IDictionary<string, object>>();
         private Dictionary<string, Task> ConcurrentRequests = new Dictionary<string, Task>();
 

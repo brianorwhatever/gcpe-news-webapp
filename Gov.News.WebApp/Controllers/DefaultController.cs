@@ -145,62 +145,70 @@ namespace Gov.News.Website.Controllers
         public ActionResult SiteStatus(bool? showErrors)
         {
             List<string> model = new List<string>();
-            DateTime start = DateTime.Now;
+
             // Disabled due to GetSubscribe and GetNewsletters not being implemented
-
             /*
-                        model.Add(SiteStatusString("NewsOnDemand: ", showErrors, ref start, () =>
-                        {
-                            var nodSubscribe = Repository.GetSubscribe();
-                            var nodConfig = (Newtonsoft.Json.Linq.JObject)nodSubscribe.GetConfigurationValues();
-                            return nodConfig["Configuration"].Select(t => new KeyValuePair<string, string>(t["ConfigKey"].ToString(), t["ConfigValue"].ToString())).First().ToString();
-                        }));
-
-                        model.Add(SiteStatusString("Newsletters count:  ", showErrors, ref start, () =>
-                        {
-                            var eNewslettersClient = Repository.GetNewsletters();
-                            return eNewslettersClient.GetEditionsAllPublicOnly().Count().ToString();
-                        }));
+            model.Add(SiteStatusString("NewsOnDemand: ", showErrors, ref start, () =>
+            {
+                var nodSubscribe = Repository.GetSubscribe();
+                var nodConfig = (Newtonsoft.Json.Linq.JObject)nodSubscribe.GetConfigurationValues();
+                return nodConfig["Configuration"].Select(t => new KeyValuePair<string, string>(t["ConfigKey"].ToString(), t["ConfigValue"].ToString())).First().ToString();
+            }));
             */
-            model.Add(SiteStatusString("Newest Facebook Post: ", showErrors, ref start, () =>
+
+            model.Add(SiteStatusString("Newsletters count:  ", showErrors, () =>
+            {
+                IEnumerable<Newsletter> newsletters = Repository.GetNewslettersAsync().Result;
+                return newsletters.Count().ToString();
+            }));
+
+            model.Add(SiteStatusString("Newest Facebook Post: ", showErrors, () =>
             {
                 FacebookPost facebookPost = Repository.GetNewestFacebookPost().Result;
                 return facebookPost.Content;
             }));
 
-            model.Add(SiteStatusString("TwitterFeed: ", showErrors, ref start, () =>
+            model.Add(SiteStatusString("TwitterFeed: ", showErrors, () =>
             {
                 string tweet = LoadTwitterPosts().Result.FirstOrDefault()?.Content;
                 int postBracket = tweet != null ? tweet.IndexOf("<") : -1;
                 return postBracket != -1 ? tweet.Substring(0, postBracket) : tweet;
             }));
 
-            /*
-            // Make sure to bypass the Repository cache
-            IPost post = null;
-            model.Add(SiteStatusString("Hub DB access, post key: ", showErrors, ref start, () =>
+            Post post = null;
+            model.Add(SiteStatusString("Hub DB access, post key: ", showErrors, () =>
             {
-                post = Data.Repository.GetPostByReference("NEWS-15137").Result;
+                post = Repository.GetPostAsync("2017FLNR0208-001391").Result;
                 return post.Key;
             }));
          
-
-            model.Add(SiteStatusString("Media proxy url: ", showErrors, ref start, () =>
+            model.Add(SiteStatusString("Media proxy url: ", showErrors, () =>
             {
                 var client = new System.Net.Http.HttpClient();
                 client.DefaultRequestHeaders.Referrer = new Uri(string.Concat(Request.Scheme, "://", Request.Host.ToUriComponent(), Request.PathBase.ToUriComponent(), Request.Path, Request.QueryString));
 
-                var result = client.GetAsync(post.AssetUrl.ToProxyUrl()).Result.ReasonPhrase;
+                var result = client.GetAsync(post.AssetUrl).Result.ReasonPhrase;
 
                 if (result != "OK") throw new Exception(result);
                 return "OK";
             }));
-               */
+
+            model.Add(SiteStatusString("Post cache size: ", showErrors, () =>
+            {
+                return  Repository._cache[typeof(Post)].Count().ToString();
+            }));
+
+            model.Add(SiteStatusString("Facebook Post cache size: ", showErrors, () =>
+            {
+                return Repository._cache[typeof(FacebookPost)].Count().ToString();
+            }));
+
             return View("SiteStatus", model);
         }
-        public static string SiteStatusString(string s, bool? showErrors, ref DateTime start, Func<string> func)
+        public static string SiteStatusString(string s, bool? showErrors, Func<string> func)
         {
-            DateTime now = DateTime.Now;
+            System.Diagnostics.Stopwatch timer = System.Diagnostics.Stopwatch.StartNew();
+
             string value;
             try
             {
@@ -214,8 +222,10 @@ namespace Gov.News.Website.Controllers
                 if (inner == null) value = ex.Message;
                 else value = (inner.InnerException ?? inner).Message;
             }
-            s += value + " (" + (int)(now - start).TotalMilliseconds + " ms)";
-            start = now;
+
+            timer.Stop();
+            s += value + " (" + (timer.ElapsedMilliseconds) + " ms)";
+
             return s;
         }
 
