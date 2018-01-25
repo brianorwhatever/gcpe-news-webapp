@@ -61,10 +61,10 @@ namespace Gov.News.Website
             RegisterNotification<Slide>(true);
             RegisterNotification<ResourceLink>(true);
 
-            RegisterIndexNotification<Home>(false);
+            RegisterIndexNotification<Home>(true);
             RegisterIndexNotification<Service>(true);
-            RegisterIndexNotification<Theme>(false);
-            RegisterIndexNotification<Tag>(false);
+            RegisterIndexNotification<Theme>(true);
+            RegisterIndexNotification<Tag>(true);
             RegisterIndexNotification<Sector>(true);
             RegisterIndexNotification<Ministry>(true);
 
@@ -124,7 +124,7 @@ namespace Gov.News.Website
 
         public async Task OnSignalRConnectionClosed(Exception ex)
         {
-            _logger.LogInformation("SignalR Client Connection closed !");
+            _logger.LogError("SignalR Client Connection closed !");
             // We probably missed notifications => Clear all posts
             ClearOnChange<Post>(_cache[typeof(Post)], null);
             await StartSignalR();
@@ -132,12 +132,14 @@ namespace Gov.News.Website
 
         public void ClearAllIndexPosts()
         {
-            IDictionary<string, object> cacheForType = _cache[typeof(IndexModel)];
-            lock (cacheForType)
+            foreach (var cacheForType in _indexCache.Values)
             {
-                foreach (var key in cacheForType.Keys.ToList())
+                lock (cacheForType)
                 {
-                    cacheForType[key] = new IndexModel(((IndexModel)cacheForType[key]).Index);
+                    foreach (IndexModel index in cacheForType.Values.ToList()) // ToList so we can iterate and modify the dictionary. Bruno
+                    {
+                        cacheForType[index.Index.Key] = new IndexModel(index.Index);
+                    }
                 }
             }
         }
@@ -323,11 +325,6 @@ namespace Gov.News.Website
         public async Task<IndexModel> GetHomeAsync()
         {
             return await GetIndexAsync<Home>("default", async () => new IndexModel(await ApiClient.Home.GetAsync(APIVersion)));
-        }
-
-        public async Task<Calendar> GetCalendarAsync(string key)
-        {
-            return null; // await GetDataModelAsync(key, ()=>ApiClient.Calendar.GetOneAsync(key.Replace('/','-'), APIVersion));
         }
 
         public async Task<Slide> GetSlideAsync(string id)
@@ -520,6 +517,7 @@ namespace Gov.News.Website
             {
                 count += ProviderHelpers.MaximumLatestNewsItems;
             }
+            DataIndex index = indexModel.Index;
             if (postKind == null)
             {
                 int latestNewsCount = indexModel.LatestNews.Count();
@@ -530,10 +528,9 @@ namespace Gov.News.Website
                 }
                 if (skip != latestNewsCount)
                 {
-                    throw new InvalidProgramException();
+                    _logger.LogError("skip ({0})/count({1}) mismatch in GetLatestPostsAsync({2})!", skip, latestNewsCount, index.Key);
                 }
             }
-            DataIndex index = indexModel.Index;
             IList<Post> posts = await ApiClient.Posts.GetLatestAsync(index.Kind, index.Key, APIVersion, postKind, count, skip);
             if (postKind != null) return posts;
 

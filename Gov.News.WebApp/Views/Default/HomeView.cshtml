@@ -66,10 +66,6 @@
     <div class="collapsible-regions">
         @Html.Partial("ResourceLinks")
         <vc:top-sectors />  @*@await Component.InvokeAsync("TopSectors")*@
-        @if (Model.CalendarModel != null)
-        {
-            @Html.Partial("EventsCalendar", Model.CalendarModel)
-        }
     </div>
 
 </div>

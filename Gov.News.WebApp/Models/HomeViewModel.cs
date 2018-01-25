@@ -6,6 +6,6 @@ namespace Gov.News.Website.Models
     public class HomeViewModel : ListViewModel
     {
         public IEnumerable<Slide> SlideItems { get; set; }
-        public Calendar CalendarModel { get; set; }
+        //public Calendar CalendarModel { get; set; }
     }
 }
