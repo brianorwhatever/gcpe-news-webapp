@@ -45,11 +45,7 @@ namespace Gov.News.Website.Controllers
             ViewBag.GoogleSiteVerification = Properties.Settings.Default.GoogleSiteVerification;
             ViewBag.BingSiteVerification = Properties.Settings.Default.BingSiteVerification;
 
-            using (Profiler.StepStatic("Creating Calendar"))
-            {
-                model.CalendarModel = await Repository.GetCalendarAsync(Properties.Settings.Default.CalendarUri.ToString());
-                return View("HomeView", model);
-            }
+            return View("HomeView", model);
         }
 
         [ResponseCache(CacheProfileName = "Feed"), Noindex]
