@@ -1,0 +1,22 @@
+node('master') {
+
+    stage('Code Quality') {
+        echo "Running SonarQube static code analysis on master branch."
+        openshiftBuild bldCfg: 'news-webapp-sonar-master', showBuildLogs: 'true'
+    }
+
+    stage('Build Image') {
+        echo "Building..."
+        openshiftBuild bldCfg: 'news-webapp-master', showBuildLogs: 'true'
+        openshiftTag destStream: 'news-webapp', verbose: 'true', destTag: '$BUILD_ID', srcStream: 'news-webapp', srcTag: 'latest'
+		openshiftTag destStream: 'news-webapp', verbose: 'true', destTag: 'test', srcStream: 'news-webapp', srcTag: '$BUILD_ID'
+    }	
+}
+
+stage('Deploy on Prod') {
+    input "Deploy to Prod?"
+    node('master') {
+        openshiftTag destStream: 'news-webapp', verbose: 'true', destTag: 'prod', srcStream: 'news-webapp', srcTag: '$BUILD_ID'
+    }
+}
+

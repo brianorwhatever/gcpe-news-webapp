@@ -1,0 +1,31 @@
+﻿@model Gov.News.Website.Models.ContentViewModel
+
+<style>
+    #footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+</style>
+
+<div class="connect subscribe">
+
+    <div class="home-body">
+
+        <div id="topElement">
+            <h3>@Model.Title</h3>
+        </div>
+
+        @if (!string.IsNullOrEmpty(@Model.Subtitle))
+        {
+            <h4>@Model.Subtitle</h4>
+        }
+
+        @Model.Html
+
+    </div>
+    
+    <div class="clear"></div>
+
+</div>

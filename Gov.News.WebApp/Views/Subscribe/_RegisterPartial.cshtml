@@ -1,0 +1,100 @@
+﻿@using Gov.News.Website.Models.Subscribe
+@model SubscribeViewModel
+
+@{ 
+    var selectedTags = new[] { "" }.ToList();
+    selectedTags.Clear();
+}
+
+<div style="display:none;">
+
+    @if (Model.Selection.Ministries != null || Model.Selection.Sectors != null)
+    {
+        <input type="hidden" name="NewsAsItHappens" value="true" />
+
+        var lists = new[] { new { Category = "", Key = "", Name = "" } }.ToList();
+        lists.Clear();
+
+        foreach (var ministry in Model.Ministries)
+        {
+            lists.Add(new { Category = "ministries", Key = ministry.Index.Key, Name = ministry.Index.Name });
+        }
+
+        foreach (var sector in Model.Sectors)
+        {
+            lists.Add(new { Category = "sectors", Key = sector.Key, Name = sector.Name });
+        }
+
+        if (Model.Tags != null)
+        {
+            foreach (var tag in Model.Tags)
+            {
+                lists.Add(new { Category = "tags", Key = tag.Key, Name = tag.Value });
+            }
+        }
+
+        lists = lists.OrderBy(e => e.Name).ToList();
+
+        foreach(var list in lists)
+        {
+            <label><input class="ministries-checkbox" type="checkbox" value="@list.Key" name="@list.Category" checked="@Model.Selection.Contains(list.Category, list.Key)" />&nbsp;@list.Name</label>
+            // Stack up the selected Tag names
+            if (Model.Selection.Contains(list.Category, list.Key)) {
+                selectedTags.Add(list.Name);
+            }
+        }
+    }
+
+    @if (Model.Selection.Emergency != null)
+    {
+        @foreach (var list in Model.Emergencies.OrderBy(e => e.Value).ToList())
+        {
+            <label><input type="checkbox" value="@list.Key" name="emergency" checked="@Model.Selection.Contains("emergency", list.Key)" />&nbsp;@list.Value</label>
+            // Stack up the selected Tag names
+            if (Model.Selection.Contains("emergency", list.Key))
+            {
+                selectedTags.Add(list.Value);
+            }
+        }
+    }
+
+    @if (Model.Selection.Services != null)
+    {
+        foreach(var service in Model.Services)
+        {
+            <label><input type="checkbox" value="@service.Key" name="Services" checked="@Model.Selection.Contains("services", service.Key)" />&nbsp;@service.Name</label>
+            // Stack up the selected Tag names
+            if (Model.Selection.Contains("services", service.Key))
+            {
+                selectedTags.Add(service.Name);
+            }
+        }
+    }
+
+    @if (Model.Selection.Newsletters != null)
+    {
+        @foreach (var newsletter in Model.Newsletters)
+        {
+            <label><input type="checkbox" value="@newsletter.Key" name="Newsletters" checked="@Model.Selection.Contains("newsletters", @newsletter.Key)" />&nbsp;@newsletter.Name</label>
+            // Stack up the selected Tag names
+            if (Model.Selection.Contains("newsletters", @newsletter.Key))
+            {
+                selectedTags.Add(newsletter.Name);
+            }
+        }
+    }
+
+</div>
+
+<div style="padding-left: 10px">
+    <div style="font-weight:bold">By submitting this form you will be subscribed to the following topics:</div>
+</div>
+
+<div style="padding-top: 15px; padding-bottom: 15px;">
+    <ul>
+        @foreach (var displayName in selectedTags)
+        {
+            <li>@displayName</li>
+        }
+    </ul>
+</div>

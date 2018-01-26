@@ -1,0 +1,876 @@
+﻿@using Gov.News.Website.Models
+@using Gov.News.Website.Helpers;
+@using Gov.News.Website;
+@using Gov.News.Api.Models;
+
+@model PostViewModel
+
+@{
+
+    if (Model.PostThumbnailUri != null)
+    {
+        Model.OGMetaImageUrl = Model.PostThumbnailUri;
+    }
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var backgrounders = Model.Post.Documents.Skip(1).ToList();
+    var firstDoc = Model.Post.Documents.First();
+    var firstFrenchDoc = backgrounders.FirstOrDefault();
+    if (firstFrenchDoc != null && firstFrenchDoc.LanguageId != 3084)
+    {
+        firstFrenchDoc = null;
+    }
+    else
+    {
+        backgrounders = backgrounders.Skip(1).ToList();
+    }
+    var leadMinistry = (Ministry)Model.LeadMinistry.Index;
+}
+
+@section Meta
+{
+    <meta name="description" content="@Model.Post.Summary" />
+    <meta name="keywords" content="@Model.Post.Keywords" />
+
+    <meta name="MBCTERMS.contentType" content="@Model.ContentType" />
+
+    <meta name="DC.date.issued" content="@Model.Post.PublishDate.Value.ToString("yyyy-MM-dd")" />
+
+    @*TODO: Replace FullName with MetaLeadMinistry*@
+    <meta name="DCTERMS.creator" content="@leadMinistry.Name.Replace(",", " ")" />
+
+    <meta name="NEWSTERMS.contentPath" content="@Model.ContentPath" />
+    <meta name="NEWSTERMS.ministryKeys" content="@string.Join(",", Model.RelatedMinistryKeys)" />
+    @*<meta name="NEWSTERMS.sectorKeys" content="@string.Join(",", Model.Sectors.Select(e=>e.Key))" />*@
+}
+
+@section FacebookMeta { 
+    <meta property="og:url" content="@Model.CanonicalUri" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="@Model.Title" />
+    <meta property="og:description" content="@(string.IsNullOrWhiteSpace(Model.Post.SocialMediaSummary) ? Model.Post.Summary : Model.Post.SocialMediaSummary)" />
+    @if (@Model.OGMetaImageUrl != null)
+    {
+        <meta name="og:image" content="@Html.Raw(Model.CanonicalUri + "/image")" />
+    }
+}
+
+
+@* Doc for the below twitter cards See - https://dev.twitter.com/cards/overview*@
+@section TwitterMeta {
+    @if (Model.PostThumbnailUri != null)
+    {
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@@BCGovNews">
+        <meta name="twitter:title" content="@Model.Title">
+        <meta name="twitter:description" content="@(string.IsNullOrWhiteSpace(Model.Post.SocialMediaSummary) ? Model.Post.Summary : Model.Post.SocialMediaSummary)">
+        @if (@Model.OGMetaImageUrl != null)
+        {
+            <meta name="twitter:image" content="@Html.Raw(Model.CanonicalUri + "/image")" />
+        }
+    }
+}
+
+    @section StoryNavigator {
+        <div class="story-navigator">
+            <div class="story-top">
+                <div class="story-details">
+                    <div class="segment titles">
+                        <h3>@leadMinistry.Name</h3>
+                        <h2 class="story-lang primary">@Model.Title</h2>
+                        @if (firstFrenchDoc != null)
+                        {
+                            <h2 class="story-lang secondary">@firstFrenchDoc.Headline</h2>
+                        }
+                    </div>
+                    <div class="segment share">
+                        @Html.Partial("ShareSocialMedia")
+                    </div>
+                    <div class="segment search">
+                        <a href="#" class="search-panel-trigger"> </a>
+                        <div class="border-hider"> </div>
+                    </div>
+                    <div class="segment more">
+                        @if (leadMinistry.IsActive == true)
+                        {
+                            @Html.ActionLink("More from this Ministry", "Ministry", "Default", null, new { @class = "more-ministry-trigger" })
+                        }
+                        else
+                        {
+                            <h2 class="story-lang primary" style="padding-top: 15px" >More from this Ministry</h2>
+                        }
+                        <div class="border-hider"> </div>
+                    </div>
+                    <div class="segment print">
+                        <a href="#" class="print-document" alt="Print" title="Print"> </a>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+            </div>
+            <div class="story-bottom">
+                <div class="search-stories" style="display: none;">
+                    <div class="search-box">
+                        @using (Html.BeginForm("Search", "Default", FormMethod.Get))
+                        {
+                            <div class="search-box-bar">
+                                <input name="q" type="text" placeholder="Search news.gov.bc.ca" />
+                                <div class="search-trigger"> </div>
+                            </div>
+
+                        }
+                    </div>
+                </div>
+                <div class="search-more-ministry" style="display: none;">
+                    <div class="search-more-content">
+                        <div class="more-menu-side">
+                            @if (Model.Minister != null)
+                            {
+                                @Html.Partial("Minister", new Tuple<Ministry, Minister>(leadMinistry, Model.Minister))
+                            }
+                        </div>
+                        <div class="more-menu-content">
+                            @Html.Partial("MenuContent", Model.LeadMinistry)
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="story-page">
+        <a href="#" class="print-document" alt="Print" title="Print">Print</a>
+
+
+        @if (leadMinistry.IsActive == true)
+        {
+            <h3><a href= "@leadMinistry.GetUri()">@leadMinistry.Name</a></h3>
+        }
+        else
+        {
+            <h3>@leadMinistry.Name <b>Note:</b> This News Release has been archived - the Ministry no longer exists</h3>
+        }
+
+        <div class="print-title">British Columbia News</div>
+
+        <!--googleon: all-->
+        <h2 class="story-lang primary">@Model.Title</h2>
+        @if (firstFrenchDoc != null)
+                {
+            <h2 class="story-lang secondary">@firstFrenchDoc.Headline</h2>
+            }
+        <!--googleoff: all-->
+
+        <div class="print-url">@Model.Post.GetPermanentUri()</div>
+
+        @if (firstDoc.Subheadline != "")
+            {
+            <!--googleon: all-->
+            <h3 class="story-lang primary subheadline">@firstDoc.Subheadline</h3>
+            if (firstFrenchDoc != null)
+            {
+                <h3 class="story-lang secondary subheadline">@firstFrenchDoc.Subheadline</h3>
+        }
+            <!--googleoff: all-->
+        }
+
+        <div class="story-info">
+            @Html.Partial("ShareSocialMedia")
+
+            <div class="resource-links">
+                <h6 class="story-lang primary">@firstDoc.PageTitle</h6>
+                @if (firstFrenchDoc != null)
+        {
+                    <h6 class="story-lang secondary">@firstFrenchDoc.PageTitle</h6>
+                }
+            </div>
+
+            <div class="location-and-date">
+                <h6>@Model.Post.Location</h6>
+                <div class="story-lang primary">
+                    @Model.Post.PublishDate.Value.DateTime.FormatDateLong()
+                </div>
+                @if (firstFrenchDoc != null)
+        {
+                    <div class="story-lang secondary">
+                        @Model.Post.PublishDate.Value.DateTime.FormatDateLong("fr-CA")
+                    </div>
+                }
+
+                @if (Model.Post.HasMediaAssets == true)
+        {
+                    <div class="media-assets">
+                        <a class="assets-link" href="#assets">Media Assets</a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="story-features">
+
+            @*@if (Model.Sectors.Any())
+            {
+                @Html.Partial("RelatedSectors", Model.Sectors)
+            }*@
+
+        @Html.Partial("ShareSocialMedia")
+
+        <div class="resource-links location-and-date">
+            <h5 class="story-lang primary">@firstDoc.PageTitle</h5>
+            @if (firstFrenchDoc != null)
+            {
+                <h5 class="story-lang secondary">@firstFrenchDoc.PageTitle</h5>
+            }
+            <h6>@Model.Post.Location</h6>
+            <div class="story-lang primary">
+                @Model.Post.PublishDate.Value.DateTime.FormatDateLong()
+            </div>
+
+            @if (firstFrenchDoc != null)
+            {
+                <div class="story-lang secondary">
+                    @Model.Post.PublishDate.Value.DateTime.FormatDateLong("fr-CA")
+                </div>
+            }
+
+            @if (Model.Post.HasMediaAssets == true)
+            {
+                <div class="media-assets">
+                    <a class="assets-link" href="#assets">Media Assets</a>
+                </div>
+            }
+        </div>
+
+        @if (firstDoc.Contacts.Any())
+        {
+        <div class="resource-links comm-contacts story-lang primary">
+            @Html.Raw(firstDoc.ContactsDetails())
+        </div>
+        }
+
+        @if (firstFrenchDoc != null && firstFrenchDoc.Contacts.Any())
+        {
+        <div class="resource-links comm-contacts story-lang secondary">
+            @Html.Raw(firstFrenchDoc.ContactsDetails())
+        </div>
+        }
+
+        @Html.Partial("MoreFromThis", leadMinistry)
+
+        @if (leadMinistry.TopicLinks.Any())
+        {
+            @Html.Partial("PopularTopics", leadMinistry.TopicLinks)
+        }
+
+        @if (leadMinistry.ServiceLinks.Any())
+        {
+            @Html.Partial("Resources", leadMinistry.ServiceLinks)
+        }
+
+        @if (leadMinistry.NewsletterLinks.Any())
+        {
+            @Html.Partial("NewsLetterLinks", leadMinistry.NewsletterLinks)
+        }
+
+    </div>
+
+    <div class="story-body">
+
+        @if (Model.Post.AssetUrl?.ToString() == "https://news.gov.bc.ca/live")
+        {
+            <vc:web-cast />
+        }
+        else if (Model.FacebookAsset != null)
+        {
+            <div class="facebook-post primary-asset">
+                @if (Model.FacebookAsset.PictureUri != null)
+                {
+                    @AssetHelper.RenderFacebookPostAsset(Model.FacebookAsset.Key, Model.FacebookAsset.PictureUri.ToUri())
+                }
+
+                <div class="facebook-article">
+                    <div class="feed-header">
+                        <h5>
+                            <img src="@Model.FacebookAsset.PosterLogo.ToUri().ToProxyUrl()" />
+                            @Html.Raw(Model.FacebookAsset.Poster)<br />
+                            <span>@Model.FacebookAsset.PosterSubtitle &#9679; @string.Format("{0:n0}", Model.FacebookAsset.PosterLikes) Likes</span>
+                        </h5>
+                        <a href="@Model.FacebookAsset.PosterUrl()" class="link-button facebook-like">Like on Facebook</a>
+                    </div>
+
+                    @AssetHelper.ConvertUrlsToLinks(Model.FacebookAsset.Content).AsHtmlParagraphs().ShowLinks()
+
+                    <div class="post-details">
+                        @Model.FacebookAsset.PostLikes
+                        @if (Model.FacebookAsset.PostLikes == 1) { <span>Like </span> } else { <span>Likes</span> } &#9679;
+                        @Model.FacebookAsset.PostComments @if (Model.FacebookAsset.PostComments == 1) { <span>Comment</span> } else { <span>Comments</span> } &#9679;
+                    @Model.FacebookAsset.PostShares @if (Model.FacebookAsset.PostShares == 1) { <span>Share</span> } else { <span>Shares </span>}
+                </div>
+                @*<div class="sharing-options">
+                        <ul>
+                            <li class="facebook-action facebook-like"><a href="#">Like</a></li>
+                            <li class="facebook-action facebook-comment"><a href="#">Comment</a></li>
+                            <li class="facebook-action facebook-share"><a href="#">Share</a></li>
+                        </ul>
+                    </div>*@
+                </div>
+
+                <div class="social-media-bar">
+                    <ul>
+                        <li class="facebook-info"><a href="@Model.Post.AssetUrl" target="_blank">Like or Comment<span class="on-story"> on this story</span><span class="on-facebook"> on Facebook</span></a></li>
+                        <li class="facebook-action facebook-share"><a href="https://www.facebook.com/sharer/sharer.php?u=@Model.Post.AssetUrl" onclick="window.open(this.href, 'newwindow', 'width=400, height=550'); return false;">Share</a></li>
+                    </ul>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="story-copy primary-asset">
+                @AssetHelper.RenderPostAsset(Model.Post.AssetUrl.ToUri(), 624).ShowLinks()
+            </div>
+        }
+
+        @{string byline = firstDoc.Byline;}
+        @if (!string.IsNullOrWhiteSpace(byline))
+        {
+            <!--googleon: all-->
+            <p class="story-lang primary byline"><b>@byline.WithHtmlBreaks()</b></p>
+            <!--googleoff: all-->
+        }
+        @{string frenchByline = firstFrenchDoc != null ? firstFrenchDoc.Byline : null;}
+        @if (!string.IsNullOrWhiteSpace(frenchByline))
+        {
+            <!--googleon: all-->
+            <p class="story-lang secondary byline"><b>@frenchByline.WithHtmlBreaks()</b></p>
+            <!--googleoff: all-->
+        }
+
+        @if (firstFrenchDoc != null)
+        {
+            <div class="language-selector story-lang secondary">
+                This article also available in<a href="#" data-story-selection="primary" class="active">English</a>
+            </div>
+
+            <div class="language-selector story-lang primary">
+                Cet article est aussi disponible en<a href="#" data-story-selection="secondary" class="active">français</a>
+            </div>
+
+            <div class="story-copy story-lang secondary collapsed">
+                <div class="story-expander">
+                    <!--googleon: all-->
+                    @AssetHelper.RenderAssetsInHtml(firstFrenchDoc.DetailsHtml, 695, Model.FacebookPostDetailsDictionary).ShowLinks()
+                    <!--googleoff: all-->
+                    <div class="article-fade"> </div>
+                </div>
+                <a href="#" class="link-button expand">Voir plus</a>
+                <a href="#" class="link-button collapse">Voir moins</a>
+            </div>
+        }
+
+        <div class="story-copy story-lang primary collapsed">
+            <div class="story-expander">
+                <!--googleon: all-->
+                @AssetHelper.RenderAssetsInHtml(firstDoc.DetailsHtml, 695, Model.FacebookPostDetailsDictionary).ShowLinks()
+                <!--googleoff: all-->
+                <div class="article-fade"> </div>
+            </div>
+            <a href="#" class="link-button expand">Expand Story</a>
+            <a href="#" class="link-button collapse">Contract Story</a>
+        </div>
+
+        @*@if (!string.IsNullOrWhiteSpace(Model.Post.LearnMoreItems))
+        {
+            <!--googleon: all-->
+            <div class="learn-more collapsed">
+                <h4>Learn More</h4>
+                <div class="story-expander">
+                    @Html.Raw(Model.Post.LearnMoreItems)
+                    <div class="article-fade"> </div>
+                </div>
+                <a href="#" class="link-button expand">Expand Learn More</a>
+                <a href="#" class="link-button collapse">Contract Learn More</a>
+            </div>
+            <!--googleoff: all-->
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.Post.QuickFacts))
+        {
+            <!--googleon: all-->
+            <div class="quick-facts">
+                <h4>Quick Facts</h4>
+                <p>
+                    @Html.Raw(Model.Post.QuickFacts)
+            </p>
+        </div>
+            <!--googleoff: all-->
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.Post.Quotes))
+        {
+            <!--googleon: all-->
+            <div class="quotes">
+                <h4>Quotes</h4>
+                @Html.Raw(Model.Post.Quotes)
+            </div>
+            <!--googleoff: all-->
+        }*@
+        <div class="comm-contacts-body-section">
+        @if (firstDoc.Contacts.Any())
+        {
+            <div class="comm-contacts-body comm-contacts story-lang primary">
+                @Html.Raw(firstDoc.ContactsDetails())
+            </div>
+        }
+
+        @if (firstFrenchDoc != null && firstFrenchDoc.Contacts.Any())
+        {
+            <div class="comm-contacts-body comm-contacts story-lang secondary">
+                @Html.Raw(firstFrenchDoc.ContactsDetails())
+            </div>
+        }
+        </div>
+
+        @if (backgrounders.Any())
+        {
+            <h4>Backgrounders</h4>
+            for (var i = 0; i < backgrounders.Count(); i++)
+            {
+                var item = backgrounders.ElementAt(i);
+                string divClass = "backgrounder";
+                if (item.LanguageId == 3084)
+                {
+                    divClass += " story-lang secondary";
+                }
+                else if (i < backgrounders.Count() - 1 && backgrounders.ElementAt(i + 1).LanguageId != 4105)
+                {
+                    divClass += " story-lang primary"; // need to be hideable
+                }
+
+                <div class="@divClass">
+                    <!--googleon: all-->
+                    <div class="backgrounder-header background-control">
+                        <a href="#" class="link-button "> </a>
+                        <h5>@item.Headline</h5>
+                    </div>
+                    <!--googleoff: all-->
+
+                    <div class="backgrounder-content">
+
+                        <!--googleon: all-->
+                        @if (!string.IsNullOrWhiteSpace(item.Subheadline))
+                        {
+                            <h6 style="margin:10px 0">@item.Subheadline</h6>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(item.Byline))
+                        {
+                            <p><b>@item.Byline</b></p>
+                        }
+
+                        @AssetHelper.RenderAssetsInHtml(item.DetailsHtml, null, Model.FacebookPostDetailsDictionary)
+                        <!--googleoff: all-->
+
+                        @if (item.Contacts.Any() && (firstDoc.Contacts.Count() != item.Contacts.Count()
+                                || (item.Contacts.Any(c => !firstDoc.Contacts.Any(c1 => c.Details == c1.Details && c.Title == c1.Title)))))
+                        {
+                            @Html.Raw(item.ContactsDetails())
+                        }
+                        <a href="#" class="link-button bottom-background-control active"> </a>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+            }
+        }
+        @if (Model.Post.HasMediaAssets == true)
+        {
+            <div id="assets" class="assets collapsed">
+                <h4>Media Assets</h4>
+                @if (Model.Post.AzureAssets != null && Model.Post.AzureAssets.Any())
+                {
+                    <div class="media-assets-container">
+                        <ul>
+                            @foreach (var azureAsset in Model.Post.AzureAssets)
+                            {
+                                <li>
+                                    <div>
+                                        <b>@azureAsset.Label</b>
+                                    </div>
+                                    @*<div>
+                                        @asset.Timestamp.FormatDateLong()
+                                    </div>*@
+                                    <div>
+                                        <a rel="nofollow" href="@azureAsset.GetUri()" download>Download (<span>@azureAsset.Length.Value.ToBytesReadable()</span>)</a>
+                                        @if(Repository.ContentDeliveryUri != null)
+                                        {
+                                            <span>|</span>
+                                            @FormattingExtensions.ShowLinks(new Microsoft.AspNetCore.Html.HtmlString($"<a rel='nofollow' href='{azureAsset.GetUri(Repository.ContentDeliveryUri)}' download>Mirror</a>"))
+                                        }
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+
+                        <div>These assets are subject to the terms of the <a href="/assets/license">News Footage License - British Columbia</a>.</div>
+
+                    </div>
+
+
+                    <a href="#" class="link-button expand">SHOW ASSETS</a>
+                }
+                else
+                {
+                    <span>Media files are incoming and will be available shortly.</span>
+                }
+            </div>
+        }
+
+        @if (Model.Post.GetUri() != Model.Post.GetPermanentUri())
+        {
+            @*TODO: Consider behavior of Share links; e.g. display when story is expanded.*@
+            @*@Html.Partial("ShareSocialMedia")*@
+            if (!string.IsNullOrWhiteSpace(Model.Post.Reference))
+            {
+                <div class="share-options">
+                    <div class="share-permalink">
+                        @Model.Post.GetPermanentUri()
+                    </div>
+                </div>
+            }
+        }
+
+            <div class="clear"></div>
+        </div>
+        <div class="clear"></div>
+    </div>
+
+    @section AssortedMedia {
+        <div class="media-container">
+            <div class="story-parts">
+                <div class="related-articles">
+                    <h3>Related Articles</h3>
+                    @if (Model.RelatedArticles.Any())
+                    {
+                        foreach (var item in Model.RelatedArticles)
+                        {
+                            <div class="related-article">
+                                <h4><a href="@item.GetUri()">@item.Headline()</a></h4>
+                                <div class="item-date">@item.PublishDate.Value.DateTime.FormatDate()</div>
+                            </div>
+                        }
+                    }
+                </div>
+
+                @if (leadMinistry != null && Model.Footer.LatestFlickrUri != null)
+                {
+                    <div class="related-image">
+                        @AssetHelper.RenderPostAsset(Model.Footer.LatestFlickrUri)
+                    </div>
+                }
+                else
+                {
+                    <div class="related-image">
+                        <img src="~/Content/Images/Gov/default-og-meta-image-1.jpg" />
+                    </div>
+                }
+
+                <div class="connect-with-bc">
+                    <h3>Connect with the @(Model.Footer.FlickrSource)</h3>
+                    <h5><a href="@Model.Footer.FlickrMoreUri" target="_blank">Photos</a></h5>
+                    <p>View the @(Model.Footer.FlickrSource)'s latest photos on Flickr.</p>
+
+                    <h5><a href="@Model.Footer.YoutubeMoreUri" target="_blank">Videos</a></h5>
+                    <p>Watch the @(Model.Footer.YoutubeSource)'s latest videos on YouTube.</p>
+
+                    <h5><a href="@Model.Footer.SoundcloudMoreUri" target="_blank">Sound Bites</a></h5>
+                    <p>Listen to the @(Model.Footer.SoundcloudSource)'s latest audio clips on SoundCloud.</p>
+                </div>
+            </div>
+        </div>
+    }
+
+    @section Scripts {
+        <script type="text/javascript" src="~/Scripts/media-assets.js"></script>
+        <script type="text/javascript">
+        $(function() {
+            $('.story-copy .expand').on('click', function(event) {
+                $(this).parent().removeClass('collapsed').addClass('expanded');
+                dcsMultiTrack('DCS.dcssip', '@Gov.News.Website.Properties.Settings.Default.NewsHostUri', 'DCS.dcsuri', '@Model.Post.GetUri().LocalPath', 'WT.dl', 'expand', 'DCSext.title', '@Model.Title');
+                event.preventDefault();
+            });
+
+            $('.story-copy .collapse').on('click', function (event) {
+                window.location.hash = "";
+                var target = $(this);
+                $(target).parent().removeClass('expanded').addClass('collapsed');
+                $(target).parent().find('.story-expander').animate({scrollTop : 0});
+                $('html, body').animate({
+                    scrollTop: $(".story-copy:visible").position().top - 40
+                });
+                event.preventDefault();
+            });
+
+            function openAssetsExpander(element) {
+                $("#assets").removeClass('collapsed').addClass('expanded');
+            }
+
+            $('.assets .expand').on('click', function (event) {
+                openAssetsExpander();
+                event.preventDefault();
+            });
+
+            $('.learn-more .expand').on('click', function(event) {
+                $(this).parent().removeClass('collapsed').addClass('expanded');
+                event.preventDefault();
+            });
+
+            $('.learn-more .collapse').on('click', function(event) {
+                $(this).parent().removeClass('expanded').addClass('collapsed');
+                $('html, body').animate({
+                    scrollTop: $(".learn-more").position().top - 40
+                });
+                event.preventDefault();
+            });
+
+            function toggleBackgrounder(trigger) {
+                var isOpen = trigger.hasClass('active');
+                trigger.parent().find('.backgrounder-content').toggle();
+
+                if (isOpen) {
+                    trigger.removeClass('active');
+                } else {
+                    trigger.addClass('active');
+                }
+            }
+
+            $('.background-control').on('click', function(event) {
+                var trigger = $(this);
+                toggleBackgrounder(trigger);
+                event.preventDefault();
+            });
+
+            $('.bottom-background-control').on('click', function(event) {
+                var trigger = $(this).parent().parent().find('.background-control');
+                toggleBackgrounder(trigger);
+                event.preventDefault();
+            });
+
+            function changeLanguage(element) {
+                var selectLanguage = element.data('story-selection');
+                $('.story-lang').hide();
+                $('.story-lang.' + selectLanguage).fadeIn('fast');
+                $('.language-selector a').removeClass('active');
+                element.addClass('active');
+                checkForShortStories();
+            }
+
+            if ($(".language-selector").length > 0)
+                changeLanguage($(".language-selector a[data-story-selection='primary']"));
+
+            $('.language-selector a').on('click', function(event) {
+                changeLanguage($(this));
+                event.preventDefault();
+            });
+
+            $('.search-panel-trigger').on('click', function() {
+                var container = $(this).parent();
+                var isActive = container.hasClass('active');
+                var panel = $(".search-stories");
+                if (isActive) {
+                    container.removeClass('active');
+                    panel.slideUp('fast');
+                } else {
+                    container.addClass('active');
+                    panel.slideDown('fast');
+                }
+                return false;
+            });
+
+            function toggleMenu() {
+                var container = $('.more-ministry-trigger').parent();
+                var isActive = container.hasClass('active');
+                var panel = $(".search-more-ministry");
+                if (isActive) {
+                    container.removeClass('active');
+                    panel.slideUp('fast');
+                } else {
+                    container.addClass('active');
+                    panel.slideDown('fast');
+                }
+            }
+
+            function closeMenu() {
+                var container = $('.more-ministry-trigger').parent();
+                var isActive = container.hasClass('active');
+                if (!isActive)
+                    return;
+                var panel = $(".search-more-ministry");
+                container.removeClass('active');
+                panel.slideUp('fast');
+            }
+
+            $(".search-more-ministry").on('click', function(e) {
+                event.stopPropagation();
+                window.menuCloseTimeout = setTimeout(function () {
+                    closeMenu();
+                }, window.menuCloseDelay);
+            });
+
+            $('html').on('click', function () {
+                closeMenu();
+            });
+
+            $('.more-ministry-trigger, .close-menu').on('click', function (event) {
+                event.stopPropagation();
+                toggleMenu();
+                return false;
+            });
+
+            function hideMoreMinistryPanel() {
+                $('.more-ministry-trigger').parent().removeClass('active');
+                $(".search-more-ministry").hide();
+            }
+
+            function toggleStoryNavigator() {
+                var nav = $("#nav-container:visible");
+                if (nav.length === 0)
+                    nav = $("#header");
+                var bodyScroll = $(window).scrollTop();
+                var triggerPositon = nav.height() + nav.position().top + 20;
+                var navigator = $(".story-navigator");
+                var showNavigator = bodyScroll > triggerPositon;
+
+                //hideMoreMinistryPanel();
+
+                if (showNavigator) {
+                    navigator.show();
+                } else {
+                    navigator.hide();
+                }
+            }
+
+            function checkForShortStories() {
+                $('.story-copy .story-expander').each(function () {
+                    var totalHeightOfStoryCopy = 0;
+                    $(this).find(':not(.article-fade)').each(function () {
+                        totalHeightOfStoryCopy += $(this).height();
+                    });
+
+                    var expandStoryLink = $(this).parent().find('.expand');
+                    var articleFadeDiv = $(this).parent().find('.article-fade');
+                    $(expandStoryLink).removeClass('no-need-to-expand');
+                    $(articleFadeDiv).removeClass('no-need-to-fade');
+                    $(this).css("height", "");
+
+                    if (totalHeightOfStoryCopy < 240) {
+                        $(expandStoryLink).addClass('no-need-to-expand');
+                        $(articleFadeDiv).addClass('no-need-to-fade');
+                        $(this).height(totalHeightOfStoryCopy+20);
+                    }
+                });
+            }
+
+            $(window).on('resize', function() {
+                hideMoreMinistryPanel();
+            });
+
+            $(window).on('scroll', function() {
+                toggleStoryNavigator();
+            });
+            toggleStoryNavigator();
+            checkForShortStories();
+
+            $('a.share-twitter').on('click', function (event) {
+                var top = event.pageY;
+                var left = event.pageX;
+                var url = "https://twitter.com/intent/tweet?url=@Model.CanonicalUri";
+
+                window.open(url, "Share on Twitter", "top=" + top + ",left=" + left + ",width=500,height=300,scrollbars=1,toolbar=0,resizable=0");
+                event.preventDefault();
+            });
+
+            $(".assets-link").on('click', function (e) {
+                e.preventDefault();
+                openAssetsExpander();
+                $('html, body').animate({
+                    scrollTop: $("#assets").position().top - 40
+                });
+            });
+
+            function expandByHash() {
+                var hash = window.location.hash;
+                if (hash == "#read-more") {
+                    $('.story-copy .expand').click();
+                } else if (hash.indexOf('#') === 0 && hash.length > 1 && hash != "#assets") {
+                    $('.story-copy .expand').parent().removeClass('collapsed').addClass('expanded');
+                    if ($(hash).length <= 0) {
+                        return;
+                    }
+                    $('html, body').animate({
+                        scrollTop: $(hash).offset().top - 60
+                    });
+                } else if (hash != '' && hash != '#') {
+                    $(hash + " a.expand").click();
+                }
+            }
+
+            $(window).bind('hashchange', function (e) {
+                e.preventDefault();
+                expandByHash();
+            });
+
+            //Called on load
+            expandByHash();
+            $('.story-copy .story-expander a[href^="#"][href!="#"]').on('click', function (event) {
+                var currentHash = window.location.hash;
+                var hash = $(this).attr("href");
+                if ($(hash).length <= 0) {
+                    event.preventDefault();
+                    return;
+                }
+                window.location.hash = hash;
+                if (currentHash == hash) {
+                    expandByHash();
+                }
+            });
+
+            $('.backgrounder-content a[href^="#"][href!="#"]').on('click', function (event) {
+                var currentHash = window.location.hash;
+                var hash = $(this).attr("href");
+                if ($(hash).length <= 0) {
+                    event.preventDefault();
+                    return;
+                }
+                window.location.hash = hash;
+                if (currentHash == hash) {
+                    expandByHash();
+                }
+            });
+
+
+            $(".search-trigger").on('click', function () {
+                $(this).parents('form:first').submit();
+            });
+
+            $(window).resize(function () {
+                checkForShortStories();
+            });
+
+            $(document).ready(function () {
+                initializeEmbeddedMediaPlaceholders("@Model.ProxyUrl()");
+                $(document).on("click", ".asset .placeholder-container .overlay-container .outer .inner .play-button", function () {
+                    playMedia(this, false);
+                }); 
+                $(document).on("click", ".asset .placeholder-container .overlay-container .outer .inner .play-instructions .save-preference", function () {
+                    playMedia(this, true);
+                });
+                $(document).on("click", ".asset .placeholder-container .overlay-container .outer .inner .play-instructions .play-close a", function () {
+                    closeInstructions(this);
+                });
+                $(window).resize(function () {
+                    resizeEmbeddedMediaAssets();
+                });
+            });
+        });
+
+
+    </script>
+    }

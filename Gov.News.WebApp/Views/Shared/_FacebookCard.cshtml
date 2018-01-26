@@ -1,0 +1,37 @@
+﻿@using Gov.News.Website.Helpers;
+@using Gov.News.Website;
+@using Gov.News.Api.Models
+
+@model FacebookPost
+
+<div class='feature-post' style='display: block;'>
+    <div class='facebook-post' style='position: relative;'>
+        <div class='facebook-article'>
+            <div class='feed-header'>
+                <a href='@Model.PosterUrl()' target='_blank' class='link-button facebook-like'>Like on Facebook</a>
+                <h5>
+                    <img src='@Model.PosterLogo.ToUri().ToProxyUrl()'/>
+                    <span class="poster-block">
+                        @Html.Raw(Model.Poster)<br />
+                        <span class='post-details' style='padding: 0'>@Model.PosterSubtitle &#9679; @string.Format("{0:n0}", @Model.PosterLikes) Likes</span>
+                    </span>
+                </h5>
+            </div>
+            <div class='clearfix'></div>
+
+            <div style='float:left; margin:10px;display:none;'>
+                <img src='@Model.PosterLogo.ToUri().ToProxyUrl()' /><br />
+                <span class='post-details' style='padding-left:0; padding-top:5px;'>@Model.PosterSubtitle</span>"
+            </div>
+
+            @AssetHelper.ConvertUrlsToLinks(Model.Content).Replace("\n", "<br />").AsHtmlParagraphs()
+
+            <div class='clearfix'></div>
+            <div class='sharing-options'>
+                <ul>
+                    <li class='facebook-info'><a href='@Model.Key' target='_blank'>Like or Comment<span class='on-story'> on this post</span><span class='on-facebook'> on Facebook</span></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

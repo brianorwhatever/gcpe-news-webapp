@@ -1,0 +1,51 @@
+﻿@using Gov.News.Website.Models
+@using Gov.News.Website.Helpers
+@using Gov.News.Api.Models
+
+@model FooterViewModel
+
+<div class="media-container">
+    <div class="media-sections">
+        <div class="photos">
+            <h3>Photos</h3>
+            <p>View the @(Model.FlickrSource)'s latest photos on Flickr</p>
+            @if (Model.LatestFlickrUri != null) {
+                @AssetHelper.RenderPostAssetThumbnail(Model.LatestFlickrUri, true)
+            }
+            <a id="mediaBannerPhotos" href="@Model.FlickrMoreUri" class="read-more" target="_blank">More Photos</a>
+        </div>
+        <div class="videos">
+            <h3>Videos</h3>
+            <p>View the @(Model.YoutubeSource)'s latest videos on YouTube</p>
+            @if (Model.LatestYoutubeUri != null)
+            {
+                @AssetHelper.RenderPostAssetThumbnail(Model.LatestYoutubeUri)
+            }
+            <a id="mediaBannerVideos" href="@Model.YoutubeMoreUri" class="read-more" target="_blank">More Videos</a>
+        </div>
+        <div class="soundbites">
+            <h3>Sound Bites</h3>
+            <p>View the @(Model.SoundcloudSource)'s latest audio clips</p>
+            @if (Model.LatestSoundcloudUri != null)
+            {
+                @AssetHelper.RenderPostAsset(Model.LatestSoundcloudUri)
+            }
+            <a id="mediaBannerSounds" href="@Model.SoundcloudMoreUri" class="read-more" target="_blank">More Sound Bites</a>
+        </div>
+
+    </div>
+
+
+    <div class="connect-with-bc">
+        <h5><a href="@Model.FlickrMoreUri" target="_blank">Photos</a></h5>
+        <p>View the @(Model.FlickrSource)'s latest photos on Flickr.</p>
+
+        <h5><a href="@Model.YoutubeMoreUri" target="_blank">Videos</a></h5>
+        <p>Watch the @(Model.YoutubeSource)'s latest videos on YouTube.</p>
+
+        <h5><a href="@Model.SoundcloudMoreUri" target="_blank">Sound Bites</a></h5>
+        <p>Listen to the @(Model.SoundcloudSource)'s latest audio clips on SoundCloud.</p>
+    </div>
+
+
+</div>
