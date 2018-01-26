@@ -1,0 +1,55 @@
+﻿@model Calendar
+
+@if (Model.Days != null)
+{
+    <div class="resource-links">
+        <h5>Events Calendar</h5>
+
+        @if (Model.Days.Count > 0)
+        {
+            <div class="event-calendar">
+                @foreach (var day in Model.Days.OrderBy(e => e.Key))
+                {
+                    <h6>@(day.Key.ToString("dddd, MMM ") + day.Key.ToString("dd").TrimStart('0'))</h6>
+                    foreach (var @eventInfo in day.Value.OrderBy(e => e.StartTime))
+                    {
+                        <div class="event-row">
+                            <div class="event-header">
+                                @if (!string.IsNullOrWhiteSpace(@eventInfo.Time))
+                                {
+                                    <div class="event-time">@eventInfo.Time</div>
+                                }
+                                <div class="event-name">@eventInfo.Name</div>
+                            </div>
+                            <div class="event-detail">
+                                @if (!string.IsNullOrWhiteSpace(eventInfo.When))
+                                {
+                                    <label>When:</label>
+                                    <div class="event-info-content">@eventInfo.When</div>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(eventInfo.Where))
+                                {
+                                    <label>Where:</label>
+                                    <div class="event-info-content">@Html.Raw(eventInfo.Where)</div>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(eventInfo.Description))
+                                {
+                                    <label>Description:</label>
+                                    <div class="event-info-content">@Html.Raw(eventInfo.Description)</div>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        }
+        else
+        {
+            <div class="event-calendar">
+                <div class="no-events">No upcoming events</div>
+            </div>
+        }
+    </div>
+}

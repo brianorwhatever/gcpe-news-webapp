@@ -1,0 +1,20 @@
+﻿@{
+    Layout = null;
+}
+
+@model IEnumerable<Uri>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sitemap | BC Gov News</title>
+</head>
+<body>
+    <ul>
+        @foreach (var uri in Model)
+        {
+            <li><a href="@uri">@uri</a></li>
+        }
+    </ul>
+</body>
+</html>

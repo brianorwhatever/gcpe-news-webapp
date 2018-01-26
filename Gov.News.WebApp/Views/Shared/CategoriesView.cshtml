@@ -1,0 +1,73 @@
+﻿@using Gov.News.Api.Models
+@using Gov.News.Website
+@using Gov.News.Website.Models
+
+@model CategoriesViewModel
+
+<div class="news-listing">
+    <div class="home-features">
+        @Html.Partial("ConnectSocialMedia")
+        @Html.Partial("ResourceLinks")
+    </div>
+
+    <div class="home-body">
+        
+        @*TODO: Replace Model.Categories.First().GetType().Name with DisplayName property*@
+        <h3>News by @Model.Categories.First().Index.GetType().Name</h3>
+        
+        @foreach (var category in Model.Categories)
+        {
+            <div class="grouped-articles">
+                <h4>
+                    <a href="@category.Index.GetUri()">
+                        @category.Index.Name
+                    </a>
+                </h4>
+                @if (category.TopPost != null)
+                {
+                    <div class="top-article">
+                        @Html.Partial("PostCard", category.TopPost)
+                    </div>
+                }
+                <div class="other-articles">
+                    @if (category.FeaturePost != null)
+                    {
+                        <div class="feature-article">
+                            @Html.Partial("PostCard", category.FeaturePost)
+                        </div>
+                    }
+                    @{Post firstLatest = category.LatestNews.FirstOrDefault();}
+                    @if (firstLatest != null)
+                    {
+                        <div class="regular-articles">
+                            @Html.Partial("PostCard", firstLatest)
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="news-control">
+                <a href="@category.Index.GetUri()" class="load-more link-button">Browse More News</a>
+                @if (category.Index is Ministry)
+                {
+                    @Html.ActionLink("Search News", "Search", "Default", new { ministry = category.Index.Key }, new { @class = "read-more" })
+                }
+                else if (category.Index.Kind == "sectors")
+                {
+                    @Html.ActionLink("Search News", "Search", "Default", new { sector = category.Index.Key }, new { @class = "read-more" })
+                }
+                <div class="clear"> </div>
+            </div>
+        }
+        @*<div class="news-control">
+            @Html.ActionLink("Search News", "Search", "Default", null, new { @class = "read-more" })
+            <div class="clear"></div>
+        </div>*@
+        <div class="clear"></div>
+    </div>
+    <div class="clear"></div>
+</div>
+
+@section AssortedMedia {
+    @Html.Partial("EmbeddedMediaBanner", Model.Footer)
+}

@@ -1,0 +1,62 @@
+﻿@using Gov.News.Website;
+@using Gov.News.Website.Models;
+@using Gov.News.Website.Helpers;
+@using Gov.News.Api.Models
+
+@model MinisterViewModel
+
+@section Meta
+{
+    @if (Model.Minister != null)
+    {
+        <meta name="description" content="@Model.Minister.Summary" />
+    }
+}
+
+<div class="ministry-listing">
+    <div class="home-features">
+        
+        <h4>@Model.Ministry.Name</h4>
+
+        @if (Model.Minister != null)
+        {
+            @Html.Partial("Minister", new Tuple<Ministry, Minister>(Model.Ministry, Model.Minister))
+        }
+
+        @{ var ministry = (Ministry)Model.Ministry; }
+
+        @if (ministry.TopicLinks.Any())
+        {
+            @Html.Partial("PopularTopics", ministry.TopicLinks)
+        }
+
+        @if (ministry.ServiceLinks.Any())
+        {
+            @Html.Partial("Resources", ministry.ServiceLinks)
+        }
+
+        @if (ministry.NewsletterLinks.Any())
+        {
+            @Html.Partial("NewsLetterLinks", ministry.NewsletterLinks)
+        }
+
+    </div>
+
+    <div class="home-body">
+        <div class="biography-details">
+            <!--googleon: all-->
+            <h2>@Model.Minister.Headline</h2>
+            @Model.Minister.Details.AsHtmlParagraphs()
+            <!--googleoff: all-->
+        </div>
+
+        <div class="news-control">
+            <a href="@Model.Ministry.GetUri()" class="read-more">All News From  @(Model.Ministry.Name == "Office of the Premier" ? "The Premier" : "This Ministry")</a>
+            <div class="clear"></div>
+        </div>
+    </div>
+</div>
+
+@section AssortedMedia {
+    @Html.Partial("EmbeddedMediaBanner", Model.Footer)
+}

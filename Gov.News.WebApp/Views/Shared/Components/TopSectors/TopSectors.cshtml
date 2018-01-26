@@ -1,0 +1,18 @@
+﻿@using Gov.News.Website
+@using Gov.News.Website.Models
+@model ICollection<IndexModel>
+<div class="resource-links">
+    <h5>Top News by Sector</h5>
+    <div>
+        @foreach (var sector in Model.OrderBy(e => e.Index.Name))
+        {
+            var post = sector.TopPost;
+
+            if (post != null)
+            {
+                <h6>@sector.Index.Name</h6>
+                <p><a href="@post.GetUri()">@post.Headline()</a></p>
+            }
+        }
+    </div>
+</div>

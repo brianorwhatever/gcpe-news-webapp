@@ -1,0 +1,85 @@
+﻿@using Gov.News.Website.Models
+
+@model ListViewModel
+
+<div class="ministry-listing sector-listing@((ViewBag.Type != null && ViewBag.Type == "factsheets") ? " fact-sheets" : "")">
+    <div class="home-features">
+        <h4>@Model.Title</h4>
+        @Html.Partial("ConnectSocialMedia")
+        <!-- collapsible-regions are cloned here by _Layout-->
+    </div>
+
+    <div class="home-body">
+        @if (ViewBag.Type == null)
+        {
+            @if (Model.IndexModel.TopPost != null)
+            {
+            <div class="top-article">
+                @Html.Partial("PostCard", Model.IndexModel.TopPost)
+            </div>
+            }
+            @if (Model.IndexModel.FeaturePost != null)
+            {
+                <div class="feature-article">
+                    @Html.Partial("PostCard", Model.IndexModel.FeaturePost)
+                </div>
+            }
+        }
+        else if (ViewBag.Type == "factsheets")
+        {
+        <h3>Factsheets</h3>
+        }
+
+        <div class="other-articles">
+            <div class="regular-articles">
+                @foreach (var article in Model.LatestPosts.Take(3))
+                {
+                    @Html.Partial("PostCard", article)
+                }
+                @foreach (var post in Model.LatestPosts.Skip(3))
+                {
+                    @Html.Partial("PostCard", post, new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "Display", "false" } })
+                }
+            </div>
+
+            <div class="news-control">
+                @*TODO: Figure out what is wrong with the following line of code; it should not be hard-coded to factsheets.*@
+                @if (ViewBag.Type != null && ViewBag.Type == "factsheets")
+                {
+                    @Html.ActionLink("Search News", "Search", "Default", new { content = "factsheets", sector = Model.Category.Key }, new { @class = "read-more" })
+                    <a href="#" class="load-more link-button">Load More Factsheets</a>
+                }
+                else
+                {
+                    if (Model.Category is Ministry)
+                    {
+                        @Html.ActionLink("Search News", "Search", "Default", new { ministry = Model.Category.Key }, new { @class = "read-more" })
+                    }
+                    else if (Model.Category is Sector)
+                    {
+                        @Html.ActionLink("Search News", "Search", "Default", new { sector = Model.Category.Key }, new { @class = "read-more" })
+                    }
+                    <a no href="#" rel="nofollow" class="load-more link-button">Load More News</a>
+                }
+                <div class="clear"> </div>
+            </div>
+
+            <div class="collapsible-regions">
+                @Html.Partial("ResourceLinks")
+                <vc:top-sectors />
+                <div class="clear"></div>
+            </div>
+        </div>
+
+        <div class="social-media-feed">
+            @if (Model.FacebookPosts != null)
+            {
+                @Html.Partial("SocialMediaFacebookFeed", Model.FacebookPosts)
+            }
+            @if (Model.TwitterPosts != null)
+            {
+                @Html.Partial("SocialMediaTwitterFeed", Model.TwitterPosts)
+            }
+        </div>
+    </div>
+</div>

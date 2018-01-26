@@ -1,0 +1,86 @@
+﻿@using Gov.News.Website;
+@using Gov.News.Website.Models;
+@using Gov.News.Website.Helpers;
+@using Gov.News.Api.Models;
+
+@model IndexModel
+
+<div class="menu-content-item">
+    <h4>
+        <img class="close-menu" src="~/Content/Images/close-icon.png" />
+        @Model.Index.Name
+    </h4>
+
+    @if (Model.TopPost != null)
+    {
+        var thumbnailUri = Model.TopPost.GetThumbnailUri();
+        <div class="top-item">
+            <h2><a href="@Model.TopPost.GetUri()">@Model.TopPost.Headline()</a></h2>
+            <div class="item-date">@Model.TopPost.PublishDate.Value.DateTime.FormatDate()</div>
+            <div class="item-content">
+                <div class="item-asset">
+                    @if (thumbnailUri != null)
+                    {
+                        <div class='asset flickr'><a href='@Model.TopPost.GetUri()'><img src='@thumbnailUri.ToProxyUrl()'/></a>
+                        </div>
+                    }
+                </div>
+                <div class="item-summary">
+                    @Model.TopPost.Summary
+                    <br/>
+                    <a href="@Model.TopPost.GetUri()" class="read-more">Read More</a>
+                </div>
+                <div class="clear"></div>
+            </div>
+        </div>
+    }
+
+    <div class="other-items">
+        @*@foreach (var article in Model.LatestNews)
+    {
+        <div class="other-item">
+            <h2>@Html.ActionLink(article.Headline, "Story", "Default")</h2>
+            <div class="item-date">@article.PublishDate.DateTime.FormatDate()</div>
+        </div>
+    }*@
+
+        @if (Model.FeaturePost != null)
+        {
+            <div class="other-item">
+                <h2><a href="@Model.FeaturePost.GetUri()">@Model.FeaturePost.Headline()</a></h2>
+                <div class="item-date">@Model.FeaturePost.PublishDate.Value.DateTime.FormatDate()</div>
+            </div>
+        }
+        @if (Model.Index is Ministry)
+        {
+            <a href="@Model.Index.GetUri()" class="link-button">ALL NEWS FROM @(Model.Index.Name == "Office of the Premier" ? "THE PREMIER" : "THIS MINISTRY")</a>
+        }
+        else
+        {
+            <a href="@Model.Index.GetUri()" class="link-button">ALL NEWS FROM THIS SECTOR</a>
+        }
+    </div>
+
+    <div class="resource-links more-info">
+        @if (Model.Index is Ministry)
+        {
+            <h5>More from  @(Model.Index.Name == "Office of the Premier" ? "the Premier" : "this Ministry")</h5>
+            <ul>
+                <li><a href="@Model.Index.GetUri()/factsheets">Factsheets</a></li>
+                @*<li>@Html.ActionLink("Newsletters", "Newsletter", "Default")</li>*@
+                <li>@Html.ActionLink("Search News", "Search", "Default", new { ministry = Model.Index.Key}, null)</li>
+                @if(!string.IsNullOrEmpty(((Ministry)Model.Index).MinisterName))
+                {
+                    <li><a href="@Model.Index.GetUri()/biography">@(Model.Index.Name == "Office of the Premier" ? "Premier" : "Minister")'s Bio</a></li>
+                }
+            </ul>
+        }
+        else
+        {
+            <h5>More from this Sector</h5>
+            <ul>
+                <li>@Html.ActionLink("Search News", "Search", "Default", new { sector = Model.Index.Key }, null)</li>
+            </ul>
+        }
+    </div>
+</div>
