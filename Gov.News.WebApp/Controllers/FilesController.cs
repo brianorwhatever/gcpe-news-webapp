@@ -4,10 +4,12 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Gov.News.Website.Controllers
 {
@@ -38,10 +40,15 @@ namespace Gov.News.Website.Controllers
                 {
                     stream = await GetAzureStream("files/" + path); // for backwards compatibility
                 }
-                return File(stream, "application/octet-stream");
+            string contentType;
+            if (!new FileExtensionContentTypeProvider().TryGetContentType(path, out contentType))
+                contentType = "application/octet-stream";
+
+                return File(stream, contentType);
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                //Will redirect to search page if file doesn't exist or there is an error.
             }
 #else
             string localPath = Path.GetFullPath(Path.Combine(Properties.Settings.Default.ContentFilesUnc, path));
