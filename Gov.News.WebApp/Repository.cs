@@ -156,6 +156,7 @@ namespace Gov.News.Website
                 {
                     if (ConcurrentRequests.ContainsKey(key))
                     {
+                        _logger.LogInformation("ConcurrentRequest: " + key);
                         task = (Task<T>)ConcurrentRequests[key]; // to prevent this UI from sending the same request to the Api
                     }
                     else
@@ -299,27 +300,28 @@ namespace Gov.News.Website
 
         public async Task<IndexModel> GetMinistryAsync(string key)
         {
-            return await GetIndexAsync<Ministry>(key, async () => new IndexModel(await ApiClient.Ministries.GetOneAsync(key, APIVersion)));
+            return await GetIndexAsync<Ministry>(key, async () => (await GetMinistriesAsync()).SingleOrDefault(m => m.Index.Key == key));
+            // Do not API fetch 1 ministry at a time as it messes up the cache
         }
 
         public async Task<IndexModel> GetSectorAsync(string key)
         {
-            return await GetIndexAsync<Sector>(key, async () => new IndexModel(await ApiClient.Sectors.GetOneAsync(key, APIVersion)));
+            return await GetIndexAsync<Sector>(key, async () => (await GetSectorsAsync()).SingleOrDefault(s => s.Index.Key == key));
         }
 
         public async Task<IndexModel> GetServiceAsync(string key)
         {
-            return await GetIndexAsync<Service>(key, async () => new IndexModel(await ApiClient.Services.GetOneAsync(key, APIVersion)));
+            return await GetIndexAsync<Service>(key, async () => (await GetServicesAsync()).SingleOrDefault(s => s.Index.Key == key));
         }
 
         public async Task<IndexModel> GetTagAsync(string key)
         {
-            return await GetIndexAsync<Tag>(key, async () => new IndexModel(await ApiClient.Tags.GetOneAsync(key, APIVersion)));
+            return await GetIndexAsync<Tag>(key, async () => (await GetTagsAsync()).SingleOrDefault(t => t.Index.Key == key));
         }
 
         public async Task<IndexModel> GetThemeAsync(string key)
         {
-            return await GetIndexAsync<Theme>(key, async () => new IndexModel(await ApiClient.Themes.GetOneAsync(key, APIVersion)));
+            return await GetIndexAsync<Theme>(key, async () => (await GetThemesAsync()).SingleOrDefault(t => t.Index.Key == key));
         }
 
         public async Task<IndexModel> GetHomeAsync()
