@@ -29,14 +29,14 @@ namespace Gov.News.Website.Models
 
         public void AddTopPostKeyToLoad(IList<string> postKeys)
         {
-            if (TopPost == null)
+            if (TopPost == null && Index.TopPostKey != null)
             {
                 postKeys.Insert(0, Index.TopPostKey);
             }
         }
         public void AddFeaturePostKeyToLoad(IList<string> postKeys)
         {
-            if (FeaturePost == null)
+            if (FeaturePost == null && Index.FeaturePostKey != null)
             {
                 postKeys.Insert(0, Index.FeaturePostKey);
             }
@@ -62,11 +62,11 @@ namespace Gov.News.Website.Models
 
         public static IEnumerable<string> GetTopPostKeysToLoad(IEnumerable<IndexModel> indexes)
         {
-            return indexes.Where(m => m.TopPost == null).Select(m => m.Index.TopPostKey);
+            return indexes.Where(m => m.TopPost == null && m.Index.TopPostKey != null).Select(m => m.Index.TopPostKey);
         }
         public static IEnumerable<string> GetFeaturePostKeysToLoad(IEnumerable<IndexModel> indexes)
         {
-            return indexes.Where(m => m.FeaturePost == null).Select(m => m.Index.FeaturePostKey);
+            return indexes.Where(m => m.FeaturePost == null && m.Index.FeaturePostKey != null).Select(m => m.Index.FeaturePostKey);
         }
     }
 }
