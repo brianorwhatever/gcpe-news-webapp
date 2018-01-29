@@ -47,7 +47,7 @@
 @section FacebookMeta { 
     <meta property="og:url" content="@Model.CanonicalUri" />
     <meta property="og:type" content="article" />
-    <meta property="og:title" content="@Model.Title" />
+    <meta property="og:title" content="@(string.IsNullOrWhiteSpace(Model.Post.SocialMediaHeadline) ? Model.Title : Model.Post.SocialMediaHeadline)" />
     <meta property="og:description" content="@(string.IsNullOrWhiteSpace(Model.Post.SocialMediaSummary) ? Model.Post.Summary : Model.Post.SocialMediaSummary)" />
     @if (@Model.OGMetaImageUrl != null)
     {
