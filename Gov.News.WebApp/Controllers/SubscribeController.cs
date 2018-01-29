@@ -149,7 +149,7 @@ namespace Gov.News.Website.Controllers
                     {
                         model.Selection.Ministries = model.Ministries.Select(m => m.Index.Key);
                         model.Selection.Sectors = model.Sectors.Select(m => m.Index.Key);
-                        model.Selection.Tags = model.Tags.Select(m => m.Key);
+                        model.Selection.Tags = model.Tags?.Select(m => m.Key);
                     }
                     else
                     {

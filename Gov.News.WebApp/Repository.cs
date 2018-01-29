@@ -102,7 +102,14 @@ namespace Gov.News.Website
             where T : DataModel
         {
             var type = typeof(T);
-            _logger.LogInformation("Received SignalR Update for type " + type.Name);
+            if (type == typeof(Minister))
+            {
+                _logger.LogInformation("SignalR alpha work around ping");
+            }
+            else
+            {
+                _logger.LogInformation("SignalR Update for type " + type.Name);
+            }
             if (type == typeof(Post))
             {
                 ClearAllIndexPosts();
@@ -234,7 +241,7 @@ namespace Gov.News.Website
 
             lock (cacheForType)
             {
-                if (!cacheForType.ContainsKey(key))
+                if (model != null && !cacheForType.ContainsKey(key))
                     cacheForType.Add(key, model);
             }
             return model;
