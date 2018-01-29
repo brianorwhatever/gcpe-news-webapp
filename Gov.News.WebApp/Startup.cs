@@ -70,11 +70,9 @@ namespace Gov.News.Website
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-        
             //TODO: Change to ServiceLifetime.Scoped once repository is no longer using static methods
-            var entityLoggerFactory = new LoggerFactory().AddDebug();
-            
-            
+            var entityLoggerFactory = new LoggerFactory();
+
             services.AddSingleton(new Func<IServiceProvider, Gov.News.Api.IClient>((serviceProvider) =>
             {
                 var client = new Gov.News.Api.Client();
@@ -122,7 +120,6 @@ namespace Gov.News.Website
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
 
             if (env.IsDevelopment())
             {

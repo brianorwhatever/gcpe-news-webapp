@@ -27,6 +27,7 @@ namespace Gov.News.Website.Middleware
             Uri newUri = await Redirect(context);
             if (newUri != null)
             {
+                _logger.LogInformation("RedirectMiddleware Handling request: " + context.Request.Path);
                 context.Response.Redirect(newUri.ToString(), false); // Not permanent
             }
         }
@@ -34,7 +35,6 @@ namespace Gov.News.Website.Middleware
         public async Task<Uri> Redirect(HttpContext context)
         {
             var request = context.Request;
-            _logger.LogInformation("RedirectMiddleware Handling request: " + request.Path);
             string host = request.Host.Value.ToLowerInvariant();
             string path = string.Concat(request.PathBase, request.Path).ToLowerInvariant();
             string query = request.QueryString.Value;
@@ -179,8 +179,6 @@ namespace Gov.News.Website.Middleware
             if (configUri == null)
             {
                 await _next.Invoke(context);
-
-                _logger.LogInformation("RedirectMiddleware Finished handling request.");
             }
             return configUri;
         }
