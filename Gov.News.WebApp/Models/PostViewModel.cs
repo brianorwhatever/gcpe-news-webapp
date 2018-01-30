@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Gov.News.Api.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace Gov.News.Website.Models
 {
@@ -16,6 +17,7 @@ namespace Gov.News.Website.Models
             PostThumbnailUri = post.GetThumbnailUri();
             CanonicalUri = post.GetUri();
             Title = post.Headline();
+            FacebookOwnershipId = Properties.Settings.Default.FacebookOwnershipId;
         }
 
         public string ContentType
@@ -43,6 +45,8 @@ namespace Gov.News.Website.Models
 
         //TODO: Replace FacebookAsset with abstract SuperAsset
         public FacebookPost FacebookAsset { get; set; }
+
+        public string FacebookOwnershipId { get; set; }
 
         public FooterViewModel Footer { get; set; }
         public Minister Minister { get; set; }
