@@ -17,6 +17,53 @@
     "template": "news-webapp-build"
   },
   "objects": [ 
+  {
+    "kind": "BuildConfig",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "dotnet-sonar",
+        "creationTimestamp": null,
+        "labels": {
+            "app": "dotnet-sonar",
+            "template": "dotnet-sonar-build"
+        }
+    },
+    "spec": {
+        "triggers": [
+            {
+                "type": "ConfigChange"
+            }
+        ],
+        "runPolicy": "Serial",
+        "source": {
+            "type": "Git",
+            "dockerfile": "",
+            "git": {
+                "uri": "https://github.com/bcgov/gcpe-news-webapp",
+                "ref": "develop"
+            },
+            "contextDir": "/Dotnet-Sonar"
+        },
+        "strategy": {
+            "type": "Docker",
+            "dockerStrategy": {
+				"dockerfilePath" : "Dockerfile.RHEL"
+            }
+        },
+        "output": {
+            "to": {
+                "kind": "ImageStreamTag",
+                "name": "dotnet-sonar:latest"
+            }
+        },
+        "resources": {},
+        "postCommit": {},
+        "nodeSelector": null
+    },
+    "status": {
+        "lastVersion": 0
+    }
+},
     {
     "kind": "ImageStream",
     "apiVersion": "v1",
@@ -61,88 +108,6 @@
     },
     "status": {
         "dockerImageRepository": ""
-    }
-},
-{
-    "kind": "ImageStream",
-    "apiVersion": "v1",
-    "metadata": {
-        "name": "s2i-dotnetcore-autorest",
-        "generation": 1,
-        "creationTimestamp": null,
-        "labels": {
-            "template": "hub-build"
-        }
-    },
-    "spec": {
-        "lookupPolicy": {
-            "local": false
-        },
-        "tags": [
-            {
-                "name": "latest",
-                "annotations": null,                
-                "generation": 1,
-                "importPolicy": {},
-                "referencePolicy": {
-                    "type": "Source"
-                }
-            }
-        ]
-    },
-    "status": {
-        "dockerImageRepository": ""
-    }
-},
-{
-    "kind": "BuildConfig",
-    "apiVersion": "v1",
-    "metadata": {
-        "name": "s2i-dotnetcore-autorest",
-        "creationTimestamp": null,
-        "labels": {
-            "app": "s2i-dotnetcore-autorest",
-            "template": "news-webapp-build"
-        }
-    },
-    "spec": {
-        "triggers": [
-            {
-                "type": "ConfigChange"
-            }
-        ],
-        "runPolicy": "Serial",
-        "source": {
-            "type": "Git",
-            "dockerfile": "FROM dotnet-runtime\r\n# This image provides a .NET Core 2.0 environment you can use to run your .NET\r\n# applications.\r\n\r\nENV DOTNET_CLI_TELEMETRY_OPTOUT 1\r\n\r\n# This setting is a workaround for issues with dotnet and certain docker versions\r\nENV LTTNG_UST_REGISTER_TIMEOUT 0\r\n\r\n# Default to UTF-8 file.encoding\r\n# Default to UTF-8 file.encoding\r\nENV PATH=/opt/app-root/src/.local/bin:/opt/app-root/src/bin:/opt/app-root/node_modules/.bin:${PATH} \\\r\n    STI_SCRIPTS_PATH=/usr/libexec/s2i\r\n\r\n    \r\nLABEL io.k8s.description=\"Platform for building and running .NET Core 2.0 applications\"       io.k8s.display-name=\".NET Core 2.0\"       io.openshift.s2i.scripts-url=image:///usr/libexec/s2i       io.openshift.tags=\"builder,.net,dotnet,dotnetcore,rh-dotnet20\"       io.openshift.expose-services=\"8080:http\"       io.s2i.scripts-url=image:///usr/libexec/s2i\r\n\r\n# Labels consumed by Red Hat build service\r\nLABEL name=\"dotnet/dotnet-20-rhel7\"       com.redhat.component=\"rh-dotnet20-docker\"       version=\"2.0\"       release=\"1\"       architecture=\"x86_64\"\r\n\r\n\r\n# Switch to root for package installs\r\nUSER 0\r\n\r\nRUN rm -R /opt/rh/rh-nodejs6\r\n\r\nENV NVM_DIR /usr/local/nvm\r\nENV NODE_VERSION  v8.9.1\r\n\r\nRUN touch ~/.bash_profile \\\r\n    \u0026\u0026 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.6/install.sh | bash \\\r\n    \u0026\u0026 . $NVM_DIR/nvm.sh \\\r\n    \u0026\u0026 nvm ls-remote \\\r\n    \u0026\u0026 nvm install $NODE_VERSION \\\r\n    \u0026\u0026 nvm alias default $NODE_VERSION \\\r\n    \u0026\u0026 nvm use default \\\r\n    \u0026\u0026 npm install -g autorest\r\n\r\nRUN chmod -R a+rwx /usr/local/nvm\r\n\r\n# Copy the S2I scripts from the specific language image to $STI_SCRIPTS_PATH.\r\nCOPY ./s2i/bin/ /usr/libexec/s2i\r\n\r\n\r\nRUN yum install -y curl \u0026\u0026 \\\r\n    yum clean all -y\r\n\r\nRUN mkdir -p /opt/app-root\r\nRUN chmod -R a+rwx /opt/app-root\r\n\r\n\r\nRUN chown -R 1001:0 /opt/app-root \u0026\u0026 fix-permissions /opt/app-root\r\n\r\n# Run container by default as user with id 1001 (default)\r\nUSER 1001\r\n\r\nenv PATH \"$PATH:/usr/local/nvm/versions/node/v8.9.1/bin/\" \r\n\r\n# Directory with the sources is set as the working directory.\r\nWORKDIR /opt/app-root/src\r\n\r\n# Set the default CMD to print the usage of the language image.\r\nCMD /usr/libexec/s2i/usage\r\n",
-            "git": {
-                "uri": "https://github.com/redhat-developer/s2i-dotnetcore.git",
-                "ref": "2.0-dev"
-            },
-            "contextDir": "2.0/build"
-        },
-        "strategy": {
-            "type": "Docker",
-            "dockerStrategy": {
-                "from": {
-                    "kind": "ImageStreamTag",
-                    "name": "dotnet:2.0"
-                },
-                "forcePull": true
-            }
-        },
-        "output": {
-            "to": {
-                "kind": "ImageStreamTag",
-                "name": "s2i-dotnetcore-autorest:latest"
-            }
-        },
-        "resources": {},
-        "postCommit": {},
-        "nodeSelector": null
-    },
-    "status": {
-        "lastVersion": 0
     }
 },
 {
@@ -559,6 +524,360 @@
     "status": {
         "lastVersion": 0
     }
+},
+{
+		"kind": "DeploymentConfig",
+		"apiVersion": "v1",
+		"metadata": {
+			"name": "${DATABASE_SERVICE_NAME}",
+			"generation": 1,
+			"creationTimestamp": null,
+			"labels": {
+						"app": "${DATABASE_SERVICE_NAME}"
+			},			
+			"annotations": {
+				"description": "Defines how to deploy the database",
+				"openshift.io/container.postgresql.image.entrypoint": "[\"container-entrypoint\",\"run-postgresql\"]"
+			}
+		},
+		"spec": {
+			"strategy": {
+				"type": "Recreate"				
+			},
+			"triggers": [
+				{
+					"type": "ConfigChange"
+				},
+				{
+					"type": "ImageChange",
+					"imageChangeParams": {
+						"automatic": true,
+						"containerNames": [
+							"postgres"
+						],
+						"from": {
+							"kind": "ImageStreamTag",
+							"namespace":  "${POSTGRES_IMAGE_NAMESPACE}",
+							"name": "postgresql:9.5"
+						}						
+					}
+				}
+			],
+			"replicas": 1,
+			"test": false,
+			"selector": {
+				"app": "${DATABASE_SERVICE_NAME}",
+				"deploymentconfig": "${DATABASE_SERVICE_NAME}"
+			},
+				
+			"template": {
+				"metadata": {
+					"creationTimestamp": null,
+					"labels": {
+						"app": "${DATABASE_SERVICE_NAME}",
+						"deploymentconfig": "${DATABASE_SERVICE_NAME}"
+					},
+					"annotations": {
+						"openshift.io/container.postgresql.image.entrypoint": "[\"container-entrypoint\",\"run-postgresql\"]"
+					}
+				},
+				"spec": {
+					"volumes": [
+						{
+							"name": "${DATABASE_SERVICE_NAME}-data",
+							"persistentVolumeClaim": {
+								"claimName": "${DATABASE_SERVICE_NAME}-pvc"
+							}
+						}
+					],
+					"containers": [
+						{
+							"name": "postgres",
+							"image": "registry.access.redhat.com/rhscl/postgresql-95-rhel7",
+							"ports": [
+								{
+									"containerPort": 5432,
+									"protocol": "TCP"
+								}
+							],
+							"env": [
+								{
+									"name": "POSTGRESQL_DATABASE",
+									"value": "${DATABASE_NAME}"
+								},
+								{
+									"name": "POSTGRESQL_PASSWORD",
+									"value": "${DATABASE_PASSWORD}"
+								},
+								{
+									"name": "POSTGRESQL_USER",
+									"value": "${DATABASE_USER}"
+								}
+							],
+							"readinessProbe": {
+								"timeoutSeconds": 1,
+							  "initialDelaySeconds": 3,
+							  "exec": {
+								"command": [ "/bin/sh", "-i", "-c", "psql -h 127.0.0.1 -U ${DATABASE_USER} -q -d ${DATABASE_NAME} -c 'SELECT 1'"]                    
+							  }
+							},
+							"livenessProbe": {
+							  "timeoutSeconds": 1,
+							  "initialDelaySeconds": 30,
+							  "tcpSocket": {
+								"port": 5432
+							  }
+							},
+							"resources": {},
+							"volumeMounts": [
+								{
+									"name": "${DATABASE_SERVICE_NAME}-data",
+									"mountPath": "/var/lib/pgsql/data"
+								}
+							],
+							"terminationMessagePath": "/dev/termination-log",
+							"imagePullPolicy": "Always"
+						}
+					],
+					"restartPolicy": "Always",
+					"terminationGracePeriodSeconds": 30,
+					"dnsPolicy": "ClusterFirst",
+					"securityContext": {
+                  "capabilities": {},
+                  "privileged": false
+                }
+            },
+			"restartPolicy": "Always",
+            "dnsPolicy": "ClusterFirst"			
+		},		
+		"status": {}
+	    }
+    },
+	{
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${DATABASE_SERVICE_NAME}",
+        "annotations": {
+          "description": "Exposes the database server"
+        }
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "postgres",
+			"protocol": "TCP",
+            "port": 5432,
+            "targetPort": 5432,
+			"nodePort": 0
+          }
+        ],
+        "selector": {
+          "app": "${DATABASE_SERVICE_NAME}"
+        },
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      },
+	   "status": {
+        "loadBalancer": {}
+      }
+    },	
+{
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${DATABASE_SERVICE_NAME}-pvc"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${DATABASE_VOLUME_CAPACITY}"
+          }
+        }
+      }
+    },
+{
+    "kind": "DeploymentConfig",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "sonarqube",
+        "generation": 1,
+        "creationTimestamp": null,
+        "labels": {
+            "app": "sonarqube",
+            "deploymentconfig": "sonarqube"
+        }
+    },
+    "spec": {
+        "strategy": {
+            "type": "Rolling",
+            "rollingParams": {
+                "updatePeriodSeconds": 1,
+                "intervalSeconds": 1,
+                "timeoutSeconds": 600,
+                "maxUnavailable": "25%",
+                "maxSurge": "25%"
+            },
+            "resources": {},
+            "activeDeadlineSeconds": 21600
+        },
+        "triggers": [
+            {
+                "type": "ConfigChange"
+            },
+            {
+                "type": "ImageChange",
+                "imageChangeParams": {
+                    "automatic": true,
+                    "containerNames": [
+                        "sonarqube"
+                    ],
+                    "from": {
+                        "kind": "ImageStreamTag",
+                        "namespace": "gcpe-news-tools",
+                        "name": "sonarqube:6.7"
+                    }
+                }
+            }
+        ],
+        "replicas": 1,
+        "test": false,
+        "selector": {
+            "app": "sonarqube",
+            "deploymentconfig": "sonarqube"
+        },
+        "template": {
+            "metadata": {
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "sonarqube",
+                    "deploymentconfig": "sonarqube"
+                },
+                "annotations": {
+                    "openshift.io/container.sonarqube.image.entrypoint": "[\"./bin/run.sh\"]"
+                }
+            },
+            "spec": {
+                "volumes": [
+                    {
+                        "name": "sonar-logs",
+                        "emptyDir": {}
+                    },
+                    {
+                        "name": "sonar-temp",
+                        "emptyDir": {}
+                    },
+                    {
+                        "name": "sonar-data",
+                        "emptyDir": {}
+                    },
+                    {
+                        "name": "sonar-plugins",
+                        "emptyDir": {}
+                    }
+                ],
+                "containers": [
+                    {
+                        "name": "sonarqube",
+                        "image": "openshiftdemos/sonarqube@sha256:fe2c7b8e9923c4dc4bd7a5d12d51ee61eb171f8898121d5f7a921ba4e5a3e67c",
+                        "ports": [
+                            {
+                                "containerPort": 9000,
+                                "protocol": "TCP"
+                            }
+                        ],
+                        "env": [
+                            {
+                                "name": "SONARQUBE_JDBC_PASSWORD",
+                                "value": "${DATABASE_PASSWORD}"
+                            },
+                            {
+                                "name": "SONARQUBE_JDBC_URL",
+                                "value": "jdbc:postgresql://${DATABASE_SERVICE_NAME}/${DATABASE_NAME}"
+                            },
+                            {
+                                "name": "SONARQUBE_JDBC_USERNAME",
+                                "value": "${DATABASE_USER}"
+                            }
+                        ],
+                        "resources": {
+                            "limits": {
+                                "cpu": "1",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "10m",
+                                "memory": "2Gi"
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "name": "sonar-logs",
+                                "mountPath": "/opt/sonarqube/logs"
+                            },
+                            {
+                                "name": "sonar-temp",
+                                "mountPath": "/opt/sonarqube/temp"
+                            },
+                            {
+                                "name": "sonar-data",
+                                "mountPath": "/opt/sonarqube/data",
+                                "subPath": "data"
+                            },
+                            {
+                                "name": "sonar-data",
+                                "mountPath": "/opt/sonarqube/extensions/plugins",
+                                "subPath": "plugins"
+                            }
+                        ],
+                        "livenessProbe": {
+                            "httpGet": {
+                                "path": "/",
+                                "port": 9000,
+                                "scheme": "HTTP"
+                            },
+                            "initialDelaySeconds": 240,
+                            "timeoutSeconds": 10,
+                            "periodSeconds": 20,
+                            "successThreshold": 1,
+                            "failureThreshold": 3
+                        },
+                        "readinessProbe": {
+                            "httpGet": {
+                                "path": "/",
+                                "port": 9000,
+                                "scheme": "HTTP"
+                            },
+                            "initialDelaySeconds": 240,
+                            "timeoutSeconds": 10,
+                            "periodSeconds": 20,
+                            "successThreshold": 1,
+                            "failureThreshold": 3
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "imagePullPolicy": "IfNotPresent"
+                    }
+                ],
+                "restartPolicy": "Always",
+                "terminationGracePeriodSeconds": 30,
+                "dnsPolicy": "ClusterFirst",
+                "securityContext": {},
+                "schedulerName": "default-scheduler"
+            }
+        }
+    },
+    "status": {
+        "latestVersion": 0,
+        "observedGeneration": 0,
+        "replicas": 0,
+        "updatedReplicas": 0,
+        "availableReplicas": 0,
+        "unavailableReplicas": 0
+    }
 }
 
 
@@ -610,6 +929,31 @@
       "displayName": "Database service name",
       "description": "Name of the database service",
       "value": "postgresql-sonarqube"
+    },
+    {
+      "name": "DATABASE_USER",
+      "displayName": "Database Username",
+      "description": "Username for the PostgreSQL user that will be used for accessing the database.",
+      "generate": "expression",
+      "from": "user[A-Z0-9]{3}"
+    },
+    {
+      "name": "DATABASE_PASSWORD",
+      "displayName": "Database Password",
+      "description": "Password for the PostgreSQL user that will be used for accessing the database.",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "DATABASE_NAME",
+      "displayName": "Database Name",
+      "value": "sonar"
+    },
+	{
+      "name": "POSTGRES_IMAGE_NAMESPACE",
+      "displayName": "postgres image namespace",
+      "description": "The OpenShift Namespace where the postgres ImageStream resides.",
+      "value": "openshift"
     }
   ]
 }
