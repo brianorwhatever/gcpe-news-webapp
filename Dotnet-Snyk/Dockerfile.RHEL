@@ -25,9 +25,6 @@ USER 0
 ENV NVM_DIR /usr/local/nvm
 ENV NODE_VERSION  v8.9.1
 
-# Copy the S2I scripts from the specific language image to $STI_SCRIPTS_PATH.
-COPY ./s2i/bin/ /usr/libexec/s2i
-
 
 # install Node.js
 RUN  rm -R /opt/rh/rh-nodejs6 \
