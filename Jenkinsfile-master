@@ -5,10 +5,19 @@ node('master') {
         openshiftBuild bldCfg: 'news-webapp-sonar-master', showBuildLogs: 'true'
     }
 
+	stage('Dependency Security Check') {
+        echo "Running Snyk analysis of dependencies"
+        openshiftBuild bldCfg: 'news-webapp-snyk-master', showBuildLogs: 'true'
+    }
+	
     stage('Build Image') {
         echo "Building..."
         openshiftBuild bldCfg: 'news-webapp-master', showBuildLogs: 'true'
         openshiftTag destStream: 'news-webapp', verbose: 'true', destTag: '$BUILD_ID', srcStream: 'news-webapp', srcTag: 'latest'
+    }
+
+	stage('Deploy to Test') {
+        echo "Deploying to test..."
 		openshiftTag destStream: 'news-webapp', verbose: 'true', destTag: 'test', srcStream: 'news-webapp', srcTag: '$BUILD_ID'
     }	
 }

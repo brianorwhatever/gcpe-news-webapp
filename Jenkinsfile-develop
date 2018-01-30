@@ -4,6 +4,11 @@ node('master') {
         echo "Running SonarQube static code analysis."
         openshiftBuild bldCfg: 'news-webapp-sonar-develop', showBuildLogs: 'true'
     }
+	
+	stage('Dependency Security Check') {
+        echo "Running Snyk analysis of dependencies"
+        openshiftBuild bldCfg: 'news-webapp-snyk-develop', showBuildLogs: 'true'
+    }
 
     stage('Build Image') {
         echo "Building..."
