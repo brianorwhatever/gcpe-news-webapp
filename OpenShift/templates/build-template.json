@@ -88,6 +88,76 @@
     }
 },
 {
+    "kind": "BuildConfig",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "dotnet-snyk",
+        "creationTimestamp": null,
+        "labels": {
+            "app": "dotnet-snyk",
+            "template": "dotnet-snyk-build"
+        }
+    },
+    "spec": {
+        "triggers": [
+            {
+                "type": "ConfigChange"
+            }
+        ],
+        "runPolicy": "Serial",
+        "source": {
+            "type": "Git",
+            "dockerfile": "",
+            "git": {
+                "uri": "https://github.com/bcgov/gcpe-news-webapp",
+                "ref": "develop"
+            },
+            "contextDir": "/Dotnet-Snyk"
+        },
+        "strategy": {
+            "type": "Docker",
+            "dockerStrategy": {
+				"dockerfilePath" : "Dockerfile.RHEL"
+            }
+        },
+        "output": {
+            "to": {
+                "kind": "ImageStreamTag",
+                "name": "dotnet-snyk:latest"
+            }
+        },
+        "resources": {},
+        "postCommit": {},
+        "nodeSelector": null
+    },
+    "status": {
+        "lastVersion": 0
+    }
+},
+    {
+    "kind": "ImageStream",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "news-webapp",
+        "generation": 1,
+        "creationTimestamp": null,
+        "labels": {
+            "app": "news-webapp"
+        },
+        "annotations": {
+            "openshift.io/generated-by": "OpenShiftNewApp"
+        }
+    },
+    "spec": {
+        "lookupPolicy": {
+            "local": false
+        }
+    },
+    "status": {
+        "dockerImageRepository": ""
+    }
+},
+{
     "kind": "ImageStream",
     "apiVersion": "v1",
     "metadata": {
@@ -99,6 +169,26 @@
         },
         "annotations": {
             "openshift.io/generated-by": "OpenShiftNewApp"
+        }
+    },
+    "spec": {
+        "lookupPolicy": {
+            "local": false
+        }
+    },
+    "status": {
+        "dockerImageRepository": ""
+    }
+},
+{
+    "kind": "ImageStream",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "dotnet-snyk",
+        "generation": 1,
+        "creationTimestamp": null,
+        "labels": {
+            "app": "dotnet-snyk"
         }
     },
     "spec": {
@@ -384,7 +474,114 @@
         "lastVersion": 0
     }
 },
-
+{
+    "kind": "BuildConfig",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "news-webapp-snyk-develop",
+        "creationTimestamp": null,
+        "labels": {
+            "app": "news-webapp"
+        }
+    },
+    "spec": {
+        "triggers": [
+            {
+                "type": "ImageChange",
+                "imageChange": {}
+            },
+            {
+                "type": "ConfigChange"
+            }
+        ],
+        "runPolicy": "Serial",
+        "source": {
+            "type": "Git",
+            "git": {
+                "uri": "https://github.com/bcgov/gcpe-news-webapp.git",
+				"ref": "develop"
+            }
+        },
+        "strategy": {
+            "type": "Source",
+            "sourceStrategy": {
+                "from": {
+                    "kind": "ImageStreamTag",
+                    "name": "dotnet-snyk:latest"
+                },
+                "env": [
+                    {
+                        "name": "DOTNET_STARTUP_PROJECT",
+                        "value": "Gov.News.WebApp"
+                    }
+                ]
+            }
+        },
+        "output": {},
+        "resources": {},
+        "postCommit": {},
+        "nodeSelector": null,
+        "successfulBuildsHistoryLimit": 5,
+        "failedBuildsHistoryLimit": 5
+    },
+    "status": {
+        "lastVersion": 0
+    }
+},
+{
+    "kind": "BuildConfig",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "news-webapp-snyk-master",
+        "creationTimestamp": null,
+        "labels": {
+            "app": "news-webapp"
+        }
+    },
+    "spec": {
+        "triggers": [
+            {
+                "type": "ImageChange",
+                "imageChange": {}
+            },
+            {
+                "type": "ConfigChange"
+            }
+        ],
+        "runPolicy": "Serial",
+        "source": {
+            "type": "Git",
+            "git": {
+                "uri": "https://github.com/bcgov/gcpe-news-webapp.git",
+				"ref": "master"
+            }
+        },
+        "strategy": {
+            "type": "Source",
+            "sourceStrategy": {
+                "from": {
+                    "kind": "ImageStreamTag",
+                    "name": "dotnet-snyk:latest"
+                },
+                "env": [
+                    {
+                        "name": "DOTNET_STARTUP_PROJECT",
+                        "value": "Gov.News.WebApp"
+                    }
+                ]
+            }
+        },
+        "output": {},
+        "resources": {},
+        "postCommit": {},
+        "nodeSelector": null,
+        "successfulBuildsHistoryLimit": 5,
+        "failedBuildsHistoryLimit": 5
+    },
+    "status": {
+        "lastVersion": 0
+    }
+},
 {
     "kind": "ImageStream",
     "apiVersion": "v1",
