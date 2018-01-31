@@ -142,6 +142,12 @@ namespace Gov.News.Website.Controllers
         {
             List<string> model = new List<string>();
 
+            model.Add(SiteStatusString("Subscribe API call: ", showErrors, () =>
+            {
+                IList<KeyValuePair2> tags = Repository.ApiClient.Subscribe.SubscriptionItemsAsync("tags", Repository.APIVersion).Result;
+                return tags.Count() > 0 ? "OK" : "Failed";
+            }));
+
             model.Add(SiteStatusString("Newsletters count:  ", showErrors, () =>
             {
                 IEnumerable<Newsletter> newsletters = Repository.GetNewslettersAsync().Result;
