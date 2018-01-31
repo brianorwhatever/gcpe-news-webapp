@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Gov.News.Api;
 using Gov.News.Api.Models;
@@ -34,7 +35,8 @@ namespace Gov.News.Website
             _factory = factory;
             ApiClient = apiClient;
             ContentDeliveryUri = new Uri(configuration["NewsContentDeliveryNetwork"]);
-            StartSignalR().GetAwaiter().GetResult();
+            Task.Run(async () => await StartSignalR());
+
             _cache.Add(typeof(Asset), new Dictionary<string, object>());
             // changes to these objects can not be (efficiently) detected by the API, so we will have to poll for changes
             _cache.Add(typeof(Newsletter), new Dictionary<string, object>());
@@ -43,34 +45,51 @@ namespace Gov.News.Website
         }
 
         /// <summary>
-        /// Replaces the Index property. 
+        /// Replaces the Index property.
         /// </summary>
         /// <returns>The top level index for the site.</returns>
         public async Task StartSignalR()
         {
-            string clientUrl = ApiClient.BaseUri.ToString() + "updates";
-            _logger.LogInformation("Starting SignalR Client with URL: " + clientUrl);
-            apiConnection = new HubConnectionBuilder()
-                            .WithUrl(ApiClient.BaseUri.ToString() + "updates")
-                            .WithLoggerFactory(_factory) // use the same logger as the app.
-                            .Build();
+            bool isReconnecting = apiConnection != null;
+            while (true)
+            {
+                try
+                {
+                    string clientUrl = ApiClient.BaseUri.ToString() + "updates";
+                    _logger.LogInformation("Starting SignalR Client with URL:" + clientUrl);
+                    apiConnection = new HubConnectionBuilder()
+                                    .WithUrl(clientUrl)
+                                    .WithLoggerFactory(_factory) // use the same logger as the app.
+                                    .Build();
 
+                    RegisterNotification<Minister>(false);
+                    RegisterNotification<Post>(false);
+                    RegisterNotification<Slide>(true);
+                    RegisterNotification<ResourceLink>(true);
 
-            RegisterNotification<Minister>(false);
-            RegisterNotification<Post>(false);
-            RegisterNotification<Slide>(true);
-            RegisterNotification<ResourceLink>(true);
+                    RegisterIndexNotification<Home>(true);
+                    RegisterIndexNotification<Service>(true);
+                    RegisterIndexNotification<Theme>(true);
+                    RegisterIndexNotification<Tag>(true);
+                    RegisterIndexNotification<Sector>(true);
+                    RegisterIndexNotification<Ministry>(true);
 
-            RegisterIndexNotification<Home>(true);
-            RegisterIndexNotification<Service>(true);
-            RegisterIndexNotification<Theme>(true);
-            RegisterIndexNotification<Tag>(true);
-            RegisterIndexNotification<Sector>(true);
-            RegisterIndexNotification<Ministry>(true);
-
-            apiConnection.Closed += new Func<Exception, Task>(OnSignalRConnectionClosed);
-            await apiConnection.StartAsync();
-            _logger.LogInformation("SignalR Client Started");
+                    apiConnection.Closed += new Func<Exception, Task>(OnSignalRConnectionClosed);
+                    await apiConnection.StartAsync();
+                    _logger.LogInformation("SignalR Client Started");
+                    if (isReconnecting)
+                    {
+                        // We probably missed notifications => Clear all posts
+                        ClearOnChange<Post>(_cache[typeof(Post)], null);
+                    }
+                    return;
+                }
+                catch (Exception)
+                {
+                    apiConnection = null;
+                    Thread.Sleep(10000); // 10 seconds
+                }
+            }
         }
 
         public void RegisterNotification<T>(bool invalidateOnUpdate = false) where T : DataModel
@@ -102,13 +121,16 @@ namespace Gov.News.Website
             where T : DataModel
         {
             var type = typeof(T);
-            if (type == typeof(Minister))
+            if (updatedKeys != null)
             {
-                _logger.LogInformation("SignalR alpha work around ping");
-            }
-            else
-            {
-                _logger.LogInformation("SignalR Update for type " + type.Name);
+                if (updatedKeys.Count() == 0)
+                {
+                    _logger.LogInformation("SignalR alpha work around ping");
+                }
+                else
+                {
+                    _logger.LogInformation("SignalR {0} Update for keys {1}", type.Name, string.Join(", ", updatedKeys));
+                }
             }
             if (type == typeof(Post))
             {
@@ -132,8 +154,6 @@ namespace Gov.News.Website
         public async Task OnSignalRConnectionClosed(Exception ex)
         {
             _logger.LogError("SignalR Client Connection closed !");
-            // We probably missed notifications => Clear all posts
-            ClearOnChange<Post>(_cache[typeof(Post)], null);
             await StartSignalR();
         }
 
@@ -175,14 +195,15 @@ namespace Gov.News.Website
                 }
                 result = await task;
             }
-            finally
+            catch (Exception)
             {
-                if (taskAdded)
+                result = default(T);
+            }
+            if (taskAdded)
+            {
+                lock (ConcurrentRequests)
                 {
-                    lock (ConcurrentRequests)
-                    {
-                        ConcurrentRequests.Remove(key);
-                    }
+                    ConcurrentRequests.Remove(key);
                 }
             }
             return result;
@@ -214,7 +235,7 @@ namespace Gov.News.Website
         {
             IDictionary<string, object> cacheForType = _cache[typeof(T)];
             T model = await GetAsync(key, taskFn, cacheForType);
-            if (model != null && model.Timestamp < DateTime.Now.AddMinutes(-expireMinutes))
+            if (model != null && model.Timestamp < DateTime.Now.AddMinutes(-expireMinutes) && apiConnection != null)
             {
                 lock (cacheForType)
                 {
@@ -251,12 +272,12 @@ namespace Gov.News.Website
         #region GetListAsync
         private async Task<IList<T>> GetListAsync<T>(Func<Task<IList<T>>> taskFn, IDictionary<string, object> cacheForType) where T : DataModel, new()
         {
-            return await GetListAsync(taskFn, cacheForType, (item) => item.Key);
+            return await GetListAsync(taskFn, cacheForType, (item) => item);
         }
         private async Task<IList<IndexModel>> GetIndexListAsync<T>(Func<Task<IList<IndexModel>>> taskFn) where T : DataModel, new()
         {
             IDictionary<string, object> cacheForType = _indexCache[typeof(T)];
-            return await GetListAsync(taskFn, cacheForType, (item) => item.Index.Key);
+            return await GetListAsync(taskFn, cacheForType, (item) => (T)(object)item.Index); // cast to T for ConcurrentRequests type name
         }
 
         private async Task<IEnumerable<T>> GetExpiringListAsync<T>(Func<Task<IList<T>>> taskFn, int expireMinutes = 2) where T : DataModel, new()
@@ -270,10 +291,10 @@ namespace Gov.News.Website
                     cacheForType.Clear();
                 }
             }
-            return await GetListAsync(taskFn, cacheForType, (item) => { item.Timestamp = DateTime.Now; return item.Key; });
+            return await GetListAsync(taskFn, cacheForType, (item) => { item.Timestamp = DateTime.Now; return item; });
         }
 
-        private async Task<IList<T>> GetListAsync<T>(Func<Task<IList<T>>> taskFn, IDictionary<string, object> cacheForType, Func<T, string> addFn)
+        private async Task<IList<T>> GetListAsync<T,ST>(Func<Task<IList<T>>> taskFn, IDictionary<string, object> cacheForType, Func<T, ST> dataModelFn) where ST : DataModel, new()
         {
             lock (cacheForType)
             {
@@ -283,7 +304,7 @@ namespace Gov.News.Website
                 }
             }
 
-            IList<T> list = await RunTaskHandlingConcurrentRequests(taskFn, typeof(T).Name);
+            IList<T> list = await RunTaskHandlingConcurrentRequests(taskFn, typeof(ST).Name);
             lock (cacheForType)
             {
                 // Check in case a concurrent request already populated the list
@@ -291,7 +312,7 @@ namespace Gov.News.Website
                 {
                     foreach (T item in list)
                     {
-                        cacheForType.Add(addFn(item), item);
+                        cacheForType.Add(dataModelFn(item).Key, item);
                     }
                 }
             }
@@ -398,7 +419,6 @@ namespace Gov.News.Website
         {
             return (await task).Select(m => new IndexModel(m)).ToList();
         }
-
 
         public async Task<IList<IndexModel>> GetSectorsAsync()
         {
