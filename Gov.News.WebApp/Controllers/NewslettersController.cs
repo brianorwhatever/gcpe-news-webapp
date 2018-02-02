@@ -75,8 +75,11 @@ namespace Gov.News.Website.Controllers
         public async Task<NewsletterViewModel> GetEditionsModel(string newsletterKey)
         {
             var model = await GetBaseModel(newsletterKey);
-            model.Title = "Editions";
-
+            if (model != null)
+            {
+                model.Title = "Editions";
+            }
+            
             return model;
         }
 
