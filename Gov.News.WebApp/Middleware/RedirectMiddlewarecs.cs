@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace Gov.News.Website.Middleware
 {
@@ -24,6 +25,20 @@ namespace Gov.News.Website.Middleware
   
         public async Task Invoke(HttpContext context)
         {
+            string host = context.Request.Host.Host.ToString();
+            var url = UriHelper.GetDisplayUrl(context.Request);
+            var userAgent = "";
+            if (context.Request.Headers.ContainsKey ("User-Agent"))
+            {
+                userAgent = context.Request.Headers["User-Agent"];
+            }
+
+            var remoteIpAddress = context.Connection.RemoteIpAddress;
+            
+            // As Kestrel does not currently have access logs, those are done here.
+            _logger.LogInformation($"{DateTime.UtcNow:HH:mm:ss.fff} {remoteIpAddress} {host} {userAgent} {context.Request.Method} {url}", null);
+
+
             Uri newUri = await Redirect(context);
             if (newUri != null)
             {
