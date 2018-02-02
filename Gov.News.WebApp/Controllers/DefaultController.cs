@@ -154,19 +154,6 @@ namespace Gov.News.Website.Controllers
                 return newsletters.Count().ToString();
             }));
 
-            model.Add(SiteStatusString("Newest Facebook Post: ", showErrors, () =>
-            {
-                FacebookPost facebookPost = Repository.GetNewestFacebookPost().Result;
-                return facebookPost.Content;
-            }));
-
-            model.Add(SiteStatusString("TwitterFeed: ", showErrors, () =>
-            {
-                string tweet = LoadTwitterPosts().Result.FirstOrDefault()?.Content;
-                int postBracket = tweet != null ? tweet.IndexOf("<") : -1;
-                return postBracket != -1 ? tweet.Substring(0, postBracket) : tweet;
-            }));
-
             Post post = null;
             model.Add(SiteStatusString("Hub DB access, post key: ", showErrors, () =>
             {
@@ -399,8 +386,6 @@ namespace Gov.News.Website.Controllers
                 rssLinks.Add(new Link() { Url = category.GetUri().ToString().TrimEnd('/') + "/feed", Title = category.Name });
 
             model.RssLinks = rssLinks.ToArray();
-
-            model.FacebookPost = await Repository.GetNewestFacebookPost();
 
             return model;
         }

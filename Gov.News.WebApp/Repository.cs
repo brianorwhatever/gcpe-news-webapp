@@ -377,16 +377,6 @@ namespace Gov.News.Website
             return await ApiClient.Newsletters.GetArticleAsync(newsletterKey, editionKey, articleKey, APIVersion);
         }
 
-        public async Task<TwitterFeed> GetTwitterFeedAsync()
-        {
-            return await GetExpiringAsync("newest", () => ApiClient.TwitterFeed.GetNewestAsync(APIVersion));
-        }
-
-        public async Task<FacebookPost> GetNewestFacebookPost()
-        {
-            return await GetExpiringAsync("newest", () => ApiClient.FacebookPosts.GetNewestAsync(APIVersion));
-        }
-
         public async Task<FacebookPost> GetFacebookPostAsync(string uri)
         {
             return await GetExpiringAsync(uri, () => ApiClient.FacebookPosts.GetByUriAsync(APIVersion, uri));

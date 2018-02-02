@@ -1020,11 +1020,11 @@ ul.inline li {
         }
 
             .home-body .article .item-text.with-image {
-                width: 260px;
+                width: 500px;
             }
 
     .home-body .grouped-articles .regular-articles .article .item-text.with-image {
-        width: 64%;
+        width: 62%;
     }
 
     .home-body .grouped-articles .feature-article .item-text.with-image {
@@ -1069,8 +1069,11 @@ ul.inline li {
     }
 
     .home-body .other-articles {
-        width: 523px;
+        width: 100%;
         float: left;
+    }
+    .home-body .other-articles .wide-articles {
+        width: 100%;
     }
 
     .home-body .grouped-articles .other-articles {
@@ -1174,97 +1177,6 @@ ul.inline li {
     .connect .twitter-feed .feed-header h5 {
         margin-top: 0;
     }
-
-.home-body .social-media-feed .feed-header h5 {
-    padding-right: 10px;
-}
-
-.home-body .social-media-feed .twitter-feed .feed-header h5 a {
-    display: inline-block;
-    font-weight: normal;
-    padding-top: 2px;
-    color: #aaa;
-}
-
-.home-body .social-media-feed .feed-header h5 a:hover {
-    color: #999;
-}
-
-.home-body .social-media-feed .feed-content {
-    width: 100%;
-    /*min-height: 400px;*/
-    background-color: #fff;
-    border: 1px solid #e1e3e6;
-    font-size: 15px;
-    line-height: 1.2em;
-}
-
-.home-body .social-media-feed .link-button {
-    background-image: url(Images/SocialMedia/20x20-facebook.png);
-    text-transform: uppercase;
-    background-position: 5px center;
-    margin-left: 10px;
-    margin-right: 10px;
-    margin-top: 5px;
-    padding-left: 32px;
-    padding-right: 10px;
-}
-
-    .home-body .social-media-feed .link-button.facebook-like,
-    .story-body .link-button.facebook-like,
-    .story-body .backgrounder .link-button.facebook-like,
-    .connect .link-button.facebook-like {
-        background-image: url(Images/SocialMedia/20x20-facebook.png);
-    }
-
-    .home-body .social-media-feed .link-button.twitter-follow,
-    .connect .link-button.twitter-follow {
-        background-image: url(Images/SocialMedia/20x20-twitter.png);
-    }
-
-.story-body .backgrounder .link-button.facebook-like {
-    background-position: 5px center;
-}
-
-.home-body .social-media-feed .feed-body {
-    width: 100%;
-    padding: 15px 10px;
-    margin-top: 15px;
-    border-top: 1px solid #e1e3e6;
-}
-
-.home-body .social-media-feed .twitter-feed .feed-body {
-    border-top: none;
-    padding: 0;
-}
-
-.home-body .social-media-feed .feed-body img {
-    max-width: 180px;
-    margin-bottom: 10px;
-}
-
-.home-body .social-media-feed .feed-body p {
-    font-size: 14px;
-    word-wrap: break-word;
-}
-
-.home-body .social-media-feed .facebook-feed .feed-body p {
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.home-body .social-media-feed .feed-body .tweet {
-    /*border-top: 1px solid #e1e3e6;*/
-    padding: 10px 10px 0;
-}
-
-.home-body .social-media-feed .feed-body .tweet-time {
-    display: inline-block;
-    float: right;
-    padding: 0 0 5px 10px;
-    color: #aaa;
-    font-size: 14px;
-}
 
 .connect .feed-body .tweet-time {
     color: #aaa;

@@ -78,8 +78,6 @@ namespace Gov.News.Website.Controllers
             model.Footer = await GetFooter(category);
             model.LatestPosts = await Repository.GetLatestPostsAsync(indexModel, postKind);
 
-            await LoadSocialFeeds(model);
-
             return model;
         }
 

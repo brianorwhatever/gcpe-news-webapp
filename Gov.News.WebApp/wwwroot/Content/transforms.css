@@ -169,19 +169,6 @@
        width: 100%;
     }
 
-    .home-body .social-media-feed {
-        width: 34%;
-    }
-
-        .home-body .social-media-feed .feed-body img {
-            max-width: 100%;
-        }
-
-        .home-body .social-media-feed .link-button {
-            font-size: 12px;
-            height: initial;
-        }
-
     .ministry-listing .home-body .feature-article .article .asset {
         max-width: 100%;
         width: inherit;
@@ -287,11 +274,6 @@
         display: none;
     }
 
-    .home-body .social-media-feed .feed h4 {
-        font-size: 15px;
-        padding-left: 35px;
-    }
-
     .media-container .story-parts .related-articles,.media-container .story-parts div.connect-with-bc {
         width: auto;
         display: block;
@@ -355,12 +337,6 @@
 @media only screen and (max-width: 750px) {
     .story-body .social-media-bar ul li.facebook-info .on-facebook {
         display: none;
-    }
-
-    .home-body .social-media-feed .feed h4 {
-        font-size: 14px;
-        padding-left: 35px;
-        padding-top: 15px;
     }
 
     .story-navigator .menu-content-item .item-asset {
@@ -538,11 +514,6 @@
         padding-right: 0;
         clear: both;
     }
-
-        .home-body .social-media-feed,
-        .story-body .social-media-feed {
-            display: none;
-        }
 
         .story-body .feed-header .facebook-like {
             clear: none;
