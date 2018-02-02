@@ -18,7 +18,8 @@ namespace Gov.News.Website.Controllers
         public async Task<ActionResult> Single(string path)
         {
 #if USE_AZURE
-            if (path.Any(e => Path.GetInvalidPathChars().Contains(e)))
+            // Return search not found if the path is null or has invalid characters.
+            if (path == null || path.Any(e => Path.GetInvalidPathChars().Contains(e)))
                 return await SearchNotFound();
 
             string fileName = Path.GetFileName(path);
