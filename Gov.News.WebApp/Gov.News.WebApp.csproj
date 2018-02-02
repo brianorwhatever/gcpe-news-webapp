@@ -11,6 +11,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Views\Shared\SocialMediaFacebookFeed.cshtml" />
+    <Content Remove="Views\Shared\SocialMediaTwitterFeed.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="app.config" />
     <None Update="wwwroot\**\*">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
