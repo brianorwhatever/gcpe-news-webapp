@@ -25,7 +25,12 @@ namespace Gov.News.Website.Middleware
   
         public async Task Invoke(HttpContext context)
         {
-            string host = context.Request.Host.Host.ToString();
+            string host = "";
+            if (context.Request.Headers.ContainsKey("X-Forwarded-For"))
+            {
+                host = context.Request.Headers["X-Forwarded-For"];
+            }
+
             var url = UriHelper.GetDisplayUrl(context.Request);
             var userAgent = "";
             if (context.Request.Headers.ContainsKey ("User-Agent"))
