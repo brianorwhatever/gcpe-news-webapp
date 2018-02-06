@@ -106,6 +106,16 @@ In order to run sonarqube analysis on a .csproj, the ProjectGuid field will need
   - .sln file format is `Project("<project type>") = "<project name>", "<.csproj location", "<project Guid>"`
 
 
+Snyk Integration
+----------------
+Snyk security scans of project dependencies are possible using a similar method as SonarQube integration.  
+
+Note that the Snyk build configuration has to be configured with the path to the .SLN file rather than the .CSPROJ typically used in a build.  
+
+Zed Attack Proxy (ZAP) Security scan
+------------------------------------
+The pipeline includes a stage that runs a ZAP scan.  This scan spiders the web application and tests for various web application vulnerabilities.  More information on this scan is here:  https://www.owasp.org/index.php/OWASP_Zed_Attack_Proxy_Project
+
 OpenShift Origin Notes
 ----------------------
 Centos based Dotnet images are provided.  If you do not have a RHEL subscription, you will need to set these as the FROM image for any dotnet build (rather than the RHEL source image).  Edit the build configuration and change the FROM image to dotnet:latest.
