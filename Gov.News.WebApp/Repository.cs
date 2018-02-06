@@ -274,6 +274,7 @@ namespace Gov.News.Website
         {
             return await GetListAsync(taskFn, cacheForType, (item) => item);
         }
+
         private async Task<IList<IndexModel>> GetIndexListAsync<T>(Func<Task<IList<IndexModel>>> taskFn) where T : DataModel, new()
         {
             IDictionary<string, object> cacheForType = _indexCache[typeof(T)];
@@ -328,7 +329,7 @@ namespace Gov.News.Website
 
         public async Task<IndexModel> GetMinistryAsync(string key)
         {
-            return await GetIndexAsync<Ministry>(key, async () => (await GetMinistriesAsync()).SingleOrDefault(m => m.Index.Key == key));
+            return await GetIndexAsync<Ministry>(key, async () => (await GetMinistriesAsync(true)).SingleOrDefault(m => m.Index.Key == key));
             // Do not API fetch 1 ministry at a time as it messes up the cache
         }
 
@@ -400,13 +401,18 @@ namespace Gov.News.Website
             return await ApiClient.Posts.GetLatestMediaUriAsync(mediaType, APIVersion);
         }
 
-        public async Task<IList<IndexModel>> GetMinistriesAsync()
+        public async Task<IList<IndexModel>> GetMinistriesAsync(bool includeInactive = false)
         {
-            return await GetIndexListAsync<Ministry>(() => CategoriesAsync(ApiClient.Ministries.GetAllAsync(APIVersion)));
+            IList<IndexModel> allMinistries = await GetIndexListAsync<Ministry>(() => CategoriesAsync(ApiClient.Ministries.GetAllAsync(APIVersion)));
+
+            if (!includeInactive)
+                return allMinistries.Where(m => ((Ministry)m.Index).IsActive == true).ToList();
+            else
+                return allMinistries;
         }
 
         private async Task<IList<IndexModel>> CategoriesAsync<T>(Task<IList<T>> task) where T : DataIndex
-        {
+        { 
             return (await task).Select(m => new IndexModel(m)).ToList();
         }
 
