@@ -405,10 +405,10 @@ namespace Gov.News.Website
         {
             IList<IndexModel> allMinistries = await GetIndexListAsync<Ministry>(() => CategoriesAsync(ApiClient.Ministries.GetAllAsync(APIVersion)));
 
-            if (!includeInactive)
-                return allMinistries.Where(m => ((Ministry)m.Index).IsActive == true).ToList();
-            else
+            if (includeInactive)
                 return allMinistries;
+            else
+                return allMinistries.Where(m => ((Ministry)m.Index).IsActive == true).ToList();
         }
 
         private async Task<IList<IndexModel>> CategoriesAsync<T>(Task<IList<T>> task) where T : DataIndex
