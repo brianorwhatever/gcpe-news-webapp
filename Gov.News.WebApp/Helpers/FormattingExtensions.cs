@@ -75,7 +75,8 @@ namespace Gov.News.Website.Helpers
 
         public static HtmlString ContactsDetails(this Document doc)
         {
-            string contactsHtml = doc.LanguageId != 3084 ? "<h5>Contacts</h5>\n" : "<h5>Renseignements additionnels</h5>\n";
+            // chuck 
+            string contactsHtml = doc.LanguageId != 3084 ? "<h5>Media Contacts</h5>\n" : "<h5>Renseignements additionnels</h5>\n";
             foreach (var contact in doc.Contacts)
             {
                 contactsHtml += string.Format(
