@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 
 namespace Gov.News.Website
 {
@@ -132,12 +133,19 @@ namespace Gov.News.Website
             }
 
             app.UseRedirect();
-
-            app.UseStaticFiles();
-            //TODO: Implement caching of static files
-            //<staticContent>
-            //  <clientCache cacheControlCustom="public" cacheControlMaxAge="1.00:00:00" cacheControlMode="UseMaxAge" />
-            //</staticContent>
+            
+            // set headers for static files
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                OnPrepareResponse = ctx =>
+                {
+                    ctx.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=600";
+                    ctx.Context.Response.Headers[HeaderNames.Pragma] = "no-cache";
+                    ctx.Context.Response.Headers["X-Frame-Options"] = "SAMEORIGIN";
+                    ctx.Context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
+                    ctx.Context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+                }
+            });
 
             if ((Properties.Settings.Default.SignalREnabled != null && Properties.Settings.Default.SignalREnabled.ToLower().Equals("true")))
             {

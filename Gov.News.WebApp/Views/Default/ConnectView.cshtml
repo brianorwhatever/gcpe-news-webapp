@@ -16,10 +16,6 @@
             <a name="facebook"></a>
             <h4>Find us on Facebook</h4>
             <div class="expandable-section-content">
-                @if (Model.FacebookPost != null)
-                {
-                    @Html.Partial("_FacebookCard", Model.FacebookPost);
-                }
                 <div class="expander-body">
                     @if (Model.FacebookLinks != null && Model.FacebookLinks.Any())
                     {

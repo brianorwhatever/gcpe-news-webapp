@@ -142,23 +142,16 @@ namespace Gov.News.Website.Controllers
         {
             List<string> model = new List<string>();
 
+            model.Add(SiteStatusString("Subscribe API call: ", showErrors, () =>
+            {
+                IList<KeyValuePair2> tags = Repository.ApiClient.Subscribe.SubscriptionItemsAsync("tags", Repository.APIVersion).Result;
+                return tags.Count() > 0 ? "OK" : "Failed";
+            }));
+
             model.Add(SiteStatusString("Newsletters count:  ", showErrors, () =>
             {
                 IEnumerable<Newsletter> newsletters = Repository.GetNewslettersAsync().Result;
                 return newsletters.Count().ToString();
-            }));
-
-            model.Add(SiteStatusString("Newest Facebook Post: ", showErrors, () =>
-            {
-                FacebookPost facebookPost = Repository.GetNewestFacebookPost().Result;
-                return facebookPost.Content;
-            }));
-
-            model.Add(SiteStatusString("TwitterFeed: ", showErrors, () =>
-            {
-                string tweet = LoadTwitterPosts().Result.FirstOrDefault()?.Content;
-                int postBracket = tweet != null ? tweet.IndexOf("<") : -1;
-                return postBracket != -1 ? tweet.Substring(0, postBracket) : tweet;
             }));
 
             Post post = null;
@@ -393,8 +386,6 @@ namespace Gov.News.Website.Controllers
                 rssLinks.Add(new Link() { Url = category.GetUri().ToString().TrimEnd('/') + "/feed", Title = category.Name });
 
             model.RssLinks = rssLinks.ToArray();
-
-            model.FacebookPost = await Repository.GetNewestFacebookPost();
 
             return model;
         }
