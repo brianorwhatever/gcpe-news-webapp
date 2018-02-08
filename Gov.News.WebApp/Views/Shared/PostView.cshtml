@@ -50,10 +50,10 @@
     <meta property="og:title" content="@(string.IsNullOrWhiteSpace(Model.Post.SocialMediaHeadline) ? Model.Title : Model.Post.SocialMediaHeadline)" />
     <meta property="og:description" content="@(string.IsNullOrWhiteSpace(Model.Post.SocialMediaSummary) ? Model.Post.Summary : Model.Post.SocialMediaSummary)" />
     <meta property="fb:pages" content="@Model.FacebookOwnershipId" />
-    @if (@Model.OGMetaImageUrl != null)
+    @*@if (@Model.OGMetaImageUrl != null)
     {
         <meta name="og:image" content="@Html.Raw(Model.CanonicalUri + "/image")" />
-    }
+    }*@
 }
 
 
