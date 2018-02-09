@@ -65,7 +65,7 @@ namespace Gov.News.Website.Middleware
                 Uri newUri = RedirectFromArchives(path, query);
                 if (newUri == null)
                 {
-                    response.StatusCode = StatusCodes.Status404NotFound;
+                    response.StatusCode = StatusCodes.Status308PermanentRedirect;
                 }
                 return newUri;
             }
@@ -82,7 +82,7 @@ namespace Gov.News.Website.Middleware
                 Uri newUri = RedirectFromNewsroom(path, query);
                 if (newUri == null)
                 {
-                    response.StatusCode = StatusCodes.Status404NotFound;
+                    response.StatusCode = StatusCodes.Status308PermanentRedirect;
                 }
                 return newUri;
             }
@@ -99,7 +99,7 @@ namespace Gov.News.Website.Middleware
                 Uri newUri = RedirectFromNewsletters(path);
                 if (newUri == null)
                 {
-                    response.StatusCode = StatusCodes.Status404NotFound;
+                    response.StatusCode = StatusCodes.Status308PermanentRedirect;
                 }
                 return newUri;
             }
@@ -697,18 +697,21 @@ namespace Gov.News.Website.Middleware
 
     public static class RedirectMiddlewareExtensions
     {
-        const bool IsPermanent = true;
+        const bool IsPermanent = false;
 
         public static IApplicationBuilder UseRedirect(this IApplicationBuilder app)
         {
-            
+
 #if !DEBUG
            
+            // Disable the HTTS redirect so that the app will run in OpenShift.
+            /*
             var options = new RewriteOptions();
 
             options = IsPermanent ? options.AddRedirectToHttpsPermanent() : options.AddRedirectToHttps();
 
-            app.UseRewriter(options);           
+            app.UseRewriter(options);
+            */
 #endif
 
             return app.UseMiddleware<RedirectMiddleware>();
