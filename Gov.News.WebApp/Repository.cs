@@ -543,21 +543,16 @@ namespace Gov.News.Website
                 count += ProviderHelpers.MaximumLatestNewsItems;
             }
             DataIndex index = indexModel.Index;
+            int latestNewsCount = indexModel.LatestNews.Count();
             if (postKind == null)
             {
-                int latestNewsCount = indexModel.LatestNews.Count();
-
                 if (latestNewsCount > skip)
                 {
                     return indexModel.LatestNews.Skip(skip).Take(count);
                 }
-                if (skip != latestNewsCount)
-                {
-                    _logger.LogError("skip ({0})/count({1}) mismatch in GetLatestPostsAsync({2})!", skip, latestNewsCount, index.Key);
-                }
             }
             IList<Post> posts = await ApiClient.Posts.GetLatestAsync(index.Kind, index.Key, APIVersion, postKind, count, skip);
-            if (postKind != null) return posts;
+            if (postKind != null || skip != latestNewsCount) return posts;
 
             IDictionary<string, object> cacheForType = _cache[typeof(Post)];
             lock (cacheForType)

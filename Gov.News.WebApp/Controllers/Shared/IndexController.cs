@@ -22,12 +22,12 @@ namespace Gov.News.Website.Controllers.Shared
         }
 
         [ResponseCache(CacheProfileName = "Feed"), Noindex]
-        public async Task<ActionResult> Feed(string key, string type, string format)
+        public async Task<ActionResult> Feed(string key, string postKind, string format)
         {
             if (this.GetType().GetTypeInfo().IsDefined(typeof(ObsoleteAttribute), false))
                 return NotFound();
 
-            var model = await GetFeedModel(key, type);
+            var model = await GetFeedModel(key, postKind);
 
             if (model == null)
                 return NotFound();
@@ -42,7 +42,7 @@ namespace Gov.News.Website.Controllers.Shared
         }
 
         [ResponseCache(CacheProfileName = "Default"), Noindex, Obsolete]
-        public ActionResult MoreNews(string key, string type)
+        public ActionResult MoreNews(string key, string postKind)
         {
             if (this.GetType().GetTypeInfo().IsDefined(typeof(ObsoleteAttribute), false))
                 return NotFound();
@@ -50,11 +50,11 @@ namespace Gov.News.Website.Controllers.Shared
             var ministry = this is MinistriesController ? key : null;
             var sector = this is CategoryController && !(this is MinistriesController) ? key : null;
             //var newstype = ConvertTypeToSingular(type);
-            return RedirectToAction("Search", "Default", new { ministry = ministry, sector = sector, content = type });
+            return RedirectToAction("Search", "Default", new { ministry = ministry, sector = sector, content = postKind });
         }
 
         [ResponseCache(CacheProfileName = "Archive"), Obsolete]
-        public ActionResult Archive(string key, string type)
+        public ActionResult Archive(string key, string postKind)
         {
             if (this.GetType().GetTypeInfo().IsDefined(typeof(ObsoleteAttribute), false))
                 return NotFound();
@@ -62,11 +62,11 @@ namespace Gov.News.Website.Controllers.Shared
             var ministry = this is MinistriesController ? key : null;
             var sector = this is CategoryController && !(this is MinistriesController) ? key : null;
             ///var newstype = ConvertTypeToSingular(type);
-            return RedirectToAction("Search", "Default", new { ministry = ministry, sector = sector, content = type });
+            return RedirectToAction("Search", "Default", new { ministry = ministry, sector = sector, content = postKind });
         }
 
         [ResponseCache(CacheProfileName = "Archive"), Noindex, Obsolete]
-        public ActionResult Month(string key, string type, int year, int? month)
+        public ActionResult Month(string key, string postKind, int year, int? month)
         {
             if (this.GetType().GetTypeInfo().IsDefined(typeof(ObsoleteAttribute), false))
                 return NotFound();
@@ -77,12 +77,12 @@ namespace Gov.News.Website.Controllers.Shared
             if (month.HasValue)
             {
                 var yearmonth = new DateTime(year, month.Value, 1).ToString("yyyy-MM-dd") + ".." + new DateTime(year, month.Value, 1).AddMonths(1).AddDays(-1).ToString("yyyy-MM-dd");
-                return RedirectToAction("Search", "Default", new { ministry = ministry, sector = sector, content = type, daterange = yearmonth });
+                return RedirectToAction("Search", "Default", new { ministry = ministry, sector = sector, content = postKind, daterange = yearmonth });
             }
             else
             {
                 var yearmonth = new DateTime(year, 1, 1).ToString("yyyy-MM-dd") + ".." + new DateTime(year, 1, 1).AddYears(1).AddDays(-1).ToString("yyyy-MM-dd");
-                return RedirectToAction("Search", "Default", new { ministry = ministry, sector = sector, content = type, daterange = yearmonth });
+                return RedirectToAction("Search", "Default", new { ministry = ministry, sector = sector, content = postKind, daterange = yearmonth });
             }
         }
 
