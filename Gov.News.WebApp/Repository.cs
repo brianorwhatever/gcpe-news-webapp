@@ -138,7 +138,7 @@ namespace Gov.News.Website
             }
             lock (cacheForType)
             {
-                if (invalidateOnUpdate)
+                if (invalidateOnUpdate || updatedKeys == null)
                 {
                     cacheForType.Clear();
                     return;

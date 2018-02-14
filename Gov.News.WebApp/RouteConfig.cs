@@ -138,7 +138,7 @@ namespace Gov.News.Website
             //(top | feature) feed [format]
             routes.MapRoute(
                 name: "Newsroom-Special-Action",
-                template: "{action}/{postKind}/{format?}",
+                template: "{action}/{type}/{format?}",
                 defaults: new { controller = "Default" },
                 constraints: new { action = "Top|Feature", format = formatConstraint }
             );
