@@ -16,9 +16,9 @@ node('master') {
         openshiftTag destStream: 'news-webapp', verbose: 'true', destTag: '$BUILD_ID', srcStream: 'news-webapp', srcTag: 'latest'
     }
 
-	stage('Deploy to Test') {
-        echo "Deploying to test..."
-		openshiftTag destStream: 'news-webapp', verbose: 'true', destTag: 'test', srcStream: 'news-webapp', srcTag: '$BUILD_ID'
+	stage('Deploy to UAT') {
+        echo "Deploying to uat..."
+		openshiftTag destStream: 'news-webapp', verbose: 'true', destTag: 'uat', srcStream: 'news-webapp', srcTag: '$BUILD_ID'
     }	
 }
 
