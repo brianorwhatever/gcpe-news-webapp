@@ -27,14 +27,14 @@ namespace Gov.News.Website.Controllers.Shared
             using (Profiler.StepStatic("Create Ministry Models"))
             {
                 var ministryModels = await Repository.GetMinistriesAsync();
-                List<string> postKeys = IndexModel.GetTopPostKeysToLoad(ministryModels).ToList();
-                postKeys.AddRange(IndexModel.GetFeaturePostKeysToLoad(ministryModels));
-                IEnumerable<Post> posts = await Repository.GetPostsAsync(postKeys);
+                List<string> uncachedPostKeys = IndexModel.GetUncachedTopPostKeys(ministryModels).ToList();
+                uncachedPostKeys.AddRange(IndexModel.GetUncachedFeaturePostKeys(ministryModels));
+                IEnumerable<Post> loadedPosts = await Repository.GetPostsAsync(uncachedPostKeys);
 
                 foreach (var ministryModel in ministryModels)
                 {
-                    ministryModel.SetTopPost(posts);
-                    ministryModel.SetFeaturePost(posts);
+                    ministryModel.SetTopPost(loadedPosts);
+                    ministryModel.SetFeaturePost(loadedPosts);
                     model.Ministries.Add(ministryModel);
                 }
             }
