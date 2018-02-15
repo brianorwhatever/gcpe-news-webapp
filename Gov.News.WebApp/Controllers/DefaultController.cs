@@ -54,9 +54,11 @@ namespace Gov.News.Website.Controllers
             if (!string.Equals(type, "feed", StringComparison.OrdinalIgnoreCase))
                 throw new NotImplementedException();
 
-            var model = await GetTopStoriesModel();
-            if (model == null)
-                return await NotFound();
+            var categoryModels = await GetAllCategoryModels();
+            // Ensure that the top posts are cached
+            IndexModel.CacheTopPosts(categoryModels, await Repository.GetPostsAsync(IndexModel.GetUncachedTopPostKeys(categoryModels)));
+
+            var model = GetSyndicationFeedViewModel("Top Stories", categoryModels.Select(m => m.TopPost));
             return await GetNewsFeedContent(format, model, false, false);
         }
 
@@ -66,9 +68,10 @@ namespace Gov.News.Website.Controllers
             if (!string.Equals(type, "feed", StringComparison.OrdinalIgnoreCase))
                 throw new NotImplementedException();
 
-            var model = await GetFeatureStoriesModel();
-            if (model == null)
-                return await NotFound();
+            var categoryModels = await GetAllCategoryModels();
+            IndexModel.CacheFeaturePosts(categoryModels, await Repository.GetPostsAsync(IndexModel.GetUncachedFeaturePostKeys(categoryModels)));
+
+            var model = GetSyndicationFeedViewModel("Featured Stories", categoryModels.Select(m => m.FeaturePost));
             return await GetNewsFeedContent(format, model, false, false);
         }
 
@@ -160,7 +163,7 @@ namespace Gov.News.Website.Controllers
                 post = Repository.GetPostAsync("2017FLNR0208-001391").Result;
                 return post.Key;
             }));
-         
+
             model.Add(SiteStatusString("Media proxy url: ", showErrors, () =>
             {
                 var client = new System.Net.Http.HttpClient();
@@ -174,7 +177,7 @@ namespace Gov.News.Website.Controllers
 
             model.Add(SiteStatusString("Post cache size: ", showErrors, () =>
             {
-                return  Repository._cache[typeof(Post)].Count().ToString();
+                return Repository._cache[typeof(Post)].Count().ToString();
             }));
 
             model.Add(SiteStatusString("Facebook Post cache size: ", showErrors, () =>
@@ -397,35 +400,23 @@ namespace Gov.News.Website.Controllers
             return model;
         }
 
-        public async Task<SyndicationFeedViewModel> GetTopStoriesModel()
+        public async Task<IList<IndexModel>> GetAllCategoryModels()
         {
-            var model = new SyndicationFeedViewModel();
-            model.AlternateUri = new Uri(Configuration["NewsHostUri"]);
-
-            model.Title = "Top Stories";
-            model.AlternateUri = null;
-
-            List<string> postKeys = IndexModel.GetTopPostKeysToLoad(await Repository.GetMinistriesAsync()).ToList();
-            postKeys.AddRange(IndexModel.GetTopPostKeysToLoad(await Repository.GetSectorsAsync()));
-            (await Repository.GetHomeAsync()).AddTopPostKeyToLoad(postKeys);
-
-            model.Entries = await Repository.GetPostsAsync(postKeys.Take(ProviderHelpers.MaximumSyndicationItems));
-
-            return model;
+            List<IndexModel> categoryModels = new List<IndexModel> { await Repository.GetHomeAsync() };
+            categoryModels.AddRange(await Repository.GetMinistriesAsync());
+            categoryModels.AddRange(await Repository.GetSectorsAsync());
+            //categoryModels.AddRange(await Repository.GetThemesAsync());
+            return categoryModels;
         }
 
-        public async Task<SyndicationFeedViewModel> GetFeatureStoriesModel()
+        public SyndicationFeedViewModel GetSyndicationFeedViewModel(string title, IEnumerable<Post> entries)
         {
             var model = new SyndicationFeedViewModel();
             model.AlternateUri = new Uri(Configuration["NewsHostUri"]);
-            model.Title = "Featured Stories";
+
+            model.Title = title;
             model.AlternateUri = null;
-
-            List<string> postKeys = IndexModel.GetFeaturePostKeysToLoad(await Repository.GetMinistriesAsync()).ToList();
-            postKeys.AddRange(IndexModel.GetFeaturePostKeysToLoad(await Repository.GetSectorsAsync()));
-            (await Repository.GetHomeAsync()).AddFeaturePostKeyToLoad(postKeys);
-
-            model.Entries = await Repository.GetPostsAsync(postKeys.Take(ProviderHelpers.MaximumSyndicationItems));
+            model.Entries = entries.Where(e => e != null).Take(ProviderHelpers.MaximumSyndicationItems);
 
             return model;
         }

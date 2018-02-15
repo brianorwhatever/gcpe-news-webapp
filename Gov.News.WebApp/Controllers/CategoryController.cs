@@ -120,15 +120,15 @@ namespace Gov.News.Website.Controllers
         {
             using (Profiler.StepStatic("Get Category Posts"))
             {
-                var topFeaturePostKeys = new List<string>();
+                var uncachedTopFeaturePostKeys = new List<string>();
 
                 foreach (var categoryModel in categoryModels)
                 {
                     //TODO: Choose post type based on 'type' supplied to controller.
 
                     //List<Post> posts = new List<Post>();
-                    categoryModel.AddTopPostKeyToLoad(topFeaturePostKeys);
-                    categoryModel.AddFeaturePostKeyToLoad(topFeaturePostKeys);
+                    categoryModel.AddTopPostKeyToLoad(uncachedTopFeaturePostKeys);
+                    categoryModel.AddFeaturePostKeyToLoad(uncachedTopFeaturePostKeys);
 
                     //var keys = posts.Select(e => e.Key).Where(e => e != null).ToList();
                     //posts.AddRange(await category.Default.TakeLastAsync(3 - keys.Count(), 0, keys));
@@ -149,12 +149,10 @@ namespace Gov.News.Website.Controllers
 
                     //categoryPosts.Add(category, last.Take(CategoriesPostsLength));
                 }
-                var topFeaturePosts = await Repository.GetPostsAsync(topFeaturePostKeys);
-                foreach (var categoryModel in categoryModels)
-                {
-                    categoryModel.SetTopPost(topFeaturePosts);
-                    categoryModel.SetFeaturePost(topFeaturePosts);
-                }
+                // Ensure that top and feature posts are cached
+                var topFeaturePosts = await Repository.GetPostsAsync(uncachedTopFeaturePostKeys);
+                IndexModel.CacheTopPosts(categoryModels, topFeaturePosts);
+                IndexModel.CacheFeaturePosts(categoryModels, topFeaturePosts);
             }
         }
 
