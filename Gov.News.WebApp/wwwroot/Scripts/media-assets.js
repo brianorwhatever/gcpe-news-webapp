@@ -42,9 +42,19 @@ function resizeEmbeddedMediaAssets() {
         var asset = $(assets[j]);
         var placeholder = asset.find(".placeholder-container");
         var placeholderContainerHeight = $(placeholder).height();
+
+        var assetPadding = 0;
+        try {
+            assetPadding = parseFloat($(asset).css("padding-bottom"))
+        }
+        catch (e) { }
+
+        $(asset).height($("#placeholder-image").get(0).height - assetPadding);
+
         if (asset.hasClass("wowza")) {
             placeholderContainerHeight = $(placeholder).find("img").height();
         }
+
         var instructionsHeight = $(placeholder).find(".overlay-container .outer .inner").height();
         var offset = parseInt((placeholderContainerHeight - instructionsHeight) / 2);
         $(placeholder).find(".overlay-container .outer .inner").css("top", offset + "px").css("visibility", "visible");
