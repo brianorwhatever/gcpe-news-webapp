@@ -51,12 +51,6 @@ function resizeEmbeddedMediaAssets() {
 
         $(asset).height($("#placeholder-image").get(0).height - assetPadding);
 
-        //var foo = $("#placeholder-image").get(0).height - assetPadding;
-        //var bar = foo + "px";
-
-        ////$("#fubar12").css("height", bar);
-        //document.getElementById("media-wrapper").height = bar;
-
         if (asset.hasClass("wowza")) {
             placeholderContainerHeight = $(placeholder).find("img").height();
         }

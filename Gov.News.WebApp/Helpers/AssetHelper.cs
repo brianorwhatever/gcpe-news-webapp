@@ -37,12 +37,12 @@ namespace Gov.News.Website.Helpers
                     mediaType = "video";
                     break;
             }
-
-
-            wrapper.AppendFormat("<div id=\"media-wrapper\" class=\"{0}-wrapper asset {0} {1}\" data-media-type=\"{0}\" data-media-id=\"{2}\">", mediaProvider, mediaType, mediaId);
+            
+            wrapper.AppendFormat("<div class=\"{0}-wrapper asset {0} {1}\" data-media-type=\"{0}\" data-media-id=\"{2}\">", mediaProvider, mediaType, mediaId);
             wrapper.Append("<div class=\"media-player-container\">");
             wrapper.Append("</div>");
             wrapper.Append("<div class=\"placeholder-container\">");
+
             if (mediaProvider == "youtube")
             {
                 youtubeImageUri = new Uri(string.Format("https://img.youtube.com/vi/{0}/maxresdefault.jpg", mediaId));
@@ -52,6 +52,7 @@ namespace Gov.News.Website.Helpers
             {
                 wrapper.AppendFormat("<img id='placeholder-image'; src=\"{0}\" onError=\"this.onerror=null; this.src='{1}';\"/>", mediaUrl, placeholderThumbnailUrl);
             }
+
             wrapper.Append("<div class=\"overlay-container\">");
             wrapper.Append("<div class=\"outer\">");
             wrapper.Append("<div class=\"inner not-expanded\">");
