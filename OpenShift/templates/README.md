@@ -30,6 +30,13 @@ Login to the server using the oc command from the page.
 Switch to the Tools project by running:
 `oc project gcpe-news-tools`
 
+***Upstream Images***
+Import the builder images for the official RedHat Dotnet Core release:
+
+`oc import-image my-dotnet/dotnet-20-rhel7 --from=registry.access.redhat.com/dotnet/dotnet-20-rhel7 --confirm`
+
+***Build Template***
+
 `oc process -f https://raw.githubusercontent.com/bcgov/gcpe-news-webapp/master/OpenShift/templates/build-template.json | oc create -f -`
 
 This will create the objects necessary to build the product.
@@ -50,10 +57,12 @@ You may also want to increase the RAM limits for the Jenkins deployment (4Gi rec
 
 The BDD tests for this project rely on gradle.  If you have problems running the functional tests (with a symptom of file not found), deleting gradlew and adding it back to the repository my resolve the issue, if the root cause is file line breaks.
 
+Keep in mind that any scripts such as gradlew that are commited to the repository will need execute permissions set.  To set execute permissions for a file checked in from a Windows PC, use the git command:  `git update-index --chmod=+x <filename>` from the directory containing the file that needs execute permissions.
+
 
 **Deployment**
 
-Once you have a valid image built, you can proceed with Deployment.
+Once you have a valid images built, you can proceed with Deployment.
 
 In the command prompt, type
 `oc project gcpe-news-dev`
@@ -97,8 +106,21 @@ In order to run sonarqube analysis on a .csproj, the ProjectGuid field will need
   - .sln file format is `Project("<project type>") = "<project name>", "<.csproj location", "<project Guid>"`
 
 
+Snyk Integration
+----------------
+Snyk security scans of project dependencies are possible using a similar method as SonarQube integration.  
+
+Note that the Snyk build configuration has to be configured with the path to the .SLN file rather than the .CSPROJ typically used in a build.  
+
+Zed Attack Proxy (ZAP) Security scan
+------------------------------------
+The pipeline includes a stage that runs a ZAP scan.  This scan spiders the web application and tests for various web application vulnerabilities.  More information on this scan is here:  https://www.owasp.org/index.php/OWASP_Zed_Attack_Proxy_Project
+
 OpenShift Origin Notes
 ----------------------
+Centos based Dotnet images are provided.  If you do not have a RHEL subscription, you will need to set these as the FROM image for any dotnet build (rather than the RHEL source image).  Edit the build configuration and change the FROM image to dotnet:latest.
+
+
 When deploying to OpenShift Origin on a laptop or personal computer, there are some considerations to keep in mind.
 
 Depending on your computer's hardware performance, you may need to increase the OpenShift timeout for communication.

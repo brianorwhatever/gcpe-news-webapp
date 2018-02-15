@@ -95,13 +95,4 @@ class FlowSpecs extends GebReportingSpec {
 		at NewsArchivePage
 	}
 
-	def "LiveClick test"() {
-	given:
-		to HomePage
-		assert waitFor { $("div", id: "carousel-holder").displayed == true } 
-	when:
-		$("a", text: "Live Webcast").click()
-	then:
-		at LivePage	
-	}
 }

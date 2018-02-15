@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace Gov.News.Website.Middleware
 {
@@ -24,9 +25,29 @@ namespace Gov.News.Website.Middleware
   
         public async Task Invoke(HttpContext context)
         {
+            string host = "";
+            if (context.Request.Headers.ContainsKey("X-Forwarded-For"))
+            {
+                host = context.Request.Headers["X-Forwarded-For"];
+            }
+
+            var url = UriHelper.GetDisplayUrl(context.Request);
+            var userAgent = "";
+            if (context.Request.Headers.ContainsKey ("User-Agent"))
+            {
+                userAgent = context.Request.Headers["User-Agent"];
+            }
+
+            var remoteIpAddress = context.Connection.RemoteIpAddress;
+            
+            // As Kestrel does not currently have access logs, those are done here.
+            _logger.LogInformation($"{DateTime.UtcNow:HH:mm:ss.fff} {remoteIpAddress} {host} {userAgent} {context.Request.Method} {url}", null);
+
+
             Uri newUri = await Redirect(context);
             if (newUri != null)
             {
+                _logger.LogInformation("RedirectMiddleware Handling request: " + context.Request.Path);
                 context.Response.Redirect(newUri.ToString(), false); // Not permanent
             }
         }
@@ -34,7 +55,6 @@ namespace Gov.News.Website.Middleware
         public async Task<Uri> Redirect(HttpContext context)
         {
             var request = context.Request;
-            _logger.LogInformation("RedirectMiddleware Handling request: " + request.Path);
             string host = request.Host.Value.ToLowerInvariant();
             string path = string.Concat(request.PathBase, request.Path).ToLowerInvariant();
             string query = request.QueryString.Value;
@@ -45,7 +65,7 @@ namespace Gov.News.Website.Middleware
                 Uri newUri = RedirectFromArchives(path, query);
                 if (newUri == null)
                 {
-                    response.StatusCode = StatusCodes.Status404NotFound;
+                    response.StatusCode = StatusCodes.Status308PermanentRedirect;
                 }
                 return newUri;
             }
@@ -62,7 +82,7 @@ namespace Gov.News.Website.Middleware
                 Uri newUri = RedirectFromNewsroom(path, query);
                 if (newUri == null)
                 {
-                    response.StatusCode = StatusCodes.Status404NotFound;
+                    response.StatusCode = StatusCodes.Status308PermanentRedirect;
                 }
                 return newUri;
             }
@@ -79,7 +99,7 @@ namespace Gov.News.Website.Middleware
                 Uri newUri = RedirectFromNewsletters(path);
                 if (newUri == null)
                 {
-                    response.StatusCode = StatusCodes.Status404NotFound;
+                    response.StatusCode = StatusCodes.Status308PermanentRedirect;
                 }
                 return newUri;
             }
@@ -179,8 +199,6 @@ namespace Gov.News.Website.Middleware
             if (configUri == null)
             {
                 await _next.Invoke(context);
-
-                _logger.LogInformation("RedirectMiddleware Finished handling request.");
             }
             return configUri;
         }
@@ -683,8 +701,9 @@ namespace Gov.News.Website.Middleware
 
         public static IApplicationBuilder UseRedirect(this IApplicationBuilder app)
         {
-            
+
 #if !DEBUG
+           
             // Disable the HTTS redirect so that the app will run in OpenShift.
             /*
             var options = new RewriteOptions();

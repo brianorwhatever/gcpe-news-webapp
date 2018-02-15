@@ -29,44 +29,60 @@ namespace Gov.News.Website.Models
 
         public void AddTopPostKeyToLoad(IList<string> postKeys)
         {
-            if (TopPost == null)
+            if (TopPost == null && Index.TopPostKey != null)
             {
                 postKeys.Insert(0, Index.TopPostKey);
             }
         }
         public void AddFeaturePostKeyToLoad(IList<string> postKeys)
         {
-            if (FeaturePost == null)
+            if (FeaturePost == null && Index.FeaturePostKey != null)
             {
                 postKeys.Insert(0, Index.FeaturePostKey);
             }
         }
+
         public async Task LoadTopAndFeaturePosts(Repository repository)
         {
             List<string> postKeys = new List<string>();
             AddTopPostKeyToLoad(postKeys);
             AddFeaturePostKeyToLoad(postKeys);
-            var posts = await repository.GetPostsAsync(postKeys);
-            SetTopPost(posts);
-            SetFeaturePost(posts);
+            var loadedPosts = await repository.GetPostsAsync(postKeys);
+            SetTopPost(loadedPosts);
+            SetFeaturePost(loadedPosts);
         }
 
-        public void SetTopPost(IEnumerable<Post> posts)
+        public void SetTopPost(IEnumerable<Post> loadedPosts)
         {
-            TopPost = posts.SingleOrDefault(p => p.Key == Index.TopPostKey) ?? TopPost;
+            TopPost = loadedPosts.SingleOrDefault(p => p.Key == Index.TopPostKey) ?? TopPost;
         }
-        public void SetFeaturePost(IEnumerable<Post> posts)
+        public void SetFeaturePost(IEnumerable<Post> loadedPosts)
         {
-            FeaturePost = posts.SingleOrDefault(p => p.Key == Index.FeaturePostKey) ?? FeaturePost;
+            FeaturePost = loadedPosts.SingleOrDefault(p => p.Key == Index.FeaturePostKey) ?? FeaturePost;
         }
 
-        public static IEnumerable<string> GetTopPostKeysToLoad(IEnumerable<IndexModel> indexes)
+        public static IEnumerable<string> GetUncachedTopPostKeys(IEnumerable<IndexModel> indexModels)
         {
-            return indexes.Where(m => m.TopPost == null).Select(m => m.Index.TopPostKey);
+            return indexModels.Where(m => m.TopPost == null && m.Index.TopPostKey != null).Select(m => m.Index.TopPostKey);
         }
-        public static IEnumerable<string> GetFeaturePostKeysToLoad(IEnumerable<IndexModel> indexes)
+        public static IEnumerable<string> GetUncachedFeaturePostKeys(IEnumerable<IndexModel> indexModels)
         {
-            return indexes.Where(m => m.FeaturePost == null).Select(m => m.Index.FeaturePostKey);
+            return indexModels.Where(m => m.FeaturePost == null && m.Index.FeaturePostKey != null).Select(m => m.Index.FeaturePostKey);
+        }
+
+        public static void CacheTopPosts(IEnumerable<IndexModel> indexModels, IEnumerable<Post> loadedPosts)
+        {
+            foreach (var indexModel in indexModels)
+            {
+                indexModel.SetTopPost(loadedPosts);
+            }
+        }
+        public static void CacheFeaturePosts(IEnumerable<IndexModel> indexModels, IEnumerable<Post> loadedPosts)
+        {
+            foreach (var indexModel in indexModels)
+            {
+                indexModel.SetFeaturePost(loadedPosts);
+            }
         }
     }
 }

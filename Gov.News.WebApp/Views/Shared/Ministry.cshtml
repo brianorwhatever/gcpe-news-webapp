@@ -71,7 +71,7 @@
                 @if (ministry.ContactUser != null)
                 {
                 <div class="resource-links">
-                    <h5>Contacts</h5>
+                    <h5>Media Contacts</h5>
                     <div>
                         @Html.Partial("CommContact", ministry.ContactUser)
                         @if (ministry.SecondContactUser != null)
@@ -109,19 +109,5 @@
             </div>
 
         </div>
-
-        @if (Model.FacebookPosts != null || Model.TwitterPosts != null)
-        {
-            <div class="social-media-feed">
-                @if (Model.FacebookPosts != null)
-                {
-                @Html.Partial("SocialMediaFacebookFeed", Model.FacebookPosts)
-                }
-                @if (Model.TwitterPosts != null)
-                {
-                @Html.Partial("SocialMediaTwitterFeed", Model.TwitterPosts)
-                }
-            </div>
-        }
     </div>
 </div>

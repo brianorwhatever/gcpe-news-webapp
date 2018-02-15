@@ -26,12 +26,9 @@ namespace ViewComponentSample.ViewComponents
         {
             var sectorModels = await _repository.GetSectorsAsync();
 
-            IEnumerable<Post> topPosts = await _repository.GetPostsAsync(IndexModel.GetTopPostKeysToLoad(sectorModels));
+            IEnumerable<Post> loadedPosts = await _repository.GetPostsAsync(IndexModel.GetUncachedTopPostKeys(sectorModels));
+            IndexModel.CacheTopPosts(sectorModels, loadedPosts);
 
-            foreach (var sectorModel in sectorModels)
-            {
-                sectorModel.SetTopPost(topPosts);
-            }
             return sectorModels;
         }
     }

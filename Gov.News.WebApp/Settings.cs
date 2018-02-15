@@ -36,6 +36,8 @@ namespace Gov.News.Website.Properties
 
         public string BingSiteVerification { get; set; }
 
+        public string FacebookOwnershipId { get; set; }
+
         public Uri CalendarUri { get; set; }
 
         public Uri ContactUri { get; set; }

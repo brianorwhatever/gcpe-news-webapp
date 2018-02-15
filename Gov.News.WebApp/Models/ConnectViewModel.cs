@@ -13,7 +13,6 @@ namespace Gov.News.Website.Models
             public string Title { get; set; }
             public string Url { get; set; }
             public string Summary { get; set; }
-
         }
 
         public ExternalConnectLink[] YoutubeLinks { get; set; }
@@ -24,6 +23,5 @@ namespace Gov.News.Website.Models
         public ExternalConnectLink[] TwitterLinks { get; set; }
         public ExternalConnectLink[] PinterestLinks { get; set; }
         public ExternalConnectLink[] UstreamLinks { get; set; }
-        public FacebookPost FacebookPost { get; set; }
     }
 }

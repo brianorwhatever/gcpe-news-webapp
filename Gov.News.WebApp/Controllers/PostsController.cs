@@ -23,16 +23,13 @@ namespace Gov.News.Website.Controllers.Shared
         {
             var post = await Repository.GetPostAsync(key);
 
-            if (post == null)
-                return await SearchNotFound();
-
             var model = await LoadDetails(post);
+
+            if (post?.RedirectUri != null)
+                return Redirect(post.RedirectUri.ToString());
 
             if (model == null)
                 return await SearchNotFound();
-
-            if (model.Post.RedirectUri != null)
-                return Redirect(model.Post.RedirectUri.ToString());
 
             //TODO: Test NotModified handling
             //var ifModifiedSince = Request.Headers["If-Modified-Since"];
@@ -53,10 +50,10 @@ namespace Gov.News.Website.Controllers.Shared
         [ResponseCache(CacheProfileName = "Default")]
         public async Task<ActionResult> Image(string key)
         {
-            if (key == null)
-                return await SearchNotFound();
+            var post = key != null ? await Repository.GetPostAsync(key) : null;
 
-            var post = await Repository.GetPostAsync(key);
+            if (post == null)
+                return await SearchNotFound();
 
             var thumbnailUri = post.GetThumbnailUri();
 
@@ -103,11 +100,13 @@ namespace Gov.News.Website.Controllers.Shared
 
         public async Task<PostViewModel> LoadDetails(Post post)
         {
+            IndexModel ministryModel = post != null ? await Repository.GetMinistryAsync(post.LeadMinistryKey) : null;
+            if (ministryModel == null) return null;
+
             PostViewModel model = new PostViewModel(post);
 
             await LoadAsync(model);
 
-            IndexModel ministryModel = await Repository.GetMinistryAsync(post.LeadMinistryKey);
             await ministryModel.LoadTopAndFeaturePosts(Repository);
 
             var posts = (await Repository.GetLatestPostsAsync(ministryModel, null)).ToList();

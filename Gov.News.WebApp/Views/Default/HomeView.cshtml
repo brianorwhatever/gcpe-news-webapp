@@ -30,7 +30,7 @@
             @Html.Partial("PostCard", Model.IndexModel.TopPost)
         </div>
     }
-
+    
     <div class="other-articles">
         @if (Model.IndexModel.FeaturePost != null)
         {
@@ -56,11 +56,6 @@
             <a href="/search" class="read-more">Search News</a>
             <div class="clear"> </div>
         </div>
-    </div>
-
-    <div class="social-media-feed">
-        @Html.Partial("SocialMediaFacebookFeed", Model.FacebookPosts)
-        @Html.Partial("SocialMediaTwitterFeed", Model.TwitterPosts)
     </div>
 
     <div class="collapsible-regions">
