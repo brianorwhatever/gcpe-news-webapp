@@ -47,8 +47,9 @@ namespace Gov.News.Website.Controllers.Shared
             if (this.GetType().GetTypeInfo().IsDefined(typeof(ObsoleteAttribute), false))
                 return NotFound();
 
-            var ministry = this is MinistriesController ? key : null;
-            var sector = this is CategoryController && !(this is MinistriesController) ? key : null;
+            var collection = (string)RouteData.Values["category"];
+            var ministry = collection == "ministries" ? key : null;
+            var sector = collection == "sectors" ? key : null;
             //var newstype = ConvertTypeToSingular(type);
             return RedirectToAction("Search", "Default", new { ministry = ministry, sector = sector, content = postKind });
         }
@@ -59,8 +60,9 @@ namespace Gov.News.Website.Controllers.Shared
             if (this.GetType().GetTypeInfo().IsDefined(typeof(ObsoleteAttribute), false))
                 return NotFound();
 
-            var ministry = this is MinistriesController ? key : null;
-            var sector = this is CategoryController && !(this is MinistriesController) ? key : null;
+            var collection = (string)RouteData.Values["category"];
+            var ministry = collection == "ministries" ? key : null;
+            var sector = collection == "sectors" ? key : null;
             ///var newstype = ConvertTypeToSingular(type);
             return RedirectToAction("Search", "Default", new { ministry = ministry, sector = sector, content = postKind });
         }
@@ -71,8 +73,9 @@ namespace Gov.News.Website.Controllers.Shared
             if (this.GetType().GetTypeInfo().IsDefined(typeof(ObsoleteAttribute), false))
                 return NotFound();
 
-            var ministry = this is MinistriesController ? key : null;
-            var sector = this is CategoryController && !(this is MinistriesController) ? key : null;
+            var collection = (string)RouteData.Values["category"];
+            var ministry = collection == "ministries" ? key : null;
+            var sector = collection == "sectors" ? key : null;
             //var newstype = ConvertTypeToSingular(type);
             if (month.HasValue)
             {
@@ -179,7 +182,7 @@ namespace Gov.News.Website.Controllers.Shared
             {
                 model.Title = "Home";
 
-                model.FeedUri = ProviderHelpers.Uri(new Uri (Configuration["NewsHostUri"]), "feed");
+                model.FeedUri = ProviderHelpers.Uri(new Uri(Configuration["NewsHostUri"]), "feed");
 
                 await homeModel.LoadTopAndFeaturePosts(Repository);
 

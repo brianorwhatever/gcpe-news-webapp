@@ -543,29 +543,28 @@ namespace Gov.News.Website
                 count += ProviderHelpers.MaximumLatestNewsItems;
             }
             DataIndex index = indexModel.Index;
-            int latestNewsCount = indexModel.LatestNews.Count();
             if (postKind == null)
             {
-                if (latestNewsCount > skip)
+                if (indexModel.LatestNews.Count() > skip)
                 {
                     return indexModel.LatestNews.Skip(skip).Take(count);
                 }
             }
             IList<Post> posts = await ApiClient.Posts.GetLatestAsync(index.Kind, index.Key, APIVersion, postKind, count, skip);
-            if (postKind != null || skip != latestNewsCount) return posts;
+            if (postKind != null || skip > MAX_NUM_CACHED_POSTS_PER_INDEX) return posts;
 
             IDictionary<string, object> cacheForType = _cache[typeof(Post)];
             lock (cacheForType)
             {
+                bool cacheClearHappenedWhileUserIsBrowsingOldReleases = skip != indexModel.LatestNews.Count();
+                if (cacheClearHappenedWhileUserIsBrowsingOldReleases) return posts;
+
                 foreach (Post post in posts)
                 {
                     object cachedPost;
                     if (!cacheForType.TryGetValue(post.Key, out cachedPost))
                     {
-                        if (skip < MAX_NUM_CACHED_POSTS_PER_INDEX)
-                        {
-                            cacheForType.Add(post.Key, post);
-                        }
+                        cacheForType.Add(post.Key, post);
                         cachedPost = post;
                     }
                     indexModel.LatestNews.Add((Post)cachedPost); // use the post already in cache instead of the newly downloaded (for memory reuse)
