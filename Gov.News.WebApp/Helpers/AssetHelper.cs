@@ -38,6 +38,7 @@ namespace Gov.News.Website.Helpers
                     break;
             }
 
+
             wrapper.AppendFormat("<div id=\"media-wrapper\" class=\"{0}-wrapper asset {0} {1}\" data-media-type=\"{0}\" data-media-id=\"{2}\">", mediaProvider, mediaType, mediaId);
             wrapper.Append("<div class=\"media-player-container\">");
             wrapper.Append("</div>");

@@ -53,6 +53,7 @@ function resizeEmbeddedMediaAssets() {
 
         //var foo = $("#placeholder-image").get(0).height - assetPadding;
         //var bar = foo + "px";
+
         ////$("#fubar12").css("height", bar);
         //document.getElementById("media-wrapper").height = bar;
 
