@@ -545,7 +545,7 @@ namespace Gov.News.Website
             DataIndex index = indexModel.Index;
             if (postKind == null)
             {
-                if (indexModel.LatestNews.Count() > skip)
+                if (indexModel.LatestNews.Count() >= skip + count)
                 {
                     return indexModel.LatestNews.Skip(skip).Take(count);
                 }
