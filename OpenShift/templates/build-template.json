@@ -723,6 +723,42 @@
     }
 },
 {
+    "kind": "BuildConfig",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "news-webapp-develop-full-pipeline",
+        "creationTimestamp": null,
+        "labels": {
+            "app": "news-webapp-full-pipeline",
+            "name": "news-webapp-develop-full-pipeline",
+            "template": "news-webapp"
+        }
+    },
+    "spec": {
+        "runPolicy": "Parallel",
+        "source": {
+            "type": "Git",
+            "git": {
+                "uri": "https://github.com/bcgov/gcpe-news-webapp.git",
+				"ref": "develop"
+            }
+        },
+        "strategy": {
+            "type": "JenkinsPipeline",
+            "jenkinsPipelineStrategy": {
+                "jenkinsfilePath": "Jenkinsfile-develop-full"
+            }
+        },
+        "output": {},
+        "resources": {},
+        "postCommit": {},
+        "nodeSelector": null
+    },
+    "status": {
+        "lastVersion": 0
+    }
+},
+{
 		"kind": "DeploymentConfig",
 		"apiVersion": "v1",
 		"metadata": {
