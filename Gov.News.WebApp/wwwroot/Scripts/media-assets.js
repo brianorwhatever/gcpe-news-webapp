@@ -9,14 +9,14 @@ function initializeEmbeddedMediaPlaceholders(proxyUrl) {
     for (j = 0; j < assets.length; j++) {
         var asset = $(assets[j]);
         var placeholder = asset.find(".placeholder-container");
-        var placeholderImage = placeholder.find("img");
+        var placeholderImage = $("#placeholder-image");
         if (placeholderImage.length > 0) {
             var assetPadding = 0;
             try {
                 assetPadding = parseFloat($(asset).css("padding-bottom"))
             }
             catch (e) { }
-            var placeholderImageHeight = $(placeholderImage).height() - assetPadding;
+            var placeholderImageHeight = $("#placeholder-image").get(0).height - assetPadding;
             $(asset).height(placeholderImageHeight);
         }
         var placeholderContainerHeight = $(placeholder).height();
