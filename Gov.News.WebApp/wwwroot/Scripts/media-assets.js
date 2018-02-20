@@ -16,6 +16,8 @@ function initializeEmbeddedMediaPlaceholders(proxyUrl) {
                 assetPadding = parseFloat($(asset).css("padding-bottom"))
             }
             catch (e) { }
+            // NOTE: the get(0).height is to access an item that is not visible in the browser.
+            //       In Chrome this is works generally but we did see some failures during testing.
             var placeholderImageHeight = $("#placeholder-image").get(0).height - assetPadding;
             $(asset).height(placeholderImageHeight);
         }

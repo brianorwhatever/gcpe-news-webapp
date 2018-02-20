@@ -360,7 +360,7 @@ namespace Gov.News.Website
 
         public async Task<Slide> GetSlideAsync(string id)
         {
-            return await GetDataModelAsync(id, async () => (await GetSlidesAsync()).SingleOrDefault(s => s.SlideId.ToString() == id));
+            return await GetDataModelAsync(id, async () => (await GetSlidesAsync()).SingleOrDefault(s => s.Key == id));
         }
 
         public async Task<Edition> GetEditionAsync(string newsletterKey, string editionKey)
