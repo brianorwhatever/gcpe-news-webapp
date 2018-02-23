@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Gov.News.Api.Models;
-using Gov.News.Website.Middleware;
 using Gov.News.Website.Models;
 using Gov.News.Website.Providers;
 using Microsoft.AspNetCore.Mvc;
@@ -188,7 +187,6 @@ namespace Gov.News.Website.Controllers
             return model;
         }
 
-        [ResponseCache(CacheProfileName = "Default"), Noindex]
         public async Task<ActionResult> Index(string category)
         {
             var model = await GetViewModel(category);

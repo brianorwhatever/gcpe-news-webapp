@@ -94,7 +94,7 @@ namespace Gov.News.Website
 
             routes.MapRoute(
                 name: "Newsroom-SiteStatus",
-                template: "site/status",
+                template: "SiteStatus",
                 defaults: new { controller = "Default", action = "SiteStatus" }
             );
 
@@ -538,7 +538,7 @@ namespace Gov.News.Website
 
             routes.MapRoute(
                 name: "GetArticle",
-                template: "newsletters/{newletterKey}/{editionKey}/{articleKey}",
+                template: "newsletters/{newsletterKey}/{editionKey}/{articleKey}",
                 defaults: new { controller = "Newsletters", action = "GetArticle"}
             );
 

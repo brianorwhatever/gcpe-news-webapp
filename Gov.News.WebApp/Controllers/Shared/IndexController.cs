@@ -4,14 +4,12 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Gov.News.Api.Models;
-using Gov.News.Website.Helpers;
 using Gov.News.Website.Middleware;
 using Gov.News.Website.Models;
 using Gov.News.Website.Providers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json.Linq;
 
 namespace Gov.News.Website.Controllers.Shared
 {
@@ -94,19 +92,13 @@ namespace Gov.News.Website.Controllers.Shared
             if (imageBytes == null)
                 return NotFound();
 
-            DateTime imageTimeStamp = timestampModified.Value.UtcDateTime.AddTicks(-(timestampModified.Value.Ticks % TimeSpan.TicksPerSecond)); // truncate to seconds
-            //TEST: Verify these headers are set correctly and received by the client browser
-            HttpContext.Response.Headers["Cache-Control"] = new string[] { "private", "max-age=" + new TimeSpan(0, 1, 0).TotalSeconds.ToString("0") };
-            HttpContext.Response.Headers["Last-Modified"] = imageTimeStamp.ToUniversalTime().ToString("R");
-
-            DateTime ifModifiedSince;
-            if (DateTime.TryParse(HttpContext.Request.Headers["If-Modified-Since"], out ifModifiedSince)
-             && ifModifiedSince.ToUniversalTime() >= imageTimeStamp)
+            if (NotModifiedSince(timestampModified))
             {
-                // The requested image has not changed
-                HttpContext.Response.StatusCode = StatusCodes.Status304NotModified;
-                return Content(string.Empty);
+                return StatusCode(StatusCodes.Status304NotModified);
             }
+
+            //Browsers honor max-age for images but not for pages (e.g Newsletters list)
+            HttpContext.Response.Headers["Cache-Control"] = new string[] { "private", "max-age=" + new TimeSpan(0, 1, 0).TotalSeconds.ToString("0") };
 
             return File(imageBytes, imageType, fileName);
         }
