@@ -2,11 +2,12 @@
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Gov.News.Api.Models;
 using Gov.News.Website.Middleware;
 using Gov.News.Website.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace Gov.News.Website.Controllers.Shared
 {
@@ -233,6 +234,19 @@ namespace Gov.News.Website.Controllers.Shared
             var client = new System.Net.Http.HttpClient();
 
             return await client.GetStreamAsync(new Uri(Repository.ContentDeliveryUri, blobName));
+        }
+
+        protected bool NotModifiedSince(DateTimeOffset? timestamp)
+        {
+            var modifiedSpan = timestamp - Request.GetTypedHeaders().IfModifiedSince;
+
+            // Ignore milliseconds because browsers are not supposed to store them
+            if (modifiedSpan.HasValue && modifiedSpan.Value.TotalMilliseconds < 1000)
+            {
+                return true;
+            }
+            Response.GetTypedHeaders().LastModified = timestamp;
+            return false;
         }
     }
 }
