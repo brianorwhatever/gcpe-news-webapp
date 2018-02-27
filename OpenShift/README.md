@@ -28,6 +28,8 @@ Then run the following command from the project's local `openshift` directory:
 genParams.sh -l
 ```
 
+**Git Bash Note:  Ensure that you do not have a linux "oc" binary on your path if using Git Bash on a Windows PC to run the scripts.  A windows "oc.exe" binary will work fine.
+
 This will generate local settings files for all of the builds, deployments, and Jenkins pipelines.
 The settings in these files will be specific to your local configuration and will be applied when you run the `genBuilds.sh` or `genDepls.sh` scripts with the `-l` switch.
 
