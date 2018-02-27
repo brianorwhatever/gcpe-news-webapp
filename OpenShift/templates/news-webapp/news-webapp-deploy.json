@@ -131,66 +131,88 @@
                     "protocol": "TCP"
                   }
                 ],
-                "env": [
-                  {
-                    "name": "DATABASE_SERVICE_NAME",
-                    "value": "${DATABASE_SERVICE_NAME}"
-                  },
-                  {
-                    "name": "POSTGRESQL_DATABASE",
-                    "value": "${DATABASE_NAME}"
-                  },
-                  {
-                    "name": "POSTGRESQL_USER",
-                    "valueFrom":
-                    {
-                      "secretKeyRef":
-                      {
-                        "name": "${DATABASE_DEPLOYMENT_NAME}",
-                        "key": "database-user"
-                      }
-                    }
-                  },
-                  {
-                    "name": "POSTGRESQL_PASSWORD",
-                    "valueFrom":
-                    {
-                      "secretKeyRef":
-                      {
-                        "name": "${DATABASE_DEPLOYMENT_NAME}",
-                        "key": "database-password"
-                      }
-                    }
-                  },
-                  {
-                    "name": "ADMINPW",
-                    "value": "${ADMIN_PASSWORD}"
-                  },
-                  {
-                    "name": "UserInitializationFile",
-                    "value": "${USER_INITIALIZATION_FILE}"
-                  },
-                  {
-                    "name": "RegionInitializationFile",
-                    "value": "${REGION_INITIALIZATION_FILE}"
-                  },
-                  {
-                    "name": "DistrictInitializationFile",
-                    "value": "${DISTRICT_INITIALIZATION_FILE}"
-                  },
-                  {
-                    "name": "ASPNETCORE_ENVIRONMENT",
-                    "value": "${ASPNETCORE_ENVIRONMENT}"
-                  },
-                  {
-                    "name": "UploadPath",
-                    "value": "${UPLOAD_PATH}"
-                  },
-                  {
-                    "name": "PDF_SERVICE_NAME",
-                    "value": "${PDF_SERVICE_NAME}"
-                  }
-                ],
+				"env": [
+					{
+						"name": "ASPNETCORE_ENVIRONMENT",
+						"value": "${ASPNETCORE_ENVIRONMENT}"
+					},
+					{
+						"name": "NewsHostUri",
+						"value": "${NEWS_HOST_URI}"
+					},
+					{
+						"name": "NewsMediaHostUri",
+						"value": "${NEWS_MEDIA_HOST_URI}"
+					},
+					{
+						"name": "NewsApi",
+						"value": "${NEWS_API}"
+					},
+					{
+						"name": "NewsMediaProxyKey",
+						"value": "${NEWS_MEDIA_PROXY_KEY}"
+					},
+					{
+						"name": "CalendarUri",
+						"value": "${CALENDAR_URI}"
+					},
+					{
+						"name": "GoogleSearchApplianceUri",
+						"value": "${GOOGLE_SEARCH_APPLIANCE_URI}"
+					},
+					{
+						"name": "NewsFilesContainer",
+						"value": "${NEWS_FILES_CONTAINER}"
+					},
+					{
+						"name": "NewsAssetsContainer",
+						"value": "${NEWS_ASSETS_CONTAINER}"
+					},
+					{
+						"name": "NewsContentDeliveryNetwork",
+						"value": "${NEWS_CONTENT_DELIVERY_NETWORK}"
+					},
+					{
+						"name": "MediaAssetsLicenseUri",
+						"value": "https://news.gov.bc.ca/files/News_Footage_License_British_Columbia.pdf"
+					},
+					{
+						"name": "ArchiveHostUri",
+						"value": "${ARCHIVE_HOST_URI}"
+					},
+					{
+						"name": "NewslettersHostUri",
+						"value": "${NEWSLETTERS_HOST_URI}"
+					},
+					{
+						"name": "BingSiteVerification",
+						"value": "${BING_SITE_VERIFICATION}"
+					},
+					{
+						"name": "ContentFilesUnc",
+						"value": "${CONTENT_FILES_UNC}"
+					},
+					{
+						"name": "LocalDataModelCacheUnc",
+						"value": "${LOCAL_DATA_MODEL_CACHE_UNC}"
+					},
+					{
+						"name": "SignalREnabled",
+						"value": "${SIGNAL_R_ENABLED}"
+					},
+					{
+						"name": "RssFeedCutoffDate",
+						"value": "${RSS_FEED_CUT_OFF_DATE}"
+					},
+					{
+						"name": "CalendarUri",
+						"value": "${CALENDAR_URI}"
+					},
+					{
+						"name": "ContactUri",
+						"value": "${CONTACT_URI}"
+					}
+				],
                 "resources":
                 {
                   "limits":
@@ -204,17 +226,30 @@
                     "memory": "${MEMORY_REQUEST}"
                   }
                 },
-                "volumeMounts": [
-                  {
-                    "name": "${NAME}-docs",
-                    "mountPath": "/uploads"
-                  },
-                  {
-                    "name": "${NAME}-secret-volume",
-                    "readOnly": true,
-                    "mountPath": "/secrets"
-                  }
-                ]
+				"readinessProbe": {
+					"httpGet": {
+						"path": "/hc",
+						"port": 8080,
+						"scheme": "HTTP"
+					},
+					"initialDelaySeconds": 10,
+					"timeoutSeconds": 1,
+					"periodSeconds": 10,
+					"successThreshold": 1,
+					"failureThreshold": 3
+				},
+				"liveinessProbe": {
+					"httpGet": {
+						"path": "/hc",
+						"port": 8080,
+						"scheme": "HTTP"
+					},
+					"initialDelaySeconds": 10,
+					"timeoutSeconds": 1,
+					"periodSeconds": 10,
+					"successThreshold": 1,
+					"failureThreshold": 3
+				}
               }
             ]
           }
@@ -287,6 +322,114 @@
       "displayName": "Memory Request",
       "description": "Starting amount of memory the container can use.",
       "value": "2Gi"
+    },
+	{
+      "name": "NEWS_HOST_URI",
+      "displayName": "NewsHostUri",
+      "description": "",
+      "value": "https://changeme"
+    },
+	{
+      "name": "NEWS_MEDIA_HOST_URI",
+      "displayName": "NewsMediaHostUri",
+      "description": "",
+      "value": "http://changeme"
+    },
+	{
+      "name": "NEWS_API",
+      "displayName": "NewsApi",
+      "description": "URI for the API Server",
+      "value": "https://changeme"
+    },
+	{
+      "name": "NEWS_MEDIA_PROXY_KEY",
+      "displayName": "NewsMediaProxyKey",
+      "description": "",
+      "value": "changeme"
+    },
+	{
+      "name": "CALENDAR_URI",
+      "displayName": "CalendarUri",
+      "description": "",
+      "value": "https://changeme"
+    },
+	{
+      "name": "GOOGLE_SEARCH_APPLIANCE_URI",
+      "displayName": "GoogleSearchApplianceUri",
+      "description": "",
+      "value": "https://changeme"
+    },
+	{
+      "name": "NEWS_FILES_CONTAINER",
+      "displayName": "NewsFilesContainer",
+      "description": "",
+      "value": "https://changeme"
+    },
+	{
+      "name": "NEWS_ASSETS_CONTAINER",
+      "displayName": "NewsAssetsContainer",
+      "description": "",
+      "value": "changeme"
+    },
+	{
+      "name": "NEWS_CONTENT_DELIVERY_NETWORK",
+      "displayName": "NewsContentDeliveryNetwork",
+      "description": "",
+      "value": "https://changeme"
+    },
+	{
+      "name": "ARCHIVE_HOST_URI",
+      "displayName": "ArchiveHostUri",
+      "description": "",
+      "value": "https://changeme"
+    },
+	{
+      "name": "NEWSLETTERS_HOST_URI",
+      "displayName": "NewslettersHostUri",
+      "description": "",
+      "value": "https://changeme"
+    },
+	{
+      "name": "BING_SITE_VERIFICATION",
+      "displayName": "BingSiteVerification",
+      "description": "",
+      "value": "changeme"
+    },
+	{
+      "name": "CONTENT_FILES_UNC",
+      "displayName": "ContentFilesUnc",
+      "description": "",
+      "value": "changeme"
+    },
+	{
+      "name": "LOCAL_DATA_MODEL_CACHE_UNC",
+      "displayName": "LocalDataModelCacheUnc",
+      "description": "",
+      "value": "/tmp/"
+    },
+	{
+      "name": "SIGNAL_R_ENABLED",
+      "displayName": "SignalREnabled",
+      "description": "",
+      "value": "true"
+    },
+	{
+      "name": "RSS_FEED_CUT_OFF_DATE",
+      "displayName": "RssFeedCutoffDate",
+      "description": "",
+      "value": "2015-06-22 13:55:00"
+    },
+	{
+      "name": "CALENDAR_URI",
+      "displayName": "CalendarUri",
+      "description": "",
+      "value": "https://changeme"
+    },
+	{
+      "name": "CONTACT_URI",
+      "displayName": "ContactUri",
+      "description": "",
+      "value": "https://changeme"
     }
   ]
 }
