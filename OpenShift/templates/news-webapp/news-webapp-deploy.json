@@ -1,0 +1,435 @@
+{
+  "kind": "Template",
+  "apiVersion": "v1",
+  "metadata":
+  {
+    "name": "${NAME}-deployment-template",
+    "creationTimestamp": null
+  },
+  "objects": [
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata":
+      {
+        "name": "${NAME}",
+        "labels":
+        {
+          "template": "${NAME}-deployment"
+        },
+        "annotations":
+        {
+          "description": "Exposes and load balances the application pods."
+        }
+      },
+      "spec":
+      {
+        "ports": [
+          {
+            "name": "8080-tcp",
+            "protocol": "TCP",
+            "port": 8080,
+            "targetPort": 8080
+          }
+        ],
+        "selector":
+        {
+          "name": "${NAME}"
+        },
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      }
+    },
+    {
+      "kind": "Route",
+      "apiVersion": "v1",
+      "metadata":
+      {
+        "name": "${NAME}"
+      },
+      "spec":
+      {
+        "host": "${APPLICATION_DOMAIN}",
+        "to":
+        {
+          "kind": "Service",
+          "name": "${NAME}",
+          "weight": 100
+        },
+        "port":
+        {
+          "targetPort": "8080-tcp"
+        }
+      }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata":
+      {
+        "name": "${NAME}",
+        "labels":
+        {
+          "template": "${NAME}-deployment"
+        },
+        "annotations":
+        {
+          "description": "Defines how to deploy ${NAME}"
+        }
+      },
+      "spec":
+      {
+        "strategy":
+        {
+          "type": "Rolling"
+        },
+        "triggers": [
+          {
+            "type": "ConfigChange"
+          },
+          {
+            "type": "ImageChange",
+            "imageChangeParams":
+            {
+              "automatic": true,
+              "containerNames": [
+                "${NAME}"
+              ],
+              "from":
+              {
+                "kind": "ImageStreamTag",
+                "namespace": "${IMAGE_NAMESPACE}",
+                "name": "${SOURCE_IMAGE_NAME}:${TAG_NAME}"
+              }
+            }
+          }
+        ],
+        "replicas": 1,
+        "selector":
+        {
+          "name": "${NAME}"
+        },
+        "template":
+        {
+          "metadata":
+          {
+            "name": "${NAME}",
+            "labels":
+            {
+              "name": "${NAME}"
+            }
+          },
+          "spec":
+          {
+            "containers": [
+              {
+                "name": "${NAME}",
+                "image": "",
+                "ports": [
+                  {
+                    "containerPort": 8080,
+                    "protocol": "TCP"
+                  }
+                ],
+				"env": [
+					{
+						"name": "ASPNETCORE_ENVIRONMENT",
+						"value": "${ASPNETCORE_ENVIRONMENT}"
+					},
+					{
+						"name": "NewsHostUri",
+						"value": "${NEWS_HOST_URI}"
+					},
+					{
+						"name": "NewsMediaHostUri",
+						"value": "${NEWS_MEDIA_HOST_URI}"
+					},
+					{
+						"name": "NewsApi",
+						"value": "${NEWS_API}"
+					},
+					{
+						"name": "NewsMediaProxyKey",
+						"value": "${NEWS_MEDIA_PROXY_KEY}"
+					},
+					{
+						"name": "CalendarUri",
+						"value": "${CALENDAR_URI}"
+					},
+					{
+						"name": "GoogleSearchApplianceUri",
+						"value": "${GOOGLE_SEARCH_APPLIANCE_URI}"
+					},
+					{
+						"name": "NewsFilesContainer",
+						"value": "${NEWS_FILES_CONTAINER}"
+					},
+					{
+						"name": "NewsAssetsContainer",
+						"value": "${NEWS_ASSETS_CONTAINER}"
+					},
+					{
+						"name": "NewsContentDeliveryNetwork",
+						"value": "${NEWS_CONTENT_DELIVERY_NETWORK}"
+					},
+					{
+						"name": "MediaAssetsLicenseUri",
+						"value": "https://news.gov.bc.ca/files/News_Footage_License_British_Columbia.pdf"
+					},
+					{
+						"name": "ArchiveHostUri",
+						"value": "${ARCHIVE_HOST_URI}"
+					},
+					{
+						"name": "NewslettersHostUri",
+						"value": "${NEWSLETTERS_HOST_URI}"
+					},
+					{
+						"name": "BingSiteVerification",
+						"value": "${BING_SITE_VERIFICATION}"
+					},
+					{
+						"name": "ContentFilesUnc",
+						"value": "${CONTENT_FILES_UNC}"
+					},
+					{
+						"name": "LocalDataModelCacheUnc",
+						"value": "${LOCAL_DATA_MODEL_CACHE_UNC}"
+					},
+					{
+						"name": "SignalREnabled",
+						"value": "${SIGNAL_R_ENABLED}"
+					},
+					{
+						"name": "RssFeedCutoffDate",
+						"value": "${RSS_FEED_CUT_OFF_DATE}"
+					},
+					{
+						"name": "CalendarUri",
+						"value": "${CALENDAR_URI}"
+					},
+					{
+						"name": "ContactUri",
+						"value": "${CONTACT_URI}"
+					}
+				],
+                "resources":
+                {
+                  "limits":
+                  {
+                    "cpu": "${CPU_LIMIT}",
+                    "memory": "${MEMORY_LIMIT}"
+                  },
+                  "requests":
+                  {
+                    "cpu": "${CPU_REQUEST}",
+                    "memory": "${MEMORY_REQUEST}"
+                  }
+                },
+				"readinessProbe": {
+					"httpGet": {
+						"path": "/hc",
+						"port": 8080,
+						"scheme": "HTTP"
+					},
+					"initialDelaySeconds": 10,
+					"timeoutSeconds": 1,
+					"periodSeconds": 10,
+					"successThreshold": 1,
+					"failureThreshold": 3
+				},
+				"liveinessProbe": {
+					"httpGet": {
+						"path": "/hc",
+						"port": 8080,
+						"scheme": "HTTP"
+					},
+					"initialDelaySeconds": 10,
+					"timeoutSeconds": 1,
+					"periodSeconds": 10,
+					"successThreshold": 1,
+					"failureThreshold": 3
+				}
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "parameters": [
+    {
+      "name": "NAME",
+      "displayName": "Name",
+      "description": "The name assigned to all of the resources defined in this template.",
+      "required": true,
+      "value": "news-webapp"
+    },
+    {
+      "name": "SOURCE_IMAGE_NAME",
+      "displayName": "Source Image Name",
+      "description": "The name of the image to use for this resource.",
+      "required": true,
+      "value": "news-webapp"
+    },
+    {
+      "name": "APPLICATION_DOMAIN",
+      "displayName": "Application Hostname",
+      "description": "The exposed hostname that will route to the application, if left blank a value will be defaulted.",
+      "value": ""
+    },
+    {
+      "name": "IMAGE_NAMESPACE",
+      "displayName": "Image Namespace",
+      "description": "The namespace of the OpenShift project containing the imagestream for the application.",
+      "required": true,
+      "value": "gcpe-news-tools"
+    },
+    {
+      "name": "TAG_NAME",
+      "displayName": "Environment TAG name",
+      "description": "The TAG name for this environment, e.g., dev, test, prod",
+      "required": true,
+      "value": "dev"
+    },    
+    {
+      "name": "ASPNETCORE_ENVIRONMENT",
+      "displayName": "AspNetCore Environment",
+      "description": "The ASP Net Core deployment environment setting.",
+      "required": true,
+      "value": "Development"
+    },
+    {
+      "name": "CPU_LIMIT",
+      "displayName": "CPU Limit",
+      "description": "Maximum amount of CPU the container can use.",
+      "value": "1"
+    },
+    {
+      "name": "MEMORY_LIMIT",
+      "displayName": "Memory Limit",
+      "description": "Maximum amount of memory the container can use.",
+      "value": "4Gi"
+    },
+    {
+      "name": "CPU_REQUEST",
+      "displayName": "CPU Request",
+      "description": "Starting amount of CPU the container can use.",
+      "value": "100m"
+    },
+    {
+      "name": "MEMORY_REQUEST",
+      "displayName": "Memory Request",
+      "description": "Starting amount of memory the container can use.",
+      "value": "2Gi"
+    },
+	{
+      "name": "NEWS_HOST_URI",
+      "displayName": "NewsHostUri",
+      "description": "",
+      "value": "https://changeme"
+    },
+	{
+      "name": "NEWS_MEDIA_HOST_URI",
+      "displayName": "NewsMediaHostUri",
+      "description": "",
+      "value": "http://changeme"
+    },
+	{
+      "name": "NEWS_API",
+      "displayName": "NewsApi",
+      "description": "URI for the API Server",
+      "value": "https://changeme"
+    },
+	{
+      "name": "NEWS_MEDIA_PROXY_KEY",
+      "displayName": "NewsMediaProxyKey",
+      "description": "",
+      "value": "changeme"
+    },
+	{
+      "name": "CALENDAR_URI",
+      "displayName": "CalendarUri",
+      "description": "",
+      "value": "https://changeme"
+    },
+	{
+      "name": "GOOGLE_SEARCH_APPLIANCE_URI",
+      "displayName": "GoogleSearchApplianceUri",
+      "description": "",
+      "value": "https://changeme"
+    },
+	{
+      "name": "NEWS_FILES_CONTAINER",
+      "displayName": "NewsFilesContainer",
+      "description": "",
+      "value": "https://changeme"
+    },
+	{
+      "name": "NEWS_ASSETS_CONTAINER",
+      "displayName": "NewsAssetsContainer",
+      "description": "",
+      "value": "changeme"
+    },
+	{
+      "name": "NEWS_CONTENT_DELIVERY_NETWORK",
+      "displayName": "NewsContentDeliveryNetwork",
+      "description": "",
+      "value": "https://changeme"
+    },
+	{
+      "name": "ARCHIVE_HOST_URI",
+      "displayName": "ArchiveHostUri",
+      "description": "",
+      "value": "https://changeme"
+    },
+	{
+      "name": "NEWSLETTERS_HOST_URI",
+      "displayName": "NewslettersHostUri",
+      "description": "",
+      "value": "https://changeme"
+    },
+	{
+      "name": "BING_SITE_VERIFICATION",
+      "displayName": "BingSiteVerification",
+      "description": "",
+      "value": "changeme"
+    },
+	{
+      "name": "CONTENT_FILES_UNC",
+      "displayName": "ContentFilesUnc",
+      "description": "",
+      "value": "changeme"
+    },
+	{
+      "name": "LOCAL_DATA_MODEL_CACHE_UNC",
+      "displayName": "LocalDataModelCacheUnc",
+      "description": "",
+      "value": "/tmp/"
+    },
+	{
+      "name": "SIGNAL_R_ENABLED",
+      "displayName": "SignalREnabled",
+      "description": "",
+      "value": "true"
+    },
+	{
+      "name": "RSS_FEED_CUT_OFF_DATE",
+      "displayName": "RssFeedCutoffDate",
+      "description": "",
+      "value": "2015-06-22 13:55:00"
+    },
+	{
+      "name": "CALENDAR_URI",
+      "displayName": "CalendarUri",
+      "description": "",
+      "value": "https://changeme"
+    },
+	{
+      "name": "CONTACT_URI",
+      "displayName": "ContactUri",
+      "description": "",
+      "value": "https://changeme"
+    }
+  ]
+}
