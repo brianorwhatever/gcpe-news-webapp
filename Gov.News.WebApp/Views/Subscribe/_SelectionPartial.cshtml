@@ -70,7 +70,7 @@
 
                         foreach (var sector in Model.Sectors)
                         {
-                            lists.Add(new { Category = "sectors", Key = sector.Index.Key, Name = sector.Index.Name });
+                            lists.Add(new { Category = "sectors", Key = sector.Key, Name = sector.Name });
                         }
 
                         if (Model.Tags != null)
@@ -178,7 +178,7 @@
                     <ul class="external-links">
                         @for (int i = 0; i < halfList; i++)
                         {
-                            var service = Model.Services.ElementAt(i).Index;
+                            var service = Model.Services.ElementAt(i);
                             <li><label><input type="checkbox" value="@service.Key" name="Services" checked="@Model.Selection.Contains("services", service.Key)" />&nbsp;@service.Name</label></li>
                         }
                     </ul>
@@ -187,7 +187,7 @@
                     <ul class="external-links">
                         @for (int i = halfList; i < Model.Services.Count(); i++)
                         {
-                            var service = Model.Services.ElementAt(i).Index;
+                            var service = Model.Services.ElementAt(i);
                             <li><label><input type="checkbox" value="@service.Key" name="Services" checked="@Model.Selection.Contains("services", service.Key)" />&nbsp;@service.Name</label></li>
                         }
                     </ul>

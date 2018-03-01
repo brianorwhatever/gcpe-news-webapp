@@ -23,7 +23,6 @@ namespace Gov.News.Website
         static public Uri ContentDeliveryUri = null;
 
         internal Dictionary<Type, IDictionary<string, object>> _cache = new Dictionary<Type, IDictionary<string, object>>();
-        private Dictionary<Type, IDictionary<string, object>> _indexCache = new Dictionary<Type, IDictionary<string, object>>();
         private Dictionary<string, Task> ConcurrentRequests = new Dictionary<string, Task>();
 
         private readonly ILogger<Repository> _logger;
@@ -67,12 +66,12 @@ namespace Gov.News.Website
                     RegisterNotification<Slide>(true);
                     RegisterNotification<ResourceLink>(true);
 
-                    RegisterIndexNotification<Home>(true);
-                    RegisterIndexNotification<Service>(true);
-                    RegisterIndexNotification<Theme>(true);
-                    RegisterIndexNotification<Tag>(true);
-                    RegisterIndexNotification<Sector>(true);
-                    RegisterIndexNotification<Ministry>(true);
+                    RegisterNotification<Home>(true);
+                    RegisterNotification<Service>(true);
+                    RegisterNotification<Theme>(true);
+                    RegisterNotification<Tag>(true);
+                    RegisterNotification<Sector>(true);
+                    RegisterNotification<Ministry>(true);
 
                     apiConnection.Closed += new Func<Exception, Task>(OnSignalRConnectionClosed);
                     await apiConnection.StartAsync();
@@ -97,10 +96,6 @@ namespace Gov.News.Website
             RegisterNotification<T>(_cache, invalidateOnUpdate);
         }
 
-        public void RegisterIndexNotification<T>(bool invalidateOnUpdate = false) where T : DataModel
-        {
-            RegisterNotification<T>(_indexCache, invalidateOnUpdate);
-        }
         public void RegisterNotification<T>(IDictionary<Type, IDictionary<string, object>> cache, bool invalidateOnUpdate = false) where T : DataModel
         {
             var type = typeof(T);
@@ -159,14 +154,11 @@ namespace Gov.News.Website
 
         public void ClearAllIndexPosts()
         {
-            foreach (var cacheForType in _indexCache.Values)
+            foreach (var cacheForType in _cache.Values)
             {
                 lock (cacheForType)
                 {
-                    foreach (IndexModel index in cacheForType.Values.ToList()) // ToList so we can iterate and modify the dictionary. Bruno
-                    {
-                        cacheForType[index.Index.Key] = new IndexModel(index.Index);
-                    }
+                    cacheForType.Clear();
                 }
             }
         }
@@ -226,11 +218,6 @@ namespace Gov.News.Website
             return await GetAsync(key, taskFn, cacheForType);
         }
 
-        private async Task<IndexModel> GetIndexAsync<T>(string key, Func<Task<IndexModel>> taskFn)
-        {
-            return await GetAsync(key, taskFn, _indexCache[typeof(T)]);
-        }
-
         private async Task<T> GetExpiringAsync<T>(string key, Func<Task<T>> taskFn, int expireMinutes = 2) where T : DataModel
         {
             IDictionary<string, object> cacheForType = _cache[typeof(T)];
@@ -270,15 +257,9 @@ namespace Gov.News.Website
         #endregion
 
         #region GetListAsync
-        private async Task<IList<T>> GetListAsync<T>(Func<Task<IList<T>>> taskFn, IDictionary<string, object> cacheForType) where T : DataModel, new()
+        private async Task<IList<T>> GetListAsync<T>(Func<Task<IList<T>>> taskFn) where T : DataModel, new()
         {
-            return await GetListAsync(taskFn, cacheForType, (item) => item);
-        }
-
-        private async Task<IList<IndexModel>> GetIndexListAsync<T>(Func<Task<IList<IndexModel>>> taskFn) where T : DataModel, new()
-        {
-            IDictionary<string, object> cacheForType = _indexCache[typeof(T)];
-            return await GetListAsync(taskFn, cacheForType, (item) => (T)(object)item.Index); // cast to T for ConcurrentRequests type name
+            return await GetListAsync(taskFn, _cache[typeof(T)], (item) => item);
         }
 
         private async Task<IEnumerable<T>> GetExpiringListAsync<T>(Func<Task<IList<T>>> taskFn, int expireMinutes = 2) where T : DataModel, new()
@@ -295,7 +276,7 @@ namespace Gov.News.Website
             return await GetListAsync(taskFn, cacheForType, (item) => { item.Timestamp = DateTime.Now; return item; });
         }
 
-        private async Task<IList<T>> GetListAsync<T,ST>(Func<Task<IList<T>>> taskFn, IDictionary<string, object> cacheForType, Func<T, ST> dataModelFn) where ST : DataModel, new()
+        private async Task<IList<T>> GetListAsync<T, ST>(Func<Task<IList<T>>> taskFn, IDictionary<string, object> cacheForType, Func<T, ST> dataModelFn) where ST : DataModel, new()
         {
             lock (cacheForType)
             {
@@ -327,35 +308,35 @@ namespace Gov.News.Website
             return await GetDataModelAsync(ministryKey, () => ApiClient.Ministries.GetMinisterAsync(ministryKey, APIVersion));
         }
 
-        public async Task<IndexModel> GetMinistryAsync(string key)
+        public async Task<Ministry> GetMinistryAsync(string key)
         {
-            return await GetIndexAsync<Ministry>(key, async () => (await GetMinistriesAsync(true)).SingleOrDefault(m => m.Index.Key == key));
+            return await GetDataModelAsync(key, async () => (await GetMinistriesAsync(true)).SingleOrDefault(m => m.Key == key));
             // Do not API fetch 1 ministry at a time as it messes up the cache
         }
 
-        public async Task<IndexModel> GetSectorAsync(string key)
+        public async Task<Sector> GetSectorAsync(string key)
         {
-            return await GetIndexAsync<Sector>(key, async () => (await GetSectorsAsync()).SingleOrDefault(s => s.Index.Key == key));
+            return await GetDataModelAsync(key, async () => (await GetSectorsAsync()).SingleOrDefault(s => s.Key == key));
         }
 
-        public async Task<IndexModel> GetServiceAsync(string key)
+        public async Task<Service> GetServiceAsync(string key)
         {
-            return await GetIndexAsync<Service>(key, async () => (await GetServicesAsync()).SingleOrDefault(s => s.Index.Key == key));
+            return await GetDataModelAsync(key, async () => (await GetServicesAsync()).SingleOrDefault(s => s.Key == key));
         }
 
-        public async Task<IndexModel> GetTagAsync(string key)
+        public async Task<Tag> GetTagAsync(string key)
         {
-            return await GetIndexAsync<Tag>(key, async () => (await GetTagsAsync()).SingleOrDefault(t => t.Index.Key == key));
+            return await GetDataModelAsync(key, async () => (await GetTagsAsync()).SingleOrDefault(t => t.Key == key));
         }
 
-        public async Task<IndexModel> GetThemeAsync(string key)
+        public async Task<Theme> GetThemeAsync(string key)
         {
-            return await GetIndexAsync<Theme>(key, async () => (await GetThemesAsync()).SingleOrDefault(t => t.Index.Key == key));
+            return await GetDataModelAsync(key, async () => (await GetThemesAsync()).SingleOrDefault(t => t.Key == key));
         }
 
-        public async Task<IndexModel> GetHomeAsync()
+        public async Task<Home> GetHomeAsync()
         {
-            return await GetIndexAsync<Home>("default", async () => new IndexModel(await ApiClient.Home.GetAsync(APIVersion)));
+            return await GetDataModelAsync<Home>("default", async () => await ApiClient.Home.GetAsync(APIVersion));
         }
 
         public async Task<Slide> GetSlideAsync(string id)
@@ -389,7 +370,7 @@ namespace Gov.News.Website
             {
                 try
                 {
-                    return await GetDataModelAsync(key, () => ApiClient.Posts.GetOneAsync(key, APIVersion), MAX_NUM_CACHED_POSTS_PER_INDEX * 50);
+                    return await GetDataModelAsync(key, () => ApiClient.Posts.GetOneAsync(key, APIVersion), MAX_NUM_CACHED_POSTS);
                 }
                 catch (Exception) { }
             }
@@ -401,24 +382,19 @@ namespace Gov.News.Website
             return await ApiClient.Posts.GetLatestMediaUriAsync(mediaType, APIVersion);
         }
 
-        public async Task<IList<IndexModel>> GetMinistriesAsync(bool includeInactive = false)
+        public async Task<IList<Ministry>> GetMinistriesAsync(bool includeInactive = false)
         {
-            IList<IndexModel> allMinistries = await GetIndexListAsync<Ministry>(() => CategoriesAsync(ApiClient.Ministries.GetAllAsync(APIVersion)));
+            IList<Ministry> allMinistries = await GetListAsync(() => ApiClient.Ministries.GetAllAsync(APIVersion));
 
             if (includeInactive)
                 return allMinistries;
             else
-                return allMinistries.Where(m => ((Ministry)m.Index).IsActive == true).ToList();
+                return allMinistries.Where(m => m.IsActive == true).ToList();
         }
 
-        private async Task<IList<IndexModel>> CategoriesAsync<T>(Task<IList<T>> task) where T : DataIndex
-        { 
-            return (await task).Select(m => new IndexModel(m)).ToList();
-        }
-
-        public async Task<IList<IndexModel>> GetSectorsAsync()
+        public async Task<IList<Sector>> GetSectorsAsync()
         {
-            return await GetIndexListAsync<Sector>(() => CategoriesAsync(ApiClient.Sectors.GetAllAsync(APIVersion)));
+            return await GetListAsync(() => ApiClient.Sectors.GetAllAsync(APIVersion));
         }
 
         public async Task<IList<Post>> GetPostsAsync(IEnumerable<string> postKeys)
@@ -454,7 +430,7 @@ namespace Gov.News.Website
                         {
                             post = postsAsked.SingleOrDefault(p => p.Key == postKey);
                             if (post == null) continue;
-                            cacheForType.Add(postKey, post);
+                            //cacheForType.Add(postKey, post);
                         }
                         posts.Add((Post)post);
                     }
@@ -463,29 +439,29 @@ namespace Gov.News.Website
             return posts;
         }
 
-        public async Task<IList<IndexModel>> GetServicesAsync()
+        public async Task<IList<Service>> GetServicesAsync()
         {
-            return await GetIndexListAsync<Service>(() => CategoriesAsync(ApiClient.Services.GetAllAsync(APIVersion)));
+            return await GetListAsync(() => ApiClient.Services.GetAllAsync(APIVersion));
         }
 
-        public async Task<IList<IndexModel>> GetThemesAsync()
+        public async Task<IList<Theme>> GetThemesAsync()
         {
-            return await GetIndexListAsync<Theme>(() => CategoriesAsync(ApiClient.Themes.GetAllAsync(APIVersion)));
+            return await GetListAsync(() => ApiClient.Themes.GetAllAsync(APIVersion));
         }
 
-        public async Task<IList<IndexModel>> GetTagsAsync()
+        public async Task<IList<Tag>> GetTagsAsync()
         {
-            return await GetIndexListAsync<Tag>(() => CategoriesAsync(ApiClient.Tags.GetAllAsync(APIVersion)));
+            return await GetListAsync<Tag>(() => ApiClient.Tags.GetAllAsync(APIVersion));
         }
 
         public async Task<IList<Slide>> GetSlidesAsync()
         {
-            return await GetListAsync(() => ApiClient.Slides.GetAllAsync(APIVersion), _cache[typeof(Slide)]);
+            return await GetListAsync(() => ApiClient.Slides.GetAllAsync(APIVersion));
         }
 
         public async Task<IEnumerable<ResourceLink>> GetResourceLinksAsync()
         {
-            return await GetListAsync(() => ApiClient.ResourceLinks.GetAllAsync(APIVersion), _cache[typeof(ResourceLink)]);
+            return await GetListAsync(() => ApiClient.ResourceLinks.GetAllAsync(APIVersion));
         }
 
         public async Task<Asset> GetFlickrAssetAsync(string assetUri)
@@ -513,64 +489,91 @@ namespace Gov.News.Website
             return flickrAsset;
         }
 
-        public async Task<IEnumerable<IndexModel>> GetPostMinistriesAsync(Post post)
+        public async Task<IEnumerable<Ministry>> GetPostMinistriesAsync(Post post)
         {
-            return (await GetMinistriesAsync()).Where(m => post.MinistryKeys.Contains(m.Index.Key));
+            return (await GetMinistriesAsync()).Where(m => post.MinistryKeys.Contains(m.Key));
         }
 
-        public async Task<IEnumerable<IndexModel>> GetPostSectorsAsync(Post post)
+        public async Task<IEnumerable<Sector>> GetPostSectorsAsync(Post post)
         {
-            return (await GetSectorsAsync()).Where(s => post.SectorKeys.Contains(s.Index.Key));
+            return (await GetSectorsAsync()).Where(s => post.SectorKeys.Contains(s.Key));
         }
 
         public async Task<IEnumerable<Newsletter>> GetNewslettersAsync()
         {
             return await GetExpiringListAsync(() => ApiClient.Newsletters.GetAllAsync(APIVersion));
         }
-        const int MAX_NUM_CACHED_POSTS_PER_INDEX = 100;
+
+        const int MAX_NUM_CACHED_POSTS = 2000;
         /// <summary>
         /// Get the next count posts of type postKind for the specified index (newsroom or category)
         /// </summary>
         /// <param name="indexModel">home or one of categories</param>
+        /// <param name="count">number of posts to get</param>
         /// <param name="postKind">One of: releases, stories, factsheets, updates or default (releases+stories except top/feature)</param>
-        /// <param name="skip">number of posts to skip</param>
+        /// <param name="categoryFilter">filter on Ministry, Sector, Themes, Service or Tag</param>
+        /// <param name="skip">number of posts to skip (ignoring top/feature posts</param>
         /// <returns></returns>
-        public async Task<IEnumerable<Post>> GetLatestPostsAsync(IndexModel indexModel, string postKind = null, int skip = 0)
+        public async Task<IEnumerable<Post>> GetLatestPostsAsync(DataIndex index, int count, string postKind = null, Func<Post, bool> categoryFilter = null, int skip = 0)
         {
-            int count = ProviderHelpers.MaximumLatestNewsItemsLoadMore;
-            if (skip == 0)
+            int postCountB4ApiCall;
+            IEnumerable<Post> filteredPosts;
+            IDictionary<string, object> cacheForPosts = _cache[typeof(Post)];
+            lock (cacheForPosts)
             {
-                count += ProviderHelpers.MaximumLatestNewsItems;
+                postCountB4ApiCall = cacheForPosts.Count();
+                var postKindFilter = postKind != null ? p => p.Kind == postKind : (Func<Post, bool>)(p => p.Kind == "releases" || p.Kind == "stories");
+                filteredPosts = cacheForPosts.Select(p => (Post)p.Value).Where(postKindFilter).ToList();
             }
-            DataIndex index = indexModel.Index;
+
+            bool cacheClearHappenedWhileUserIsBrowsingOldReleases = skip > filteredPosts.Count();
+            bool canBeCached = skip < MAX_NUM_CACHED_POSTS && (postKind == null || postKind == "factsheets") && categoryFilter == null && !cacheClearHappenedWhileUserIsBrowsingOldReleases;
+
+            int skipToAsk = canBeCached ? filteredPosts.Count() : skip;
             if (postKind == null)
             {
-                if (indexModel.LatestNews.Count() >= skip + count)
-                {
-                    return indexModel.LatestNews.Skip(skip).Take(count);
-                }
+                filteredPosts = filteredPosts.Where(p => p.Key != index.TopPostKey && p.Key != index.FeaturePostKey);
             }
-            IList<Post> posts = await ApiClient.Posts.GetLatestAsync(index.Kind, index.Key, APIVersion, postKind, count, skip);
-            if (postKind != null || skip > MAX_NUM_CACHED_POSTS_PER_INDEX) return posts;
-
-            IDictionary<string, object> cacheForType = _cache[typeof(Post)];
-            lock (cacheForType)
+            if (categoryFilter != null)
             {
-                bool cacheClearHappenedWhileUserIsBrowsingOldReleases = skip != indexModel.LatestNews.Count();
-                if (cacheClearHappenedWhileUserIsBrowsingOldReleases) return posts;
+                filteredPosts = filteredPosts.Where(categoryFilter).ToList();
+            }
 
-                foreach (Post post in posts)
+            bool useCache = skip + count <= filteredPosts.Count(); // enough posts in the cache to use it?
+            IEnumerable<Post> fetchedPosts = null;
+            if (canBeCached || !useCache)
+            {
+                // Ask for more when we can cache it. Also we don't want to end up with a request where part of the posts is coming from cache (say we have 110 posts and we ask from 105 to 115)
+                int countToAsk = canBeCached ? ProviderHelpers.MaximumLatestNewsItemsLoadMore * 5 : count;
+                fetchedPosts = await ApiClient.Posts.GetLatestAsync(index.Kind, index.Key, APIVersion, postKind, countToAsk, skipToAsk);
+                if (canBeCached)
                 {
-                    object cachedPost;
-                    if (!cacheForType.TryGetValue(post.Key, out cachedPost))
+                    CacheLatestPosts(fetchedPosts, cacheForPosts, postCountB4ApiCall); // we also cache top/feature posts (sorted by PublishDate)
+                    if (!useCache)
                     {
-                        cacheForType.Add(post.Key, post);
-                        cachedPost = post;
+                        fetchedPosts = fetchedPosts.Where(p => p.Key != index.TopPostKey && p.Key != index.FeaturePostKey);
                     }
-                    indexModel.LatestNews.Add((Post)cachedPost); // use the post already in cache instead of the newly downloaded (for memory reuse)
                 }
             }
-            return indexModel.LatestNews.Skip(skip).Take(count);
+            return (useCache || fetchedPosts == null ? filteredPosts.Skip(skip) : fetchedPosts).Take(count);
+        }
+
+        public void CacheLatestPosts(IEnumerable<Post> posts, IDictionary<string, object> cacheForPosts, int postCountB4ApiCall)
+        {
+            lock (cacheForPosts)
+            {
+                // check that nobody inserted some new posts
+                if (postCountB4ApiCall == cacheForPosts.Count())
+                {
+                    foreach (Post post in posts)
+                    {
+                        if (!cacheForPosts.ContainsKey(post.Key))
+                        {
+                            cacheForPosts.Add(post.Key, post);
+                        }
+                    }
+                }
+            }
         }
     }
 }

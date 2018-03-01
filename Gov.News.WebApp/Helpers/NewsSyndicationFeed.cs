@@ -119,7 +119,7 @@ namespace Gov.News.Website
                 item.LastUpdatedTime = (DateTimeOffset) entry.PublishDate;
             }
 
-            var ministry = (await _repository.GetMinistryAsync(entry.LeadMinistryKey))?.Index as Category;
+            var ministry = await _repository.GetMinistryAsync(entry.LeadMinistryKey);
 
             if (ministry != null)
                 item.Categories.Add(new SyndicationCategory(ministry.Name));

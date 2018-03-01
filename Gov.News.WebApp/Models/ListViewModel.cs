@@ -8,8 +8,6 @@ namespace Gov.News.Website.Models
     {
         public IndexModel IndexModel { get; set; }
 
-        // for all postTypes (not just the cached LatestNews)
-        public IEnumerable<Post> LatestPosts { get; set; }
         public System.Uri FeedUri { get; set; }
         public Category Category { get; set; }
 
