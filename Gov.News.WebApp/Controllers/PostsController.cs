@@ -8,6 +8,7 @@ using Gov.News.Api.Models;
 using Gov.News.Website.Helpers;
 using Gov.News.Website.Middleware;
 using Gov.News.Website.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
@@ -18,7 +19,7 @@ namespace Gov.News.Website.Controllers.Shared
         public PostsController(Repository repository, IConfiguration configuration) : base(repository, configuration)
         {
         }
-        [ResponseCache(CacheProfileName = "Default")]
+
         public async Task<ActionResult> Details(string key)
         {
             var post = await Repository.GetPostAsync(key);
@@ -31,29 +32,25 @@ namespace Gov.News.Website.Controllers.Shared
             if (model == null)
                 return await SearchNotFound();
 
-            //TODO: Test NotModified handling
-            //var ifModifiedSince = Request.Headers["If-Modified-Since"];
-            //if (ifModifiedSince != null)
-            //{
-            //    var modifiedSince = DateTime.Parse(ifModifiedSince).ToLocalTime();
-
-            //    if (modifiedSince >= model.Post.Timestamp)
-            //        return new HttpStatusCodeResult(System.Net.HttpStatusCode.NotModified);
-            //}
-
-            //TEST: Verify this header is set correctly and received by the client browser
-            HttpContext.Response.Headers["Last-Modified"] = model.Post.Timestamp.Value.ToUniversalTime().ToString("R");
+            // We can't just use post.Timestamp here because we would have to take into account the mega-menu(ministries), sidebar(media contacts, featured topics an services, related newsletters and posts), Live Webcast)
+            //if (NotModifiedSince(post.Timestamp))
+            //    return StatusCode(StatusCodes.Status304NotModified);
 
             ViewData.Add("CustomContentClass", "detail");
             return View("PostView", model);
         }
-        [ResponseCache(CacheProfileName = "Default")]
+
         public async Task<ActionResult> Image(string key)
         {
             var post = key != null ? await Repository.GetPostAsync(key) : null;
 
             if (post == null)
                 return await SearchNotFound();
+
+            if (NotModifiedSince(post.Timestamp))
+            {
+                return StatusCode(StatusCodes.Status304NotModified);
+            }
 
             var thumbnailUri = post.GetThumbnailUri();
 
@@ -79,8 +76,6 @@ namespace Gov.News.Website.Controllers.Shared
 
             if (stream == null)
                 return await SearchNotFound();
-
-            HttpContext.Response.Headers["Last-Modified"] = post.Timestamp.Value.ToUniversalTime().ToString("R");
 
             return File(stream, type.ToString());
         }
