@@ -14,6 +14,7 @@
             <script type="text/javascript">
                 $(document).ready(function () {
                     initializeEmbeddedMediaPlaceholders();
+                    resizeEmbeddedMediaAssets();
                     $(document).on("click", ".asset .placeholder-container .overlay-container .outer .inner .play-button", function () {
                         playMedia(this, false);
                     });
