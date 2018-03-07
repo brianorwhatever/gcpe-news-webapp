@@ -30,7 +30,7 @@ namespace Gov.News.Website.Controllers
         {
             Debug.Assert(key != null);
 
-            Ministry index = (await Repository.GetMinistryAsync(key)).Index as Ministry;
+            Ministry index = await Repository.GetMinistryAsync(key);
 
             if (index == null)
                 return default(MinisterViewModel);

@@ -39,11 +39,11 @@
 
         <div class="other-articles">
             <div class="regular-articles">
-                @foreach (var article in Model.LatestPosts.Take(3))
+                @foreach (var article in Model.IndexModel.LatestNews.Take(3))
                 {
                     @Html.Partial("PostCard", article)
                 }
-                @foreach (var post in Model.LatestPosts.Skip(3))
+                @foreach (var post in Model.IndexModel.LatestNews.Skip(3))
                 {
                     @Html.Partial("PostCard", post, new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "Display", "false" } })
                 }

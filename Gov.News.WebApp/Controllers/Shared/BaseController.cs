@@ -22,25 +22,40 @@ namespace Gov.News.Website.Controllers.Shared
             Configuration = configuration;
         }
 
-        public async Task LoadAsync(BaseViewModel model)
+        public async Task LoadAsync(BaseViewModel model, List<IndexModel> additionalIndexModels = null)
         {
             using (Profiler.StepStatic("Create Ministry Models"))
             {
-                var ministryModels = await Repository.GetMinistriesAsync();
-                List<string> uncachedPostKeys = IndexModel.GetUncachedTopPostKeys(ministryModels).ToList();
-                uncachedPostKeys.AddRange(IndexModel.GetUncachedFeaturePostKeys(ministryModels));
+                var ministries = await Repository.GetMinistriesAsync();
+                List<string> uncachedPostKeys = IndexModel.GetTopPostKeys(ministries).ToList();
+                uncachedPostKeys.AddRange(IndexModel.GetFeaturePostKeys(ministries));
+                if (additionalIndexModels != null)
+                {
+                    var additionalIndexes = additionalIndexModels.Select(m => m.Index);
+                    uncachedPostKeys.AddRange(IndexModel.GetTopPostKeys(additionalIndexes));
+                    uncachedPostKeys.AddRange(IndexModel.GetFeaturePostKeys(additionalIndexes));
+                }
                 IEnumerable<Post> loadedPosts = await Repository.GetPostsAsync(uncachedPostKeys);
 
-                foreach (var ministryModel in ministryModels)
+                foreach (var ministry in ministries)
                 {
+                    var ministryModel = new IndexModel(ministry);
                     ministryModel.SetTopPost(loadedPosts);
                     ministryModel.SetFeaturePost(loadedPosts);
                     model.Ministries.Add(ministryModel);
                 }
+                if (additionalIndexModels != null)
+                {
+                    foreach (var indexModel in additionalIndexModels)
+                    {
+                        indexModel.SetTopPost(loadedPosts);
+                        indexModel.SetFeaturePost(loadedPosts);
+                    }
+                }
             }
 
             model.ResourceLinks = await Repository.GetResourceLinksAsync();
-            var homeSettings = (await Repository.GetHomeAsync()).Index as Home;
+            var homeSettings = await Repository.GetHomeAsync();
             model.WebcastingLive = !string.IsNullOrEmpty(homeSettings.LiveWebcastM3uPlaylist);
         }
 

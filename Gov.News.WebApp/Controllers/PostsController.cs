@@ -95,32 +95,32 @@ namespace Gov.News.Website.Controllers.Shared
 
         public async Task<PostViewModel> LoadDetails(Post post)
         {
-            IndexModel ministryModel = post != null ? await Repository.GetMinistryAsync(post.LeadMinistryKey) : null;
-            if (ministryModel == null) return null;
+            Ministry ministry = post != null ? await Repository.GetMinistryAsync(post.LeadMinistryKey) : null;
+            if (ministry == null) return null;
 
             PostViewModel model = new PostViewModel(post);
 
             await LoadAsync(model);
 
-            await ministryModel.LoadTopAndFeaturePosts(Repository);
+            model.LeadMinistry = model.Ministries.FirstOrDefault(m => m.Index.Key == post.LeadMinistryKey);
 
-            var posts = (await Repository.GetLatestPostsAsync(ministryModel, null)).ToList();
-            model.LeadMinistry = ministryModel;
             model.Minister = await Repository.GetMinisterAsync(post.LeadMinistryKey);
 
-            model.RelatedMinistryKeys = (await Repository.GetPostMinistriesAsync(post)).Select(m => m.Index.Key);
+            model.RelatedMinistryKeys = (await Repository.GetPostMinistriesAsync(post)).Select(m => m.Key);
 
-            model.RelatedSectorKeys = (await Repository.GetPostSectorsAsync(post)).Select(m => m.Index.Key);
+            model.RelatedSectorKeys = (await Repository.GetPostSectorsAsync(post)).Select(m => m.Key);
 
             //Load [RelatedArticlesLength] posts, excluding the current post
-            if (ministryModel.FeaturePost != null)
+            List<Post> posts = new List<Post>();
+            if (model.LeadMinistry.TopPost != null)
             {
-                posts.Insert(0, ministryModel.FeaturePost);
+                posts.Add(model.LeadMinistry.TopPost);
             }
-            if (ministryModel.TopPost != null)
+            if (model.LeadMinistry.FeaturePost != null)
             {
-                posts.Insert(0, ministryModel.TopPost);
+                posts.Add(model.LeadMinistry.FeaturePost);
             }
+            posts.AddRange(await Repository.GetLatestPostsAsync(ministry, RelatedArticlesLength - posts.Count + 1, null, MinistryFilter(ministry.Key)));
             model.RelatedArticles = posts.Where(e => e.Key != model.Post.Key).Take(RelatedArticlesLength);
 
             if (post.AssetUrl != null)
@@ -131,7 +131,7 @@ namespace Gov.News.Website.Controllers.Shared
                 }
             }
 
-            model.Footer = await GetFooter(ministryModel.Index as Category);
+            model.Footer = await GetFooter(ministry);
 
             model.FacebookPostDetailsDictionary = await GetFacebookAssetDetails(post.Documents);
 

@@ -24,11 +24,17 @@ namespace ViewComponentSample.ViewComponents
         }
         private async Task<IEnumerable<IndexModel>> GetItemsAsync()
         {
-            var sectorModels = await _repository.GetSectorsAsync();
+            var sectors = await _repository.GetSectorsAsync();
 
-            IEnumerable<Post> loadedPosts = await _repository.GetPostsAsync(IndexModel.GetUncachedTopPostKeys(sectorModels));
-            IndexModel.CacheTopPosts(sectorModels, loadedPosts);
+            IEnumerable<Post> loadedPosts = await _repository.GetPostsAsync(IndexModel.GetTopPostKeys(sectors));
 
+            var sectorModels = new List<IndexModel>();
+            foreach (var sector in sectors)
+            {
+                var sectorModel = new IndexModel(sector);
+                sectorModel.SetTopPost(loadedPosts);
+                sectorModels.Add(sectorModel);
+            }
             return sectorModels;
         }
     }
