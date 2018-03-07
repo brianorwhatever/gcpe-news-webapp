@@ -6,12 +6,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Gov.News.Api;
 using Gov.News.Api.Models;
-using Gov.News.Website.Models;
 using Gov.News.Website.Providers;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
+using Microsoft.Rest;
 
 namespace Gov.News.Website
 {
@@ -19,7 +20,7 @@ namespace Gov.News.Website
     {
         public const string APIVersion = "1.0";
         public IClient ApiClient { get; private set; }
-        public HubConnection apiConnection;
+        public bool apiConnected = true;
         static public Uri ContentDeliveryUri = null;
 
         internal Dictionary<Type, IDictionary<string, object>> _cache = new Dictionary<Type, IDictionary<string, object>>();
@@ -49,110 +50,120 @@ namespace Gov.News.Website
         /// <returns>The top level index for the site.</returns>
         public async Task StartSignalR()
         {
-            bool isReconnecting = apiConnection != null;
             while (true)
             {
                 try
                 {
                     string clientUrl = ApiClient.BaseUri.ToString() + "updates";
                     _logger.LogInformation("Starting SignalR Client with URL:" + clientUrl);
-                    apiConnection = new HubConnectionBuilder()
-                                    .WithUrl(clientUrl)
-                                    .WithLoggerFactory(_factory) // use the same logger as the app.
-                                    .Build();
+                    HubConnection api = new HubConnectionBuilder()
+                                                .WithUrl(clientUrl)
+                                                .WithLoggerFactory(_factory) // use the same logger as the app.
+                                                .Build();
 
-                    RegisterNotification<Minister>(false);
-                    RegisterNotification<Post>(false);
-                    RegisterNotification<Slide>(true);
-                    RegisterNotification<ResourceLink>(true);
+                    RegisterNotification<Minister>(api, (keys) => GetMinistersAsync(keys).GetAwaiter().GetResult());
+                    RegisterNotification<Post>(api, (keys) => GetPostsAsync(keys, true).GetAwaiter().GetResult());
+                    RegisterNotification<Home>(api, (ignore) => GetHomeAsync().GetAwaiter().GetResult());
 
-                    RegisterNotification<Home>(true);
-                    RegisterNotification<Service>(true);
-                    RegisterNotification<Theme>(true);
-                    RegisterNotification<Tag>(true);
-                    RegisterNotification<Sector>(true);
-                    RegisterNotification<Ministry>(true);
+                    RegisterNotification<Slide>(api, (ignore) => GetSlidesAsync().GetAwaiter().GetResult());
+                    RegisterNotification<ResourceLink>(api, (ignore) => GetResourceLinksAsync().GetAwaiter().GetResult());
+                    RegisterNotification<Service>(api, (ignore) => GetServicesAsync().GetAwaiter().GetResult());
+                    RegisterNotification<Theme>(api, (ignore) => GetThemesAsync().GetAwaiter().GetResult());
+                    RegisterNotification<Tag>(api, (ignore) => GetTagsAsync().GetAwaiter().GetResult());
+                    RegisterNotification<Sector>(api, (ignore) => GetSectorsAsync().GetAwaiter().GetResult());
+                    RegisterNotification<Ministry>(api, (ignore) => GetMinistriesAsync().GetAwaiter().GetResult());
 
-                    apiConnection.Closed += new Func<Exception, Task>(OnSignalRConnectionClosed);
-                    await apiConnection.StartAsync();
+                    api.Closed += new Func<Exception, Task>(OnSignalRConnectionClosed);
+                    await api.StartAsync();
+                    apiConnected = true;
                     _logger.LogInformation("SignalR Client Started");
-                    if (isReconnecting)
-                    {
-                        // We probably missed notifications => Clear all posts
-                        ClearOnChange<Post>(_cache[typeof(Post)], null);
-                    }
+                    // We probably missed notifications => Clear all entries
+                    ClearAllCaches();
                     return;
                 }
                 catch (Exception)
                 {
-                    apiConnection = null;
                     Thread.Sleep(10000); // 10 seconds
                 }
             }
         }
 
-        public void RegisterNotification<T>(bool invalidateOnUpdate = false) where T : DataModel
-        {
-            RegisterNotification<T>(_cache, invalidateOnUpdate);
-        }
-
-        public void RegisterNotification<T>(IDictionary<Type, IDictionary<string, object>> cache, bool invalidateOnUpdate = false) where T : DataModel
+        public void RegisterNotification<T>(HubConnection api, Func<IEnumerable<string>, object> updateFn) where T : DataModel
         {
             var type = typeof(T);
             IDictionary<string, object> cacheForType;
-            if (!cache.TryGetValue(type, out cacheForType))
+            if (!_cache.TryGetValue(type, out cacheForType))
             {
                 cacheForType = new Dictionary<string, object>();
-                cache.Add(type, cacheForType);
+                _cache.Add(type, cacheForType);
             }
             var notificationMethod = type.Name + "Update";
-            apiConnection.On<List<string>>(notificationMethod, updatedKeys => ClearOnChange<T>(cacheForType, updatedKeys, invalidateOnUpdate));
+            api.On<IEnumerable<string>>(notificationMethod, updatedKeys => ClearOnChange<T>(cacheForType, updatedKeys, updateFn));
 
             //apiConnection.InvokeAsync("SubscribeToAll");
             //apiConnection.InvokeAsync("SubscribeTo", "Ministry")
         }
 
-        public void ClearOnChange<T>(IDictionary<string, object> cacheForType, IList<string> updatedKeys, bool invalidateOnUpdate = true)
+        public void ClearOnChange<T>(IDictionary<string, object> cacheForType, IEnumerable<string> updatedKeys, Func<IEnumerable<string>, object> updateFn)
             where T : DataModel
         {
             var type = typeof(T);
-            if (updatedKeys != null)
+            if (updatedKeys.Count() == 0)
             {
-                if (updatedKeys.Count() == 0)
-                {
-                    _logger.LogInformation("SignalR alpha work around ping");
-                }
-                else
-                {
-                    _logger.LogInformation("SignalR {0} Update for keys {1}", type.Name, string.Join(", ", updatedKeys));
-                }
+                _logger.LogInformation("SignalR alpha work around ping");
             }
-            if (type == typeof(Post))
+            else
             {
-                ClearAllIndexPosts();
-            }
-            lock (cacheForType)
-            {
-                if (invalidateOnUpdate || updatedKeys == null)
+                _logger.LogInformation("SignalR {0} Update for keys {1}", type.Name, string.Join(", ", updatedKeys));
+                bool isPostUpdate = type.Name == "Post";
+                if (!isPostUpdate && type.Name != "Minister")
                 {
                     cacheForType.Clear();
-                    return;
                 }
-                foreach (var updatedKey in updatedKeys)
+                // call the API server (maybe be a different one)
+                var update = updateFn(updatedKeys);
+                if (isPostUpdate)
                 {
-                    _logger.LogInformation("Clearing key " + updatedKey);
-                    cacheForType.Remove(updatedKey);
+                    lock (cacheForType)
+                    {
+                        var updatedPosts = update as IList<Post>;
+                        bool need2ReSortPosts = false;
+                        foreach (string key in updatedKeys)
+                        {
+                            Post updatedPost = updatedPosts.FirstOrDefault(p => p.Key == key);
+                            if (updatedPost == null)
+                            {
+                                cacheForType.Remove(key); // post unpublished
+                                continue;
+                            }
+                            object cachedPost;
+                            cacheForType.TryGetValue(key, out cachedPost);
+                            need2ReSortPosts |= cachedPost == null || ((Post)cachedPost).PublishDate != updatedPost.PublishDate;
+                            cacheForType[key] = updatedPost;
+                        }
+                        PurgeCache<T>(cacheForType, NUM_CACHED_POSTS * 2);
+                        if (need2ReSortPosts)
+                        {
+                            var newPostList = cacheForType.OrderByDescending(m => ((Post)m.Value).PublishDate).ToList();
+                            cacheForType.Clear();
+                            foreach (KeyValuePair<string, object> p in newPostList)
+                            {
+                                cacheForType.Add(p);
+                            }
+                        }
+                    }
                 }
             }
         }
 
         public async Task OnSignalRConnectionClosed(Exception ex)
         {
+            apiConnected = false;
             _logger.LogError("SignalR Client Connection closed !");
             await StartSignalR();
         }
 
-        public void ClearAllIndexPosts()
+        public void ClearAllCaches()
         {
             foreach (var cacheForType in _cache.Values)
             {
@@ -201,10 +212,19 @@ namespace Gov.News.Website
             return result;
         }
 
-        #region GetAsync
-        private async Task<T> GetDataModelAsync<T>(string key, Func<Task<T>> taskFn, int maxSize = 100) where T : DataModel
+        private Func<Task<T>> ConfigureAwaitFunction<T>(Func<Task<HttpOperationResponse<T>>> taskFn) // where T is a DataModel or a List of DataModels
         {
-            IDictionary<string, object> cacheForType = _cache[typeof(T)];
+            return async () =>
+            {
+                using (var _result = await taskFn().ConfigureAwait(false))
+                {
+                    return _result.Body;
+                }
+            };
+        }
+
+        private void PurgeCache<T>(IDictionary<string, object> cacheForType, int maxSize) where T : DataModel
+        {
             if (cacheForType.Count > maxSize)
             {
                 lock (cacheForType)
@@ -215,14 +235,20 @@ namespace Gov.News.Website
                     }
                 }
             }
-            return await GetAsync(key, taskFn, cacheForType);
+        }
+        #region GetAsync
+        private async Task<T> GetDataModelAsync<T>(string key, Func<Task<HttpOperationResponse<T>>> updateFn, int maxSize = 100) where T : DataModel
+        {
+            IDictionary<string, object> cacheForType = _cache[typeof(T)];
+            PurgeCache<T>(cacheForType, maxSize);
+            return await GetAsync(key, ConfigureAwaitFunction(updateFn), cacheForType);
         }
 
         private async Task<T> GetExpiringAsync<T>(string key, Func<Task<T>> taskFn, int expireMinutes = 2) where T : DataModel
         {
             IDictionary<string, object> cacheForType = _cache[typeof(T)];
             T model = await GetAsync(key, taskFn, cacheForType);
-            if (model != null && model.Timestamp < DateTime.Now.AddMinutes(-expireMinutes) && apiConnection != null)
+            if (model != null && model.Timestamp < DateTime.Now.AddMinutes(-expireMinutes) && apiConnected)
             {
                 lock (cacheForType)
                 {
@@ -240,7 +266,7 @@ namespace Gov.News.Website
             lock (cacheForType)
             {
                 object cachedEntry;
-                if (cacheForType.TryGetValue(key, out cachedEntry))
+                if (cacheForType.TryGetValue(key, out cachedEntry) || !apiConnected)
                 {
                     return (T)cachedEntry;
                 }
@@ -257,9 +283,9 @@ namespace Gov.News.Website
         #endregion
 
         #region GetListAsync
-        private async Task<IList<T>> GetListAsync<T>(Func<Task<IList<T>>> taskFn) where T : DataModel, new()
+        private async Task<IList<T>> GetListAsync<T>(Func<Task<HttpOperationResponse<IList<T>>>> taskFn) where T : DataModel, new()
         {
-            return await GetListAsync(taskFn, _cache[typeof(T)], (item) => item);
+            return await GetListAsync(ConfigureAwaitFunction(taskFn), _cache[typeof(T)], (item) => item);
         }
 
         private async Task<IEnumerable<T>> GetExpiringListAsync<T>(Func<Task<IList<T>>> taskFn, int expireMinutes = 2) where T : DataModel, new()
@@ -268,7 +294,7 @@ namespace Gov.News.Website
             lock (cacheForType)
             {
                 var maxAge = DateTime.Now.AddMinutes(-expireMinutes);
-                if (cacheForType.Any(e => ((T)e.Value).Timestamp < maxAge))
+                if (cacheForType.Any(e => ((T)e.Value).Timestamp < maxAge) && apiConnected)
                 {
                     cacheForType.Clear();
                 }
@@ -303,45 +329,46 @@ namespace Gov.News.Website
 
         #endregion
 
+        public static Dictionary<string, List<string>> MustRevalidateHeader()
+        {
+            var list = new List<string>() { CacheControlHeaderValue.MustRevalidateString };
+            return new Dictionary<string, List<string>>() { { HeaderNames.CacheControl, list } };
+        }
+
         public async Task<Minister> GetMinisterAsync(string ministryKey)
         {
-            return await GetDataModelAsync(ministryKey, () => ApiClient.Ministries.GetMinisterAsync(ministryKey, APIVersion));
+            return await GetDataModelAsync(ministryKey, () => ApiClient.Ministries.GetMinisterWithHttpMessagesAsync(ministryKey, APIVersion, MustRevalidateHeader()));
+        }
+
+        public async Task<IList<Minister>> GetMinistersAsync(IEnumerable<string> ministryKeys)
+        {
+            var ministers = new List<Minister>();
+            foreach (var ministryKey in ministryKeys)
+            {
+                ministers.Add(await GetMinisterAsync(ministryKey));
+            }
+            return ministers;
         }
 
         public async Task<Ministry> GetMinistryAsync(string key)
         {
-            return await GetDataModelAsync(key, async () => (await GetMinistriesAsync(true)).SingleOrDefault(m => m.Key == key));
+            return (await GetMinistriesAsync(true)).SingleOrDefault(m => m.Key == key);
             // Do not API fetch 1 ministry at a time as it messes up the cache
         }
 
         public async Task<Sector> GetSectorAsync(string key)
         {
-            return await GetDataModelAsync(key, async () => (await GetSectorsAsync()).SingleOrDefault(s => s.Key == key));
-        }
-
-        public async Task<Service> GetServiceAsync(string key)
-        {
-            return await GetDataModelAsync(key, async () => (await GetServicesAsync()).SingleOrDefault(s => s.Key == key));
-        }
-
-        public async Task<Tag> GetTagAsync(string key)
-        {
-            return await GetDataModelAsync(key, async () => (await GetTagsAsync()).SingleOrDefault(t => t.Key == key));
-        }
-
-        public async Task<Theme> GetThemeAsync(string key)
-        {
-            return await GetDataModelAsync(key, async () => (await GetThemesAsync()).SingleOrDefault(t => t.Key == key));
+            return (await GetSectorsAsync()).SingleOrDefault(s => s.Key == key);
         }
 
         public async Task<Home> GetHomeAsync()
         {
-            return await GetDataModelAsync<Home>("default", async () => await ApiClient.Home.GetAsync(APIVersion));
+            return await GetDataModelAsync("default", async () => await ApiClient.Home.GetWithHttpMessagesAsync(APIVersion, MustRevalidateHeader()));
         }
 
         public async Task<Slide> GetSlideAsync(string id)
         {
-            return await GetDataModelAsync(id, async () => (await GetSlidesAsync()).SingleOrDefault(s => s.Key == id));
+            return (await GetSlidesAsync()).SingleOrDefault(s => s.Key == id);
         }
 
         public async Task<Edition> GetEditionAsync(string newsletterKey, string editionKey)
@@ -370,7 +397,7 @@ namespace Gov.News.Website
             {
                 try
                 {
-                    return await GetDataModelAsync(key, () => ApiClient.Posts.GetOneAsync(key, APIVersion), MAX_NUM_CACHED_POSTS);
+                    return (await GetPostsAsync(new List<string>() { key })).FirstOrDefault();
                 }
                 catch (Exception) { }
             }
@@ -384,7 +411,7 @@ namespace Gov.News.Website
 
         public async Task<IList<Ministry>> GetMinistriesAsync(bool includeInactive = false)
         {
-            IList<Ministry> allMinistries = await GetListAsync(() => ApiClient.Ministries.GetAllAsync(APIVersion));
+            IList<Ministry> allMinistries = await GetListAsync(() => ApiClient.Ministries.GetAllWithHttpMessagesAsync(APIVersion, MustRevalidateHeader()));
 
             if (includeInactive)
                 return allMinistries;
@@ -394,10 +421,10 @@ namespace Gov.News.Website
 
         public async Task<IList<Sector>> GetSectorsAsync()
         {
-            return await GetListAsync(() => ApiClient.Sectors.GetAllAsync(APIVersion));
+            return await GetListAsync(() => ApiClient.Sectors.GetAllWithHttpMessagesAsync(APIVersion, MustRevalidateHeader()));
         }
 
-        public async Task<IList<Post>> GetPostsAsync(IEnumerable<string> postKeys)
+        public async Task<IList<Post>> GetPostsAsync(IEnumerable<string> postKeys, bool revalidate = false)
         {
             postKeys = postKeys.Distinct();
             var posts = new List<Post>();
@@ -409,30 +436,25 @@ namespace Gov.News.Website
                 {
                     foreach (var postKey in postKeys)
                     {
-                        if (!cacheForType.ContainsKey(postKey))
+                        object post;
+                        if (revalidate || !cacheForType.TryGetValue(postKey, out post))
                         {
                             postKeysToFetch.Add(postKey);
                         }
+                        else
+                        {
+                            posts.Add((Post)post);
+                        }
                     }
                 }
-                IList<Post> postsAsked = null;
-                if (postKeysToFetch.Any())
+                if (postKeysToFetch.Any() && apiConnected)
                 {
-                    postsAsked = await ApiClient.Posts.GetAsync(APIVersion, postKeysToFetch);
-                }
+                    var customHeaders = revalidate ? MustRevalidateHeader() : null;
+                    IList<Post> postsAsked = await ConfigureAwaitFunction(() => ApiClient.Posts.GetWithHttpMessagesAsync(APIVersion, postKeysToFetch, customHeaders))();
 
-                lock (cacheForType)
-                {
-                    foreach (var postKey in postKeys)
+                    lock (cacheForType)
                     {
-                        object post;
-                        if (!cacheForType.TryGetValue(postKey, out post) && postsAsked != null)
-                        {
-                            post = postsAsked.SingleOrDefault(p => p.Key == postKey);
-                            if (post == null) continue;
-                            //cacheForType.Add(postKey, post);
-                        }
-                        posts.Add((Post)post);
+                        posts.AddRange(postsAsked);
                     }
                 }
             }
@@ -441,27 +463,27 @@ namespace Gov.News.Website
 
         public async Task<IList<Service>> GetServicesAsync()
         {
-            return await GetListAsync(() => ApiClient.Services.GetAllAsync(APIVersion));
+            return await GetListAsync(() => ApiClient.Services.GetAllWithHttpMessagesAsync(APIVersion, MustRevalidateHeader()));
         }
 
         public async Task<IList<Theme>> GetThemesAsync()
         {
-            return await GetListAsync(() => ApiClient.Themes.GetAllAsync(APIVersion));
+            return await GetListAsync(() => ApiClient.Themes.GetAllWithHttpMessagesAsync(APIVersion, MustRevalidateHeader()));
         }
 
         public async Task<IList<Tag>> GetTagsAsync()
         {
-            return await GetListAsync<Tag>(() => ApiClient.Tags.GetAllAsync(APIVersion));
+            return await GetListAsync(() => ApiClient.Tags.GetAllWithHttpMessagesAsync(APIVersion, MustRevalidateHeader()));
         }
 
         public async Task<IList<Slide>> GetSlidesAsync()
         {
-            return await GetListAsync(() => ApiClient.Slides.GetAllAsync(APIVersion));
+            return await GetListAsync(() => ApiClient.Slides.GetAllWithHttpMessagesAsync(APIVersion, MustRevalidateHeader()));
         }
 
         public async Task<IEnumerable<ResourceLink>> GetResourceLinksAsync()
         {
-            return await GetListAsync(() => ApiClient.ResourceLinks.GetAllAsync(APIVersion));
+            return await GetListAsync(() => ApiClient.ResourceLinks.GetAllWithHttpMessagesAsync(APIVersion, MustRevalidateHeader()));
         }
 
         public async Task<Asset> GetFlickrAssetAsync(string assetUri)
@@ -504,7 +526,7 @@ namespace Gov.News.Website
             return await GetExpiringListAsync(() => ApiClient.Newsletters.GetAllAsync(APIVersion));
         }
 
-        const int MAX_NUM_CACHED_POSTS = 2000;
+        const int NUM_CACHED_POSTS = 2000;
         /// <summary>
         /// Get the next count posts of type postKind for the specified index (newsroom or category)
         /// </summary>
@@ -527,7 +549,7 @@ namespace Gov.News.Website
             }
 
             bool cacheClearHappenedWhileUserIsBrowsingOldReleases = skip > filteredPosts.Count();
-            bool canBeCached = skip < MAX_NUM_CACHED_POSTS && (postKind == null || postKind == "factsheets") && categoryFilter == null && !cacheClearHappenedWhileUserIsBrowsingOldReleases;
+            bool canBeCached = skip < NUM_CACHED_POSTS && (postKind == null || postKind == "factsheets") && categoryFilter == null && !cacheClearHappenedWhileUserIsBrowsingOldReleases;
 
             int skipToAsk = canBeCached ? filteredPosts.Count() : skip;
             if (postKind == null)
@@ -541,9 +563,9 @@ namespace Gov.News.Website
 
             bool useCache = skip + count <= filteredPosts.Count(); // enough posts in the cache to use it?
             IEnumerable<Post> fetchedPosts = null;
-            if (canBeCached || !useCache)
+            if ((canBeCached || !useCache) && apiConnected)
             {
-                // Ask for more when we can cache it. Also we don't want to end up with a request where part of the posts is coming from cache (say we have 110 posts and we ask from 105 to 115)
+                // Ask for more when we can cache it.
                 int countToAsk = canBeCached ? ProviderHelpers.MaximumLatestNewsItemsLoadMore * 5 : count;
                 fetchedPosts = await ApiClient.Posts.GetLatestAsync(index.Kind, index.Key, APIVersion, postKind, countToAsk, skipToAsk);
                 if (canBeCached)
