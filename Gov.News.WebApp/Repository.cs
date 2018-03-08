@@ -116,9 +116,22 @@ namespace Gov.News.Website
             {
                 _logger.LogInformation("SignalR {0} Update for keys {1}", type.Name, string.Join(", ", updatedKeys));
                 bool isPostUpdate = type.Name == "Post";
-                if (!isPostUpdate && type.Name != "Minister")
+                if (!isPostUpdate)
                 {
-                    cacheForType.Clear();
+                    lock (cacheForType)
+                    {
+                        if (type.Name == "Minister")
+                        {
+                            foreach (string key in updatedKeys)
+                            {
+                                cacheForType.Remove(key);
+                            }
+                        }
+                        else
+                        {
+                            cacheForType.Clear();
+                        }
+                    }
                 }
                 // call the API server (maybe be a different one)
                 var update = updateFn(updatedKeys);
@@ -126,6 +139,7 @@ namespace Gov.News.Website
                 {
                     lock (cacheForType)
                     {
+                        var oldestPost = cacheForType.Any() ? (Post)cacheForType.TakeLast(1).SingleOrDefault().Value : null;
                         var updatedPosts = update as IList<Post>;
                         bool need2ReSortPosts = false;
                         foreach (string key in updatedKeys)
@@ -136,6 +150,7 @@ namespace Gov.News.Website
                                 cacheForType.Remove(key); // post unpublished
                                 continue;
                             }
+                            if (oldestPost == null || oldestPost.PublishDate > updatedPost.PublishDate) continue; // Can't insert as it would probably out of order
                             object cachedPost;
                             cacheForType.TryGetValue(key, out cachedPost);
                             need2ReSortPosts |= cachedPost == null || ((Post)cachedPost).PublishDate != updatedPost.PublishDate;
@@ -549,7 +564,7 @@ namespace Gov.News.Website
             }
 
             bool cacheClearHappenedWhileUserIsBrowsingOldReleases = skip > filteredPosts.Count();
-            bool canBeCached = skip < NUM_CACHED_POSTS && (postKind == null || postKind == "factsheets") && categoryFilter == null && !cacheClearHappenedWhileUserIsBrowsingOldReleases;
+            bool canBeCached = (postKind == null || postKind == "factsheets") && categoryFilter == null && postCountB4ApiCall < NUM_CACHED_POSTS && !cacheClearHappenedWhileUserIsBrowsingOldReleases;
 
             int skipToAsk = canBeCached ? filteredPosts.Count() : skip;
             if (postKind == null)

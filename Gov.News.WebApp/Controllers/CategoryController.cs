@@ -25,10 +25,10 @@ namespace Gov.News.Website.Controllers
 
             var index = await GetDataIndex(key, category) as Category;
 
-            var model = await GetModel(index, postKind);
-
-            if (model == null)
+            if (index == null)
                 return await SearchNotFound();
+
+            var model = await GetModel(index, postKind);
 
             ViewBag.Type = postKind;
             return View("CategoryView", model);
