@@ -38,7 +38,7 @@ podTemplate(label: 'owasp-zap', name: 'owasp-zap', serviceAccount: 'jenkins', cl
     args: '${computer.jnlpmac} ${computer.name}'
   )
 ]) {
-     node('zap') {
+     node('owasp-zap') {
        stage('ZAP Security Scan') {
          dir('/zap') {
                 def retVal = sh returnStatus: true, script: '/zap/zap-baseline.py -r baseline.html -t https://dev.news.gov.bc.ca'
