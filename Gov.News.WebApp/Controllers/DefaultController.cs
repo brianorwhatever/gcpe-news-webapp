@@ -54,11 +54,9 @@ namespace Gov.News.Website.Controllers
             if (!string.Equals(type, "feed", StringComparison.OrdinalIgnoreCase))
                 throw new NotImplementedException();
 
-            var categoryModels = await GetAllCategoryModels();
-            // Ensure that the top posts are cached
-            IndexModel.CacheTopPosts(categoryModels, await Repository.GetPostsAsync(IndexModel.GetUncachedTopPostKeys(categoryModels)));
+            var topKeys = IndexModel.GetTopPostKeys(await GetAllCategories());
 
-            var model = GetSyndicationFeedViewModel("Top Stories", categoryModels.Select(m => m.TopPost));
+            var model = await GetSyndicationFeedViewModel("Top Stories", topKeys);
             return await GetNewsFeedContent(format, model, false, false);
         }
 
@@ -68,10 +66,9 @@ namespace Gov.News.Website.Controllers
             if (!string.Equals(type, "feed", StringComparison.OrdinalIgnoreCase))
                 throw new NotImplementedException();
 
-            var categoryModels = await GetAllCategoryModels();
-            IndexModel.CacheFeaturePosts(categoryModels, await Repository.GetPostsAsync(IndexModel.GetUncachedFeaturePostKeys(categoryModels)));
+            var featureKeys = IndexModel.GetFeaturePostKeys(await GetAllCategories());
 
-            var model = GetSyndicationFeedViewModel("Featured Stories", categoryModels.Select(m => m.FeaturePost));
+            var model = await GetSyndicationFeedViewModel("Featured Stories", featureKeys);
             return await GetNewsFeedContent(format, model, false, false);
         }
 
@@ -383,7 +380,7 @@ namespace Gov.News.Website.Controllers
                         new Link() {Url ="http://www.healthlinkbc.ca/publichealthalerts", Title = "HealthLinkBC" },
                     };
             var ministries = model.Ministries.Select(m => m.Index).OrderBy(c => c.Name == "Office of the Premier" ? 0 : 1).ThenBy(c => c.Name);
-            var sectors = (await Repository.GetSectorsAsync()).Select(m => m.Index);
+            var sectors = await Repository.GetSectorsAsync();
             var categories = ministries.Union(sectors.OrderBy(c => c.Name)).ToList();
             foreach (var category in categories)
                 rssLinks.Add(new Link() { Url = category.GetUri().ToString().TrimEnd('/') + "/feed", Title = category.Name });
@@ -400,23 +397,23 @@ namespace Gov.News.Website.Controllers
             return model;
         }
 
-        public async Task<IList<IndexModel>> GetAllCategoryModels()
+        public async Task<IList<DataIndex>> GetAllCategories()
         {
-            List<IndexModel> categoryModels = new List<IndexModel> { await Repository.GetHomeAsync() };
+            var categoryModels = new List<DataIndex> { await Repository.GetHomeAsync() };
             categoryModels.AddRange(await Repository.GetMinistriesAsync());
             categoryModels.AddRange(await Repository.GetSectorsAsync());
             //categoryModels.AddRange(await Repository.GetThemesAsync());
             return categoryModels;
         }
 
-        public SyndicationFeedViewModel GetSyndicationFeedViewModel(string title, IEnumerable<Post> entries)
+        public async Task<SyndicationFeedViewModel> GetSyndicationFeedViewModel(string title, IEnumerable<string> postKeys)
         {
             var model = new SyndicationFeedViewModel();
             model.AlternateUri = new Uri(Configuration["NewsHostUri"]);
 
             model.Title = title;
             model.AlternateUri = null;
-            model.Entries = entries.Where(e => e != null).Take(ProviderHelpers.MaximumSyndicationItems);
+            model.Entries = (await Repository.GetPostsAsync(postKeys.Take(ProviderHelpers.MaximumSyndicationItems))).Where(e => e != null);
 
             return model;
         }
