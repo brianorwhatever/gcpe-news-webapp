@@ -7,15 +7,10 @@ namespace Gov.News.Website.Models
 {
     public class IndexModel
     {
-        public IndexModel()
-        {
-            LatestNews = new List<Post>();
-        }
-
-        public IndexModel(DataIndex index)
+        public IndexModel(DataIndex index, IEnumerable<Post> latestNews = null)
         {
             Index = index;
-            LatestNews = new List<Post>();
+            LatestNews = latestNews ?? new List<Post>();
         }
 
         public DataIndex Index { get; set; }
@@ -24,32 +19,29 @@ namespace Gov.News.Website.Models
 
         public Post FeaturePost { get; private set; }
 
-        // cache for the default postType (releases+stories not factsheets)
-        public IList<Post> LatestNews { get; private set; }
+        public IEnumerable<Post> LatestNews { get; private set; }
 
-        public void AddTopPostKeyToLoad(IList<string> postKeys)
+        public static void AddTopPostKeyToLoad(DataIndex index, IList<string> postKeys)
         {
-            if (TopPost == null && Index.TopPostKey != null)
+            if (index.TopPostKey != null)
             {
-                postKeys.Insert(0, Index.TopPostKey);
+                postKeys.Insert(0, index.TopPostKey);
             }
         }
-        public void AddFeaturePostKeyToLoad(IList<string> postKeys)
+        public static void AddFeaturePostKeyToLoad(DataIndex index, IList<string> postKeys)
         {
-            if (FeaturePost == null && Index.FeaturePostKey != null)
+            if (index.FeaturePostKey != null)
             {
-                postKeys.Insert(0, Index.FeaturePostKey);
+                postKeys.Insert(0, index.FeaturePostKey);
             }
         }
 
-        public async Task LoadTopAndFeaturePosts(Repository repository)
+        public static async Task<IEnumerable<Post>> LoadTopAndFeaturePosts(DataIndex index, Repository repository)
         {
             List<string> postKeys = new List<string>();
-            AddTopPostKeyToLoad(postKeys);
-            AddFeaturePostKeyToLoad(postKeys);
-            var loadedPosts = await repository.GetPostsAsync(postKeys);
-            SetTopPost(loadedPosts);
-            SetFeaturePost(loadedPosts);
+            AddTopPostKeyToLoad(index, postKeys);
+            AddFeaturePostKeyToLoad(index, postKeys);
+            return await repository.GetPostsAsync(postKeys);
         }
 
         public void SetTopPost(IEnumerable<Post> loadedPosts)
@@ -61,28 +53,13 @@ namespace Gov.News.Website.Models
             FeaturePost = loadedPosts.SingleOrDefault(p => p.Key == Index.FeaturePostKey) ?? FeaturePost;
         }
 
-        public static IEnumerable<string> GetUncachedTopPostKeys(IEnumerable<IndexModel> indexModels)
+        public static IEnumerable<string> GetTopPostKeys(IEnumerable<DataIndex> dataIndexes)
         {
-            return indexModels.Where(m => m.TopPost == null && m.Index.TopPostKey != null).Select(m => m.Index.TopPostKey);
+            return dataIndexes.Where(m => m.TopPostKey != null).Select(m => m.TopPostKey);
         }
-        public static IEnumerable<string> GetUncachedFeaturePostKeys(IEnumerable<IndexModel> indexModels)
+        public static IEnumerable<string> GetFeaturePostKeys(IEnumerable<DataIndex> dataIndexes)
         {
-            return indexModels.Where(m => m.FeaturePost == null && m.Index.FeaturePostKey != null).Select(m => m.Index.FeaturePostKey);
-        }
-
-        public static void CacheTopPosts(IEnumerable<IndexModel> indexModels, IEnumerable<Post> loadedPosts)
-        {
-            foreach (var indexModel in indexModels)
-            {
-                indexModel.SetTopPost(loadedPosts);
-            }
-        }
-        public static void CacheFeaturePosts(IEnumerable<IndexModel> indexModels, IEnumerable<Post> loadedPosts)
-        {
-            foreach (var indexModel in indexModels)
-            {
-                indexModel.SetFeaturePost(loadedPosts);
-            }
+            return dataIndexes.Where(m => m.FeaturePostKey != null).Select(m => m.FeaturePostKey);
         }
     }
 }

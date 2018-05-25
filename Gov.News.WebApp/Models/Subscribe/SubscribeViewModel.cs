@@ -10,9 +10,9 @@ namespace Gov.News.Website.Models.Subscribe
 
         public IEnumerable<Newsletter> Newsletters { get; set; }
 
-        public IEnumerable<IndexModel> Sectors { get; set; }
+        public IEnumerable<DataIndex> Sectors { get; set; }
 
-        public IEnumerable<IndexModel> Services { get; set; }
+        public IEnumerable<DataIndex> Services { get; set; }
 
         public IEnumerable<KeyValuePair2> Tags { get; set; }
 

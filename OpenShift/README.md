@@ -79,15 +79,21 @@ If you are working with a new set of OpenShift projects, or you have run a `oc d
 
 ### Generating the Builds, Images and Pipelines in the Tools Project
 
-Run;
+Run the following script to generate the builds, images and pipelines:
 ```
 genBuilds.sh
 ```
-, and follow the instructions.
+
+(use `genBuilds.sh -l` if you are deploying to a local instance of OpenShift)
+
 
 All of the builds should start automatically as their dependencies are available, starting with builds with only docker image and source dependencies.
 
 The process of deploying the Jenkins pipelines will automatically provision a Jenkins instance if one does not already exist.  This makes it easy to start fresh; you can simply delete the existing instance along with it's associated PVC, and fresh instances will be provisioned.
+
+### Jenkins Configuration
+
+If you wish to use the full pipeline definition, with support for advanced functional testing, security scans etc, please see [this document](Jenkins.md).  
 
 ### Generate the Deployment Configurations and Deploy the Components
 
@@ -99,9 +105,9 @@ genDepls.sh -e <environmentName/>
 
 ### Wire up your Jenkins Pipelines
 
-When the Jenkins Pipelines were provisioned when your ran `genBuilds.sh` web-hook URLs and secrets were generated automatically.  To trigger the pipelines via GIT commits, register the URL(s) for the pipelines with GIT.
+By design the pipeline definitions have web hook secrets not included.  These can be added using the Web interface for OpenShift; locate the pipeline you wish to configure a web hook for, and use the Edit action menu option.  Click "Show advanced options" to enable the Web Hook fields, and then add a new web hook by using the Add WebHook form.  Be sure to choose  Github as the type.
 
-Copy and paste the pipeline's web-hook url into the Payload URL of the GIT web-hook (it comes complete with the secret).
+Copy and paste the pipeline's web-hook url into the Payload URL of the GIT web-hook (it comes complete with the secret).  Be sure to click Save before you close the edit form.
 
 Set the content type to **application/json**
 
