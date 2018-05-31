@@ -1,17 +1,10 @@
 ﻿<div class="resource-links connect share">
     <h6>Share</h6>
     <ul>
-        <li class="facebook-action facebook-share"><a href="https://www.facebook.com/sharer/sharer.php?u=@Model.CanonicalUri" onclick="openWindow(); return false;" class="share-facebook" title="Facebook"> </a></li>
+        <li class="facebook-action facebook-share"><a href="https://www.facebook.com/sharer/sharer.php?u=@Model.CanonicalUri" onclick="window.open(this.href, 'newwindow', 'width=400, height=550'); return false;" class="share-facebook" title="Facebook"> </a></li>
         <li><a href="#" class="share-twitter" title="Twitter"></a></li>
         <li><a href="mailto:?subject=@Model.Title&body=@Model.CanonicalUri" class="share-email" title="Email"> </a></li>
         @*<li><a href="#" class="share-this" title="Add This"> </a></li>*@
     </ul>
 </div>
-
-<script>
-    function openWindow() {
-        var win = window.open(this.href, 'newwindow', 'width=400, height=550');
-        console.log(win.document.body.innerHTML);
-    }
-</script>
 
