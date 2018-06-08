@@ -367,10 +367,12 @@
 
             <div class="story-copy story-lang secondary collapsed">
                 <div class="story-expander">
-                    <!--googleon: all-->
-                    @AssetHelper.RenderAssetsInHtml(firstFrenchDoc.DetailsHtml, 695, Model.FacebookPostDetailsDictionary).ShowLinks()
-                    <!--googleoff: all-->
-                    <div class="article-fade"> </div>
+                    <article>
+                        <!--googleon: all-->
+                        @AssetHelper.RenderAssetsInHtml(firstFrenchDoc.DetailsHtml, 695, Model.FacebookPostDetailsDictionary).ShowLinks()
+                        <!--googleoff: all-->
+                        <div class="article-fade"> </div>
+                    </article>
                 </div>
                 <a href="#" class="link-button expand">Voir plus</a>
                 <a href="#" class="link-button collapse">Voir moins</a>
@@ -379,10 +381,12 @@
 
         <div class="story-copy story-lang primary collapsed">
             <div class="story-expander">
-                <!--googleon: all-->
-                @AssetHelper.RenderAssetsInHtml(firstDoc.DetailsHtml, 695, Model.FacebookPostDetailsDictionary).ShowLinks()
-                <!--googleoff: all-->
-                <div class="article-fade"> </div>
+                <article>
+                    <!--googleon: all-->
+                    @AssetHelper.RenderAssetsInHtml(firstDoc.DetailsHtml, 695, Model.FacebookPostDetailsDictionary).ShowLinks()
+                    <!--googleoff: all-->
+                    <div class="article-fade"> </div>
+                </article>
             </div>
             <a href="#" class="link-button expand">Expand Story</a>
             <a href="#" class="link-button collapse">Contract Story</a>
