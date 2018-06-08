@@ -20,7 +20,7 @@ namespace Gov.News.Website.Models
 
         public BaseViewModel()
         {
-            OGMetaImageUrl = new Uri(Properties.Settings.Default.NewsHostUri, "/Content/Images/Gov/default-og-meta-image-1.jpg");
+            OGMetaImageUrl = new Uri(Properties.Settings.Default.NewsHostUri, "/Content/Images/Gov/default-og-meta-image.jpg");
 
             Ministries = new List<IndexModel>();
         }
