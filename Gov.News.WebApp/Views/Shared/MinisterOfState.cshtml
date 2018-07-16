@@ -11,12 +11,12 @@
 {
     <div class="resource-links minister">
         <h5>@Ministry.Name</h5>
-        
+
         <img src="@Minister.Photo" />
         <h5>@Minister.Headline</h5>
 
         @Minister.Summary.AsHtmlParagraphs()
-        
+
         <a href="@Ministry.GetMinisterUri()" class="read-more">Read Bio</a>
 
         @if (!string.IsNullOrWhiteSpace(Minister.EmailHtml))
@@ -25,7 +25,18 @@
             <p>Email: @Html.Raw(Minister.EmailHtml)</p>
         }
         <ul>
-            <li><a href="@Ministry.GetUri()">Visit Minister of State Website</a></li>
+            <li>
+                <a href="@Ministry.GetUri()">
+                    @if (Ministry.Key == "emergency-preparedness")@*this is a workaround to address: https://apps.gcpe.gov.bc.ca/jira/browse/SDI-6589 which is a special case for emergency preparedness since they no longer have a minister of state*@
+                    {
+                        @:Visit Website
+                    }
+                    else
+                    {
+                        @:Visit Minister of State Website
+                    }
+                </a>
+            </li>
         </ul>
     </div>
 }
