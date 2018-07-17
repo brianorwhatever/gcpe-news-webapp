@@ -58,7 +58,7 @@
             <div class="news-control">
 
                 @*TODO: Figure out what is wrong with the following line of code; it should not be hard-coded to factsheets.*@
-                @if (ViewBag.Type != null && ViewBag.Type == "factsheets" && Model.IndexModel.LatestNews != null && Model.IndexModel.LatestNews.Count() > 1)
+                @if (ViewBag.Type != null && ViewBag.Type == "factsheets" && Model.IndexModel.LatestNews.Count() > 1)
                 {
                     @Html.ActionLink("Search News", "Search", "Default", new { content = "factsheets", ministry = Model.Category.Key }, new { @class = "read-more" })
                     <a href="#" class="load-more link-button">Load More Factsheets</a>
