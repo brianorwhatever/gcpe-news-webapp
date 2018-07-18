@@ -37,11 +37,6 @@
             <h3>Factsheets</h3>
         }
 
-        @if (ViewBag.Type == "factsheets" && Model.IndexModel.LatestNews.FirstOrDefault() == null)
-        {
-            <p>There are no factsheets available.</p>
-        }
-
         <div class="other-articles">
             <div class="regular-articles">
                 @foreach (var article in Model.IndexModel.LatestNews.Take(3))
