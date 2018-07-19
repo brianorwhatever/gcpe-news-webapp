@@ -34,7 +34,7 @@
         }
         else if (ViewBag.Type == "factsheets")
         {
-            <h3>Factsheets</h3>
+            <h3>Factsheets &amp; Opinion Editorials</h3>
         }
 
         <div class="other-articles">
@@ -56,7 +56,7 @@
                 @if (ViewBag.Type != null && ViewBag.Type == "factsheets")
                 {
                     @Html.ActionLink("Search News", "Search", "Default", new { content = "factsheets", ministry = Model.Category.Key }, new { @class = "read-more" })
-                    <a href="#" class="load-more link-button">Load More Factsheets</a>
+                    <a href="#" class="load-more link-button">Load More</a>
                 }
                 else
                 {

@@ -375,7 +375,7 @@ namespace Gov.News.Website.Controllers
             var rssLinks = new List<Link>()
                     {
                         new Link() {Url ="https://news.gov.bc.ca/feed", Title = "BC Gov News" },
-                        new Link() {Url ="https://news.gov.bc.ca/factsheets/feed", Title = "Factsheets" },
+                        new Link() {Url ="https://news.gov.bc.ca/factsheets/feed", Title = "Factsheets & Opinion Editorials" },
                         new Link() {Url ="http://www.emergencyinfobc.gov.bc.ca/category/alerts/feed", Title = "EmergencyInfoBC" },
                         new Link() {Url ="http://www.healthlinkbc.ca/publichealthalerts", Title = "HealthLinkBC" },
                     };
