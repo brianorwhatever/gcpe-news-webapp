@@ -185,6 +185,11 @@ namespace Gov.News.Website.Controllers.Shared
             else
             {
                 model.Title = Char.ToUpper(postKind[0]) + postKind.Substring(1);
+
+                if (model.Title == "Factsheets") {
+                    model.Title = model.Title + " & Opinion Editorials";
+                }
+
                 model.FeedUri = ProviderHelpers.Uri(new Uri(Configuration["NewsHostUri"]), postKind + "/" + "feed");
                 await LoadAsync(model);
             }
