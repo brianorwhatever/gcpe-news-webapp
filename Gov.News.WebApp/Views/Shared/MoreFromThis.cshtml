@@ -22,7 +22,7 @@
 
     <div class="resource-links">
 
- 
+        
         @if (Model.Key == "office-of-the-premier")
         {
             <h5>More from the Premier</h5>
@@ -37,7 +37,7 @@
             @if (ViewBag.Type == null || ViewBag.Type != "factsheets")
             {
 
-                <li><a href="@Model.GetUri()/factsheets">Factsheets</a></li>
+                <li><a href="@Model.GetUri()/factsheets">Factsheets &amp; Opinion Editorials</a></li>
 
                 if (Model.Key == "office-of-the-premier")
                 {

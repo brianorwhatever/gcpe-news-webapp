@@ -31,6 +31,14 @@ namespace Gov.News.Website.Controllers
             var model = await GetModel(index, postKind);
 
             ViewBag.Type = postKind;
+
+            // speeches doesn't have a header in the view because of a null postKind, but if the key argument is "speeches" then we're guaranteed 
+            // that the model contains speeches so this should be fine to set manually
+            if (postKind == null && key == "speeches")
+            {
+                ViewBag.Type = "speeches";
+            }
+
             return View("CategoryView", model);
         }
 
