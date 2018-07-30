@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.HealthChecks;
-using Microsoft.Extensions.Hosting;
+// using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 
@@ -17,7 +17,7 @@ namespace Gov.News.Website
 {
     public class Startup
     {
-        public Startup(Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
+        public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath);
@@ -97,7 +97,7 @@ namespace Gov.News.Website
 
             
             services.AddSingleton<Repository, Repository>();
-            services.AddSingleton<IHostedService, Hubs.LiveHub>();
+            services.AddSingleton<Microsoft.Extensions.Hosting.IHostedService, Hubs.LiveHub>();
 
             // Add the Configuration object so that controllers may use it through dependency injection
             services.AddSingleton<IConfiguration>(Configuration);
@@ -118,7 +118,7 @@ namespace Gov.News.Website
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
 
