@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.HealthChecks;
-// using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 
@@ -97,7 +97,7 @@ namespace Gov.News.Website
 
             
             services.AddSingleton<Repository, Repository>();
-            services.AddSingleton<Microsoft.Extensions.Hosting.IHostedService, Hubs.LiveHub>();
+            services.AddSingleton<IHostedService, Hubs.LiveHub>();
 
             // Add the Configuration object so that controllers may use it through dependency injection
             services.AddSingleton<IConfiguration>(Configuration);
