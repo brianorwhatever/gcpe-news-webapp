@@ -63,6 +63,15 @@ namespace Gov.News.Website.Controllers
                 content.AppendLine("user-agent: *");
                 content.AppendLine("Disallow: /");
             }
+            else
+            {
+                content.AppendLine("user-agent: *");
+                content.AppendLine("Disallow: /assets");
+                content.AppendLine("Disallow: /error");
+                content.AppendLine("Disallow: /files");
+                content.AppendLine("Disallow: /search");
+                content.AppendLine("Disallow: /subscribe");
+            }
 
             return this.Content(content.ToString(), "text/plain", Encoding.UTF8);
         }
