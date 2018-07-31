@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Gov.News.Api;
@@ -9,6 +10,7 @@ using Gov.News.Website.Middleware;
 using Gov.News.Website.Models;
 using Gov.News.Website.Providers;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Link = Gov.News.Website.Models.ConnectViewModel.ExternalConnectLink;
@@ -17,8 +19,11 @@ namespace Gov.News.Website.Controllers
 {
     public class DefaultController : Shared.IndexController<Home>
     {
-        public DefaultController(Repository repository, IConfiguration configuration) : base(repository, configuration)
+        private readonly IHostingEnvironment _env;
+
+        public DefaultController(Repository repository, IConfiguration configuration, IHostingEnvironment env) : base(repository, configuration)
         {
+            _env = env;
         }
 
         [ResponseCache(CacheProfileName = "Default"), Noarchive]
@@ -46,6 +51,29 @@ namespace Gov.News.Website.Controllers
             ViewBag.BingSiteVerification = Properties.Settings.Default.BingSiteVerification;
 
             return View("HomeView", model);
+        }
+
+        [Route("robots.txt")]
+        public ContentResult DynamicRobotsFile()
+        {
+            StringBuilder content = new StringBuilder();
+
+            if (!_env.IsProduction())
+            {
+                content.AppendLine("user-agent: *");
+                content.AppendLine("Disallow: /");
+            }
+            else
+            {
+                content.AppendLine("user-agent: *");
+                content.AppendLine("Disallow: /assets");
+                content.AppendLine("Disallow: /error");
+                content.AppendLine("Disallow: /files");
+                content.AppendLine("Disallow: /search");
+                content.AppendLine("Disallow: /subscribe");
+            }
+
+            return this.Content(content.ToString(), "text/plain", Encoding.UTF8);
         }
 
         [ResponseCache(CacheProfileName = "Feed"), Noindex]

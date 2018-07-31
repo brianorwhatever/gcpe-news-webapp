@@ -1,6 +1,0 @@
-User-agent: *
-Disallow: /assets
-Disallow: /error
-Disallow: /files
-Disallow: /search
-Disallow: /subscribe
