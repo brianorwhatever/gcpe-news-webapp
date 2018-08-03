@@ -18,7 +18,16 @@ namespace Gov.News.Website
 
             const string formats = "rss|atom";
             const string postKinds = "Stories|Releases|Factsheets|Updates";
-            const string categories = "Ministries|Sectors|Regions|Tags|Themes|Services";
+            
+            //Aug. 3/2018
+            //const string categories = "Ministries|Sectors|Regions|Tags|Themes|Services";
+            
+            //The line above has been updated. During the News work in Fall 2017 (BC Gov news public web api) and move to OpenShift
+            //Regions were not implemented in the application as they were never used. Therefore to prohibit the appliation throwing
+            //errors on routes containing regions, it is being removed fromt he routes.
+
+            //If regions are reimplmented in Repository.cs and the Web API, put them back in the route table.
+            const string categories = "Ministries|Sectors|Tags|Themes|Services";
 
             IRouteConstraint yearConstraint = new RegexRouteConstraint(@"^\d{4}$");
             IRouteConstraint monthConstraint = new RegexRouteConstraint(@"^(\d{2})?$");
