@@ -464,7 +464,7 @@ namespace Gov.News.Website
                 }
                 if (postKeysToFetch.Any() && apiConnected)
                 {
-                    var customHeaders = revalidate ? MustRevalidateHeader() : null;
+                    var customHeaders = MustRevalidateHeader(); // revalidate ? MustRevalidateHeader() : null;
                     IList<Post> postsAsked = await ConfigureAwaitFunction(() => ApiClient.Posts.GetWithHttpMessagesAsync(APIVersion, postKeysToFetch, customHeaders))();
 
                     lock (cacheForType)
