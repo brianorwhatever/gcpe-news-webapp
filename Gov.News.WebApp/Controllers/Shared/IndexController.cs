@@ -237,6 +237,9 @@ namespace Gov.News.Website.Controllers.Shared
         {
             DataIndex index = await GetDataIndex(key, (string)RouteData.Values["category"]);
 
+            if (index == null)
+                return null;
+
             var model = new SyndicationFeedViewModel();
             model.AlternateUri = new Uri(Configuration["NewsHostUri"]);
 
