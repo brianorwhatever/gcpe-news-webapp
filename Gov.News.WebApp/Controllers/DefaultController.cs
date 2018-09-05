@@ -269,7 +269,6 @@ namespace Gov.News.Website.Controllers
             model.FacebookLinks = new Link[]
             {
                         new Link() { Url = "http://www.facebook.com/BCProvincialGovernment", Title = "Government of British Columbia", Summary = "Join us for BC news, information and updates" },
-                        new Link() { Url = "http://www.facebook.com/BCJobsPlan" , Title = "BC Jobs Plan" , Summary = "Get updates on 'Canada Starts Here: The BC Jobs Plan'" },
                         new Link() { Url = "http://www.facebook.com/johnhorganbc", Title = "Premier John Horgan", Summary = "Connect with the Premier of British Columbia" },
                         new Link() { Url = "http://www.facebook.com/AboriginalEdBC", Title = "Aboriginal Education BC" },
                         new Link() { Url = "http://www.facebook.com/BizPaLBC", Title = "BC BizPaL" },
@@ -280,13 +279,12 @@ namespace Gov.News.Website.Controllers
                         new Link() { Url = "http://www.facebook.com/BCForestFireInfo", Title = "BC Wildfire Service" },
                         new Link() { Url = "http://www.facebook.com/pages/Columbia-River-Treaty-Review/471508369560835?fref=ts", Title = "Columbia River Treaty Review" },
                         new Link() { Url = "http://www.facebook.com/pages/Conservation-Officer-Service/282011641840394", Title = "Conservation Officer Service" },
-                        new Link() { Url = "http://www.facebook.com/pages/GoodNeighbourBC/124539291010254", Title = "GoodNeighbourBC" },
                         new Link() { Url = "http://www.facebook.com/HealthyFamiliesBC", Title = "Healthy Families BC" },
                         new Link() { Url = "https://www.facebook.com/QuitNowBC", Title = "QuitNowBC" },
                         new Link() { Url = "http://www.facebook.com/BCRecSitesandTrails", Title = "Rec Sites and Trails BC" },
                         new Link() { Url = "http://www.facebook.com/ServiceBC", Title = "Service BC" },
                         new Link() { Url = "http://www.facebook.com/HelloBC", Title = "Tourism British Columbia" },
-                        new Link() { Url = "http://www.facebook.com/TranBC", Title = "TranBC" },
+                        new Link() { Url = "http://www.facebook.com/TranBC", Title = "BC Transportation and Infrastructure" },
                         new Link() { Url = "http://www.facebook.com/WorkBC", Title = "WorkBC" },
             };
 
@@ -328,8 +326,7 @@ namespace Gov.News.Website.Controllers
                         new Link() { Url = "http://twitter.com/BCGovRangelands", Title = "@BCGovRangelands" , Summary = "Get info on cutting and grazing on Crown range lands across BC" },
                         new Link() { Url = "http://twitter.com/BCgovtjobs", Title = "@BCGovtJobs", Summary = "Looking for a job? Find links to BC Public Service job postings" },
                         new Link() { Url = "http://twitter.com/BC_Housing", Title = "@BC_Housing", Summary = "Learn about housing solutions and the latest projects in BC" },
-                        new Link() { Url = "http://twitter.com/bcic", Title = "@BCIC", Summary = "Info on developing entrepreneurial talent and commercializing technology in BC" },
-                        new Link() { Url = "https://twitter.com/BCJobsPlan", Title = "@BCJobsPlan", Summary = "Join the discussion on Canada Starts Here: The BC Jobs Plan" },
+                        new Link() { Url = "https://twitter.com/innovate_bc", Title = "@BCIC", Summary = "Info on developing entrepreneurial talent and commercializing technology in BC" },
                         new Link() { Url = "http://twitter.com/bcstats", Title = "@BCStats", Summary = "Get the facts from BC's central statistical agency" },
                         new Link() { Url = "https://twitter.com/BCTradeInvest", Title = "@BCTradeInvest", Summary = "Find expertise to help your business grow internationally" },
                         new Link() { Url = "http://twitter.com/CRTreaty", Title = "@CRTreaty", Summary = "Join the discussion on the Columbia River Treaty Review" },
@@ -351,12 +348,10 @@ namespace Gov.News.Website.Controllers
                         new Link() { Url = "http://twitter.com/HealthyFamilyBC", Title = "@HealthyFamilyBC" , Summary = "Join the Healthy Families discussion and share your ideas" },
                         new Link() { Url = "http://twitter.com/HelloBC", Title = "@HelloBC", Summary = "Find and share tourism and travel tips for British Columbia" },
                         new Link() { Url = "https://twitter.com/immunizebc", Title = "@ImmunizeBC" , Summary = "Find info about immunization as best protection against many diseases" },
-                        new Link() { Url = "http://twitter.com/LiveSmartBCca", Title = "@LiveSmartBCca" , Summary = "Learn how to make green choices that save you money" },
                         new Link() { Url = "http://twitter.com/MyBCLibrary", Title = "@MyBCLibrary" , Summary = "Promoting the value of libraries in your community" },
                         new Link() { Url = "http://twitter.com/quitnowbc", Title = "@QuitNowBC", Summary = "Want to quit smoking? We can help!" },
                         new Link() { Url = "http://twitter.com/RoadSafetyBC", Title = "@RoadSafetyBC" , Summary = "Get information on road safety and driver behaviour" },
                         new Link() { Url = "https://twitter.com/SBRoundtableBC", Title = "@SBRoundtableBC" , Summary = "Consulting with small businesses on issues, strategies & actions" },
-                        new Link() { Url = "http://www.twitter.com/SmartFarmBC", Title = "@SmartFarmBC", Summary = "Helping BC Farmers learn and implement best practices" },
                         new Link() { Url = "http://twitter.com/studentaidbc", Title = "@StudentAidBC" , Summary = "Learn more about student loans, grants and scholarships in BC" },
                         new Link() { Url = "http://twitter.com/TranBC", Title = "@TranBC" , Summary = "Engaging on BC transportation and infrastructure services, projects and safety" },
                         new Link() { Url = "https://twitter.com/TranBC_BVLDS", Title = "@TranBC_BVLDS" , Summary = "Keeping the Bulkley Valley, Lakes, and Stikine District informed" },
@@ -386,15 +381,11 @@ namespace Gov.News.Website.Controllers
 
             model.BlogsLinks = new Link[]
             {
-                        new Link() { Url = "http://engage.bcedplan.ca/", Title = "BC's Education Plan" },
                         new Link() { Url = "http://www.bcic.ca/blog#", Title = "BC Innovation Council" },
                         new Link() { Url = "http://www.britishcolumbia.ca/Global/Blog/", Title = "BC Trade and Invest" },
                         new Link() { Url = "http://blog.data.gov.bc.ca/", Title = "DataBC" },
-                        new Link() { Url = "http://embracebc.tumblr.com/", Title = "EmbraceBC" },
                         new Link() { Url = "http://emergencyinfobc.gov.bc.ca/", Title = "EmergencyInfoBC" },
                         new Link() { Url = "http://www2.gov.bc.ca/govtogetherbc/index.page", Title = "GovTogetherBC" },
-                        new Link() { Url = "http://www.healthyfamiliesbc.ca/communities/", Title = "HealthyFamiliesBC" },
-                        new Link() { Url = "http://www.hellobc.com/british-columbia/blog.aspx", Title = "HelloBC(Tourism)" },
                         new Link() { Url = "http://blog.gov.bc.ca/livingwatersmart/", Title = "Living Water Smart" },
                         new Link() { Url = "http://www.tranbc.ca/", Title = "TranBC" },
                         new Link() { Url = "https://www.workbc.ca/blog.aspx", Title = "WorkBC" },
