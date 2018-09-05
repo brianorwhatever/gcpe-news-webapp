@@ -276,6 +276,7 @@ namespace Gov.News.Website.Controllers
                         new Link() { Url = "http://www.facebook.com/BCEducationandLiteracy", Title = "BC Education and Literacy" },
                         new Link() { Url = "http://www.facebook.com/pages/BCIC/124363430933347", Title = "BC Innovation Council" },
                         new Link() { Url = "http://www.facebook.com/YourBCParks", Title = "BC Parks" },
+                        new Link() { Url = "http://www.facebook.com/TranBC", Title = "BC Transportation and Infrastructure" },
                         new Link() { Url = "http://www.facebook.com/BCForestFireInfo", Title = "BC Wildfire Service" },
                         new Link() { Url = "http://www.facebook.com/pages/Columbia-River-Treaty-Review/471508369560835?fref=ts", Title = "Columbia River Treaty Review" },
                         new Link() { Url = "http://www.facebook.com/pages/Conservation-Officer-Service/282011641840394", Title = "Conservation Officer Service" },
@@ -284,7 +285,6 @@ namespace Gov.News.Website.Controllers
                         new Link() { Url = "http://www.facebook.com/BCRecSitesandTrails", Title = "Rec Sites and Trails BC" },
                         new Link() { Url = "http://www.facebook.com/ServiceBC", Title = "Service BC" },
                         new Link() { Url = "http://www.facebook.com/HelloBC", Title = "Tourism British Columbia" },
-                        new Link() { Url = "http://www.facebook.com/TranBC", Title = "BC Transportation and Infrastructure" },
                         new Link() { Url = "http://www.facebook.com/WorkBC", Title = "WorkBC" },
             };
 
