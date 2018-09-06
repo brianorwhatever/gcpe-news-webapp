@@ -60,4 +60,6 @@
     <Folder Include="Views\Shared\Components\TopSectors\" />
   </ItemGroup>
 
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JSONSchema="http://json.schemastore.org/bundleconfig" /></VisualStudio></ProjectExtensions>
+
 </Project>
