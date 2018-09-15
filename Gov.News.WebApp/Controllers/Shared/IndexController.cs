@@ -164,6 +164,8 @@ namespace Gov.News.Website.Controllers.Shared
         public async Task<HomeViewModel> GetHomePosts(string postKind)
         {
             DataIndex homeIndex = await Repository.GetHomeAsync();
+            if (homeIndex == null)
+                return null;
 
             int count = ProviderHelpers.MaximumLatestNewsItemsLoadMore + ProviderHelpers.MaximumLatestNewsItems;
             var latestNews = await Repository.GetLatestPostsAsync(homeIndex, count, postKind);
