@@ -83,7 +83,7 @@ namespace Gov.News.Website.Hubs
                 try
                 {
                     var homeSettings= await _repository.GetHomeAsync();
-                    var manifest_url_setting = homeSettings.LiveWebcastFlashMediaManifestUrl;
+                    var manifest_url_setting = homeSettings?.LiveWebcastFlashMediaManifestUrl;
                     if (manifest_url_setting == null)
                     {
                         SetDead();

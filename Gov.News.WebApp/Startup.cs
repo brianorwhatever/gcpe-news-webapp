@@ -2,7 +2,6 @@
 using Gov.News.WebApp;
 using Gov.News.Website.Middleware;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -72,8 +71,6 @@ namespace Gov.News.Website
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             //TODO: Change to ServiceLifetime.Scoped once repository is no longer using static methods
-            var entityLoggerFactory = new LoggerFactory();
-
             services.AddSingleton(new Func<IServiceProvider, Gov.News.Api.IClient>((serviceProvider) =>
             {
                 var client = new Gov.News.Api.Client();
@@ -118,10 +115,8 @@ namespace Gov.News.Website
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
