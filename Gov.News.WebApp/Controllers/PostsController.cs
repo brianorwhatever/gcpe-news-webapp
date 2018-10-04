@@ -103,6 +103,10 @@ namespace Gov.News.Website.Controllers.Shared
             await LoadAsync(model);
 
             model.LeadMinistry = model.Ministries.FirstOrDefault(m => m.Index.Key == post.LeadMinistryKey);
+            if (model.LeadMinistry == null)
+            { // for Archived ministries
+                model.LeadMinistry = new IndexModel(ministry);
+            }
 
             model.Minister = await Repository.GetMinisterAsync(post.LeadMinistryKey);
 
