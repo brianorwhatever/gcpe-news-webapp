@@ -26,11 +26,13 @@ namespace Gov.News.Website.Helpers
             return char.ToUpper(text[0]) + text.Substring(1);
         }
 
+        static TimeSpan midnight = new TimeSpan(0, 0, 0);
         public static string FormatDateLong(this DateTime date, string locale = "en-CA")
         {
+            bool hasTime = date.TimeOfDay != midnight;
             if (locale != "en-CA")
-                return date.ToString("dddd d MMMM yyyy, hh:mm", new CultureInfo(locale));
-            return date.ToString("dddd, MMMM d, yyyy h:mm tt");
+                return date.ToString(hasTime ? "dddd d MMMM yyyy, hh:mm" : "dddd d MMMM yyyy", new CultureInfo(locale));
+            return date.ToString(hasTime ? "dddd, MMMM d, yyyy h:mm tt" : "dddd, MMMM d, yyyy");
         }
 
         public static string FormatDateLong(this DateTimeOffset dateOffset, string locale = "en-CA")
