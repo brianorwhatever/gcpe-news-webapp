@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AngleSharp" Version="0.9.9" />
+    <PackageReference Include="AngleSharp" Version="0.9.10" />
     <PackageReference Include="Gov.News.Api.Client" Version="1.0.82" />
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.*" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="1.0.*" />
