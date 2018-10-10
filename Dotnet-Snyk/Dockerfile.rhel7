@@ -35,8 +35,7 @@ RUN INSTALL_PKGS="bzip2 fontconfig " && \
 
 
 # install Node.js
-RUN  rm -R /opt/rh/rh-nodejs6 \
-    && mkdir /opt/rh/rh-nodejs6 \
+RUN mkdir /opt/rh/rh-nodejs6 \
     && touch /opt/rh/rh-nodejs6/enable \
     && chmod a+rx /opt/rh/rh-nodejs6/enable \
     && touch ~/.bash_profile \
