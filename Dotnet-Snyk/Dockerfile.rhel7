@@ -8,6 +8,7 @@ RUN INSTALL_PKGS="bzip2 fontconfig " && \
     $INSTALL_PKGS && \
     yum -y groupinstall "Fonts" && \
     rpm -V $INSTALL_PKGS && \
+    && npm install -g snyk \
     yum clean all -y && \
     chown -R 1001:0 /opt/app-root && fix-permissions /opt/app-root
 
