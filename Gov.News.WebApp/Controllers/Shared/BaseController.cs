@@ -56,7 +56,7 @@ namespace Gov.News.Website.Controllers.Shared
 
             model.ResourceLinks = await Repository.GetResourceLinksAsync();
             var homeSettings = await Repository.GetHomeAsync();
-            model.WebcastingLive = !string.IsNullOrEmpty(homeSettings.LiveWebcastM3uPlaylist);
+            model.WebcastingLive = !string.IsNullOrEmpty(homeSettings?.LiveWebcastM3uPlaylist);
         }
 
         public class NewsroomFilter : MemoryStream

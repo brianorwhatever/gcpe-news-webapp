@@ -27,12 +27,12 @@ namespace Gov.News.Website
         private Dictionary<string, Task> ConcurrentRequests = new Dictionary<string, Task>();
 
         private readonly ILogger<Repository> _logger;
-        private readonly ILoggerFactory _factory;
+        private readonly IConfiguration _configuration;
 
-        public Repository(IClient apiClient, IMemoryCache memoryCache, IConfiguration configuration, ILogger<Repository> logger, ILoggerFactory factory)
+        public Repository(IClient apiClient, IMemoryCache memoryCache, IConfiguration configuration, ILogger<Repository> logger)
         {
+            _configuration = configuration;
             _logger = logger;
-            _factory = factory;
             ApiClient = apiClient;
             ContentDeliveryUri = new Uri(configuration["NewsContentDeliveryNetwork"]);
             Task.Run(async () => await StartSignalR());
@@ -58,7 +58,7 @@ namespace Gov.News.Website
                     _logger.LogInformation("Starting SignalR Client with URL:" + clientUrl);
                     HubConnection api = new HubConnectionBuilder()
                                                 .WithUrl(clientUrl)
-                                                .WithLoggerFactory(_factory) // use the same logger as the app.
+                                                .ConfigureLogging(logging => logging.AddConfiguration(_configuration))
                                                 .Build();
 
                     RegisterNotification<Minister>(api, (keys) => GetMinistersAsync(keys).GetAwaiter().GetResult());
@@ -108,63 +108,57 @@ namespace Gov.News.Website
             where T : DataModel
         {
             var type = typeof(T);
-            if (updatedKeys.Count() == 0)
+            _logger.LogInformation("SignalR {0} Update for keys {1}", type.Name, string.Join(", ", updatedKeys));
+            bool isPostUpdate = type.Name == "Post";
+            if (!isPostUpdate)
             {
-                _logger.LogInformation("SignalR alpha work around ping");
-            }
-            else
-            {
-                _logger.LogInformation("SignalR {0} Update for keys {1}", type.Name, string.Join(", ", updatedKeys));
-                bool isPostUpdate = type.Name == "Post";
-                if (!isPostUpdate)
+                lock (cacheForType)
                 {
-                    lock (cacheForType)
+                    if (type.Name == "Minister")
                     {
-                        if (type.Name == "Minister")
-                        {
-                            foreach (string key in updatedKeys)
-                            {
-                                cacheForType.Remove(key);
-                            }
-                        }
-                        else
-                        {
-                            cacheForType.Clear();
-                        }
-                    }
-                }
-                // call the API server (maybe be a different one)
-                var update = updateFn(updatedKeys);
-                if (isPostUpdate)
-                {
-                    lock (cacheForType)
-                    {
-                        var oldestPost = cacheForType.Any() ? (Post)cacheForType.TakeLast(1).SingleOrDefault().Value : null;
-                        var updatedPosts = update as IList<Post>;
-                        bool need2ReSortPosts = false;
                         foreach (string key in updatedKeys)
                         {
-                            Post updatedPost = updatedPosts.FirstOrDefault(p => p.Key == key);
-                            if (updatedPost == null)
-                            {
-                                cacheForType.Remove(key); // post unpublished
-                                continue;
-                            }
-                            if (oldestPost == null || oldestPost.PublishDate > updatedPost.PublishDate) continue; // Can't insert as it would probably out of order
-                            object cachedPost;
-                            cacheForType.TryGetValue(key, out cachedPost);
-                            need2ReSortPosts |= cachedPost == null || ((Post)cachedPost).PublishDate != updatedPost.PublishDate;
-                            cacheForType[key] = updatedPost;
+                            cacheForType.Remove(key);
                         }
-                        PurgeCache<T>(cacheForType, NUM_CACHED_POSTS * 2);
-                        if (need2ReSortPosts)
+                    }
+                    else
+                    {
+                        cacheForType.Clear();
+                    }
+                }
+            }
+            // call the API server (maybe be a different one)
+            var update = updateFn(updatedKeys);
+            if (isPostUpdate)
+            {
+                lock (cacheForType)
+                {
+                    var oldestPost = cacheForType.Any() ? (Post)cacheForType.TakeLast(1).SingleOrDefault().Value : null;
+                    var updatedPosts = update as IList<Post>;
+                    bool need2ReSortPosts = false;
+                    foreach (string key in updatedKeys)
+                    {
+                        Post updatedPost = updatedPosts.FirstOrDefault(p => p.Key == key);
+                        if (updatedPost == null)
                         {
-                            var newPostList = cacheForType.OrderByDescending(m => ((Post)m.Value).PublishDate).ToList();
-                            cacheForType.Clear();
-                            foreach (KeyValuePair<string, object> p in newPostList)
-                            {
-                                cacheForType.Add(p);
-                            }
+                            cacheForType.Remove(key); // post unpublished
+                            need2ReSortPosts = true;
+                            continue;
+                        }
+                        if (oldestPost == null || oldestPost.PublishDate > updatedPost.PublishDate) continue; // Can't insert as it would probably out of order
+                        object cachedPost;
+                        cacheForType.TryGetValue(key, out cachedPost);
+                        need2ReSortPosts |= cachedPost == null || ((Post)cachedPost).PublishDate != updatedPost.PublishDate;
+                        cacheForType[key] = updatedPost;
+                    }
+                    PurgeCache<T>(cacheForType, NUM_CACHED_POSTS * 2);
+                    if (need2ReSortPosts)
+                    {
+                        var newPostList = cacheForType.OrderByDescending(m => ((Post)m.Value).PublishDate).ToList();
+                        cacheForType.Clear();
+                        foreach (KeyValuePair<string, object> p in newPostList)
+                        {
+                            cacheForType.Add(p);
                         }
                     }
                 }
@@ -254,7 +248,8 @@ namespace Gov.News.Website
         #region GetAsync
         private async Task<T> GetDataModelAsync<T>(string key, Func<Task<HttpOperationResponse<T>>> updateFn, int maxSize = 100) where T : DataModel
         {
-            IDictionary<string, object> cacheForType = _cache[typeof(T)];
+            IDictionary<string, object> cacheForType;
+            if (!_cache.TryGetValue(typeof(T), out cacheForType)) return null;
             PurgeCache<T>(cacheForType, maxSize);
             return await GetAsync(key, ConfigureAwaitFunction(updateFn), cacheForType);
         }
