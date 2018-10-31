@@ -274,7 +274,7 @@ namespace Gov.News.Website.Controllers
                         new Link() { Url = "http://www.facebook.com/BizPaLBC", Title = "BC BizPaL" },
                         new Link() { Url = "http://www.facebook.com/ImmunizeBC", Title = "BC Centre for Disease Control: ImmunizeBC" },
                         new Link() { Url = "http://www.facebook.com/BCEducationandLiteracy", Title = "BC Education and Literacy" },
-                        new Link() { Url = "http://www.facebook.com/pages/BCIC/124363430933347", Title = "BC Innovation Council" },
+                        new Link() { Url = "http://www.facebook.com/pages/BCIC/124363430933347", Title = "Innovate BC" },
                         new Link() { Url = "http://www.facebook.com/YourBCParks", Title = "BC Parks" },
                         new Link() { Url = "http://www.facebook.com/TranBC", Title = "BC Transportation and Infrastructure" },
                         new Link() { Url = "http://www.facebook.com/BCForestFireInfo", Title = "BC Wildfire Service" },
@@ -286,7 +286,7 @@ namespace Gov.News.Website.Controllers
                         new Link() { Url = "http://www.facebook.com/ServiceBC", Title = "Service BC" },
                         new Link() { Url = "http://www.facebook.com/HelloBC", Title = "Tourism British Columbia" },
                         new Link() { Url = "http://www.facebook.com/WorkBC", Title = "WorkBC" },
-            };
+            }.OrderBy(t => t.Title).ToArray();
 
 
             model.YoutubeLinks = new Link[]
@@ -306,7 +306,7 @@ namespace Gov.News.Website.Controllers
                          new Link() { Url = "http://www.youtube.com/user/TourismBC", Title = "Tourism British Columbia" },
                          new Link() { Url = "http://www.youtube.com/user/WelcomeBCca", Title = "WelcomeBC" },
                          new Link() { Url = "http://www.youtube.com/workbc", Title = "WorkBC" },
-            };
+            }.OrderBy(t => t.Title).ToArray();;
 
             model.FlickrLinks = new Link[]
             {
@@ -315,7 +315,7 @@ namespace Gov.News.Website.Controllers
                          new Link() { Url = "http://www.flickr.com/photos/tranbc/", Title = "BC Ministry of Transportation & Infrastructure's photostream" },
                          new Link() { Url = "http://www.flickr.com/photos/emergencyinfobc", Title = "PreparedBC's photostream" },
                          new Link() { Url = "http://www.flickr.com/photos/bc_housing", Title = "BC Housing's photostream" },
-            };
+            }.OrderBy(t => t.Title).ToArray();;
 
             model.TwitterLinks = new Link[]
             {
@@ -326,7 +326,7 @@ namespace Gov.News.Website.Controllers
                         new Link() { Url = "http://twitter.com/BCGovRangelands", Title = "@BCGovRangelands" , Summary = "Get info on cutting and grazing on Crown range lands across BC" },
                         new Link() { Url = "http://twitter.com/BCgovtjobs", Title = "@BCGovtJobs", Summary = "Looking for a job? Find links to BC Public Service job postings" },
                         new Link() { Url = "http://twitter.com/BC_Housing", Title = "@BC_Housing", Summary = "Learn about housing solutions and the latest projects in BC" },
-                        new Link() { Url = "https://twitter.com/innovate_bc", Title = "@BCIC", Summary = "Info on developing entrepreneurial talent and commercializing technology in BC" },
+                        new Link() { Url = "https://twitter.com/innovate_bc", Title = "@Innovate_BC", Summary = "Info on developing entrepreneurial talent and commercializing technology in BC" },
                         new Link() { Url = "http://twitter.com/bcstats", Title = "@BCStats", Summary = "Get the facts from BC's central statistical agency" },
                         new Link() { Url = "https://twitter.com/BCTradeInvest", Title = "@BCTradeInvest", Summary = "Find expertise to help your business grow internationally" },
                         new Link() { Url = "http://twitter.com/CRTreaty", Title = "@CRTreaty", Summary = "Join the discussion on the Columbia River Treaty Review" },
@@ -364,12 +364,12 @@ namespace Gov.News.Website.Controllers
                         new Link() { Url = "https://twitter.com/TranBC_Skeena", Title = "@TranBC_Skeena" , Summary = "Keeping the Skeena area informed" },
                         new Link() { Url = "https://twitter.com/TranBCVanIsle", Title = "@TranBCVanIsle" , Summary = "Local road and transportation information for Vancouver Islanders" },
                         new Link() { Url = "http://twitter.com/WorkBC", Title = "@WorkBC", Summary = "Explore career paths and get tips for finding jobs in British Columbia" },
-            };
+            }.OrderBy(t => t.Title).ToArray();;
 
             model.UstreamLinks = new Link[]
             {
                         new Link() {Url ="http://www.ustream.tv/user/EmergencyInfoBC", Title = "EmergencyInfoBC" }
-            };
+            }.OrderBy(t => t.Title).ToArray();;
 
             model.PinterestLinks = new Link[]
             {
@@ -377,11 +377,11 @@ namespace Gov.News.Website.Controllers
                         new Link() { Url ="http://pinterest.com/TranBC", Title = "TranBC" },
                         new Link() { Url ="http://pinterest.com/EmergencyInfoBC", Title = "PreparedBC" },
                         new Link() { Url ="http://www.pinterest.com/HealthyFamilyBC", Title = "Healthy Families BC" },
-            };
+            }.OrderBy(t => t.Title).ToArray();;
 
             model.BlogsLinks = new Link[]
             {
-                        new Link() { Url = "http://www.bcic.ca/blog#", Title = "BC Innovation Council" },
+                        new Link() { Url = "http://www.bcic.ca/blog#", Title = "Innovate BC" },
                         new Link() { Url = "http://www.britishcolumbia.ca/Global/Blog/", Title = "BC Trade and Invest" },
                         new Link() { Url = "http://blog.data.gov.bc.ca/", Title = "DataBC" },
                         new Link() { Url = "http://emergencyinfobc.gov.bc.ca/", Title = "EmergencyInfoBC" },
@@ -389,7 +389,7 @@ namespace Gov.News.Website.Controllers
                         new Link() { Url = "http://blog.gov.bc.ca/livingwatersmart/", Title = "Living Water Smart" },
                         new Link() { Url = "http://www.tranbc.ca/", Title = "TranBC" },
                         new Link() { Url = "https://www.workbc.ca/blog.aspx", Title = "WorkBC" },
-            };
+            }.OrderBy(t => t.Title).ToArray();;
 
             var rssLinks = new List<Link>()
                     {
