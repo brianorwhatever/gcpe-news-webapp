@@ -274,7 +274,7 @@ namespace Gov.News.Website.Controllers
                         new Link() { Url = "http://www.facebook.com/BizPaLBC", Title = "BC BizPaL" },
                         new Link() { Url = "http://www.facebook.com/ImmunizeBC", Title = "BC Centre for Disease Control: ImmunizeBC" },
                         new Link() { Url = "http://www.facebook.com/BCEducationandLiteracy", Title = "BC Education and Literacy" },
-                        new Link() { Url = "http://www.facebook.com/pages/BCIC/124363430933347", Title = "BC Innovation Council" },
+                        new Link() { Url = "http://www.facebook.com/pages/BCIC/124363430933347", Title = "Innovate BC" },
                         new Link() { Url = "http://www.facebook.com/YourBCParks", Title = "BC Parks" },
                         new Link() { Url = "http://www.facebook.com/TranBC", Title = "BC Transportation and Infrastructure" },
                         new Link() { Url = "http://www.facebook.com/BCForestFireInfo", Title = "BC Wildfire Service" },
@@ -326,7 +326,7 @@ namespace Gov.News.Website.Controllers
                         new Link() { Url = "http://twitter.com/BCGovRangelands", Title = "@BCGovRangelands" , Summary = "Get info on cutting and grazing on Crown range lands across BC" },
                         new Link() { Url = "http://twitter.com/BCgovtjobs", Title = "@BCGovtJobs", Summary = "Looking for a job? Find links to BC Public Service job postings" },
                         new Link() { Url = "http://twitter.com/BC_Housing", Title = "@BC_Housing", Summary = "Learn about housing solutions and the latest projects in BC" },
-                        new Link() { Url = "https://twitter.com/innovate_bc", Title = "@BCIC", Summary = "Info on developing entrepreneurial talent and commercializing technology in BC" },
+                        new Link() { Url = "https://twitter.com/innovate_bc", Title = "@Innovate_BC", Summary = "Info on developing entrepreneurial talent and commercializing technology in BC" },
                         new Link() { Url = "http://twitter.com/bcstats", Title = "@BCStats", Summary = "Get the facts from BC's central statistical agency" },
                         new Link() { Url = "https://twitter.com/BCTradeInvest", Title = "@BCTradeInvest", Summary = "Find expertise to help your business grow internationally" },
                         new Link() { Url = "http://twitter.com/CRTreaty", Title = "@CRTreaty", Summary = "Join the discussion on the Columbia River Treaty Review" },
@@ -381,7 +381,7 @@ namespace Gov.News.Website.Controllers
 
             model.BlogsLinks = new Link[]
             {
-                        new Link() { Url = "http://www.bcic.ca/blog#", Title = "BC Innovation Council" },
+                        new Link() { Url = "http://www.bcic.ca/blog#", Title = "Innovate BC" },
                         new Link() { Url = "http://www.britishcolumbia.ca/Global/Blog/", Title = "BC Trade and Invest" },
                         new Link() { Url = "http://blog.data.gov.bc.ca/", Title = "DataBC" },
                         new Link() { Url = "http://emergencyinfobc.gov.bc.ca/", Title = "EmergencyInfoBC" },
